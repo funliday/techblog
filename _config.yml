@@ -8,7 +8,9 @@ subtitle: ''
 description: ''
 keywords:
 author: Kewang
-language: en
+language:
+- zh-tw
+- en
 timezone: 'Asia/Taipei'
 
 # URL
