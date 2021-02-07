@@ -2,6 +2,8 @@
 title: 用 Redis 來處理 City 的 autocomplete 功能 - 1
 date: 2019-01-08 14:00:01
 tags:
+- autocomplete
+- redis
 ---
 
 Autocomplete 在現在的應用程式已經是個不可或缺的功能，但這個功能因為要一直發 request 到 server 上，簡直就是 DDoS 了 XDDD，對 server 是個不小的負擔。一方面要讓功能正常快速的運作，一方面又要讓 server 不會被打掛，是個不容易做的好的功能。這篇就來分享一下 Redis 的作者 antirez 是如何運用 Redis 來達到這個功能。
@@ -29,6 +31,8 @@ Redis 是一個 in-memory database，讀寫的效率自然不在話下，做 Aut
 
 ---
 
-當使用者輸入 t，發送請求到 server 的時候，server 用 Redis 的搜尋指令 (ZRANK) 找出 index 為 1，然後再從 1 開始，將資料取回來 (ZRANGE) 50 筆，所以上面的 14 筆資料都會取回來。最後 server 再把這 14 筆結尾有 * 的資料過濾出來，剩下 7, 11, 14 這三筆，再把 * 濾掉回給使用者就完成這個功能了。
+當使用者輸入 <kbd>t</kbd>，發送請求到 server 的時候，server 用 Redis 的搜尋指令 (ZRANK) 找出 index 為 1，然後再從 1 開始，將資料取回來 (ZRANGE) 50 筆，所以上面的 14 筆資料都會取回來。最後 server 再把這 14 筆結尾有 * 的資料過濾出來，剩下 7, 11, 14 這三筆，再把 * 濾掉回給使用者就完成這個功能了。
 
 所以使用者輸入了 t，server 就會回給使用者 taipei, taiwan, tall 這三個 candidate，這就完成最簡單的 Autocomplete 功能。但 Autocomplete 可不只有這樣而已，剩下的細節等下次有空再來分享一下好了。
+
+* Auto Complete with Redis: http://oldblog.antirez.com/post/autocomplete-with-redis.html
