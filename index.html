@@ -71,6 +71,197 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-解決瞬時大流量的-GET-請求" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" class="article-date">
+  <time class="dt-published" datetime="2021-01-12T01:47:55.000Z" itemprop="datePublished">2021-01-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>最近 Funliday 常發一些精選旅遊回憶的 App 通知給使用者，在去年十一二月的時候發通知 Server 還能撐的了瞬時大流量的 request。</p>
+<p>但今年開始發這類通知，總共發了三次，三次都造成 Server 被打掛，而且重開 AP 還緩解不了，瞬間手足無措。大概都要等過了十分鐘左右，Server 才將這些 request 消化完。</p>
+<p>這裡就來簡單整理一下時間軸，順便分享一下 Funliday 是如何解決這個問題。</p>
+<hr>
+<ul>
+<li>1/6 1900：系統排程發送精選旅遊回憶的 App 通知</li>
+<li>1/6 1900+10s 開始：Server 收到極大量的 request</li>
+<li>1/6 1900+20s：Nginx 出現錯誤訊息 1024 worker not enough，並回傳 http status code 503</li>
+<li>1/6 1900+25s：PostgreSQL 出現錯誤訊息 could not fork new process for connection (cannot allocate memory)</li>
+<li>1/6 1900+38s：Node.js 收到 PostgreSQL 的 exception。There was an error establishing an SSL connection error</li>
+<li>1/6 1900+69s：PostgreSQL 出現錯誤訊息 database system is shut down</li>
+<li>1/6 1900+546s：PostgreSQL 出現錯誤訊息 the database system is starting up</li>
+</ul>
+<hr>
+<p>看了時間軸就覺得奇怪，先不論 10s 的時候發了極大量 request，造成 20s 在 Nginx 出現 worker not enough 的錯誤訊息。而是要關注 25s 時的 PostgreSQL 出現 could not fork new process for connection 的錯誤訊息。</p>
+<p>Funliday 用了同時可承載 n 個 connection 的資料庫，而且程式碼又有加上 connection pool，理論上根本不該出現這個錯誤訊息。但整個時間軸看下來感覺就是 PostgreSQL 的 capacity 問題，造成系統無法運作。</p>
+<p>因為就算將 Nginx 的 worker connection size 再加大 10 倍，只是造成 PostgreSQL 要接受的 request 也跟著被加大 10 倍，但 PostgreSQL 那裡因為 request 變多，原本在 69s 直接關機的時間點只會提早，而無法真正緩解這個狀況。</p>
+<p>基於以上狀況，小編就開始回去看自己的程式碼是不是哪裡寫錯了。會這樣想也是覺得 PostgreSQL 應該沒這麼弱，一下就被打掛，一定是自己程式碼的問題 Orz</p>
+<hr>
+<p>這邊來分享一下自己程式碼的寫法，圖一是原始寫法，在每個 API 都 create 一個 db client instance 來處理該 API 層的所有 db request。這是蠻單純的做法，也是 day 1 開始的處理方式。但有個小問題，就是每個 API 層都要自己 create instance，不好管理，且浪費資源。</p>
+<p>後來因為想要做 graceful shutdown 的關係，所以調整了一下 db client instance 的建立方式，用 inject 將 instance 綁在 request 上面，如圖二。這樣只要在 middleware 建立 db client instance 就好，好管理，而且只要有 req 就可以取得 instance，非常方便。而這也是 1/6 時的程式碼，就從這裡開始研究吧。</p>
+<hr>
+<p>直接切入 node-postgres 的文件，認真讀了一下 pool 有下面兩種使用方式：</p>
+<ol>
+<li>pool.connect, pool.release：文件寫著 checkout, use, and return，光看描述就應該用這個沒錯。</li>
+<li>pool.query：適用於不需要 pool 的連線方式，文件上也清楚寫著內部實作是直接 call client.query，所以用了這個方式是完全跟 pool 扯不上邊。</li>
+</ol>
+<p>但偏偏小編從 day 1 用的就是第 2 種方式 Orz，雖然看起來應該是寫錯，但也是要修改後實測，才知道是不是真的可以解決問題。</p>
+<hr>
+<p>如圖三，這是修改後的程式碼。想了一下子，覺得目前在 API 層使用 req.pool.query 還不錯，不想用官方的建議做法：先 create client，然後 query 之後，再使用 release。</p>
+<p>如果照官方建議做法，API 層的程式碼會多一堆與商業邏輯無關的程式碼，也不好維護。所以在不想動到 API 層的程式碼，只能使用 monkey patch 的方式來達到這個需求。</p>
+<p>monkey patch 可以將原方法利用類似 override 的方式，將整個方法改掉，而不改變 caller 的程式碼，這也是 JavaScript, Ruby, Python 這類動態語言的特性之一，但真的要慎用，一不小心就會把原方法改成完全不同意義的方法了。</p>
+<p>所以原本應該要在 API 層實作 connect, query, release 一大堆程式碼，可以用 monkey patch 完美解決這一大堆程式碼。</p>
+<hr>
+<p>在 dev 壓測後至少 capacity 可以達到原本的 4 倍以上，隔天實際上 production 之後也確實如壓測般的數據，可以承載目前的流量。</p>
+<p>其實這篇分享的重點只有一點，文件看仔細才是最重要的事啦！如果沒把文件看仔細，然後開發經驗也不足的話，什麼 RCA、monkey patch 都幫不上忙啦！</p>
+<hr>
+<p>後記：有夠丟臉，其實完全用不到圖三，只要把圖二的 pool creation 放到最外層就好了，因為 pool.query 的內部實作已經有做 connect, query, release 了。</p>
+<p>感謝下面的 Mark T. W. Lin 及 Rui An Huang 的幫忙，實在是太搞笑了 Orz</p>
+<ul>
+<li>Pool 的文件：<a target="_blank" rel="noopener" href="https://node-postgres.com/features/pooling">https://node-postgres.com/features/pooling</a></li>
+<li>官方建議寫法：<a target="_blank" rel="noopener" href="https://node-postgres.com/guides/project-structure">https://node-postgres.com/guides/project-structure</a></li>
+<li>pool.query 的內部實作：<a target="_blank" rel="noopener" href="https://github.com/%E2%80%A6/node-postgres/blob/master/packages/pg-%E2%80%A6">https://github.com/…/node-postgres/blob/master/packages/pg-…</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckkuzepue000t0wr48iiv4ijs" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-在-PostgreSQL-TW-分享的「大解密！用-PostgreSQL-提升-350-倍的-Funliday-推薦景點計算速度」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2020-11-30T01:57:03.000Z" itemprop="datePublished">2020-11-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/">在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/JAHObsopwdGJAz" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/postgresql-350-funliday" title="大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度" target="_blank">大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>今年最後一次的公開演講，一年講四次不一樣的題目真的很累人 XDDD。這次到 PostgreSQL.TW 來分享一下 Funliday-旅遊規劃 是如何做推薦景點的，也是之前筆記的投影片版本。</p>
+<p>這兩年推薦景點的改版學到不少東西，除了投影片裡面提到的技術面，其他部分小編也來分享一下：</p>
+<ol>
+<li>資料庫是存資料用的，不要陷入正規化迷思</li>
+<li>APM 很好用，建議 day 1 就加上去</li>
+<li>即時是相對的，不強求每次都取得最新資料</li>
+<li>技術很重要，但技術是滿足業務需求</li>
+<li>定期檢視原程式碼，有時問題是資料量大才會出現</li>
+</ol>
+<p>PS. 沒想到這次場地的仁愛路小樹屋，旁邊居然就是 iCHEF 資廚 的新辦公室，真是太巧了 XD</p>
+<ul>
+<li>文字筆記: <a href="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/">https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckkuzepu5000f0wr44zlof8s6" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-在-MOPCON-2020-分享的「如何使用-iframe-製作一個易於更新及更安全的前端套件」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2020-10-26T01:58:38.000Z" itemprop="datePublished">2020-10-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/">在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/2gXeRhdmwtkpFi" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/iframe-238967650" title="如何使用 iframe 製作一個易於更新及更安全的前端套件" target="_blank">如何使用 iframe 製作一個易於更新及更安全的前端套件</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>這是小編在這次 MOPCON 分享的內容「如何使用 iframe 製作一個易於更新及更安全的前端套件」，來聽的人跟預期的差不多，應該都被吸去 R1 聽游舒帆大大的分享了 XD。</p>
+<p>不過要反省一下，這個題目已經改過一次了，但還是取的不好，這個確實要好好檢討。雖然改名後的題目名為「前端套件」，但內容主要是在講後端的安全性，要對前端做些保護，主要有下面幾點：</p>
+<ul>
+<li>CORS：要加上 Access-Control-Allow-Origin</li>
+<li>api key 外流：加上 referer 做允許名單的驗證</li>
+<li>網域偽造：使用 HTTPS 及 HSTS</li>
+</ul>
+<p>最後分享了如何把網域加到 HSTS preload list 以及目前還在草案中的 SVCB/HTTPS 如何解決首次 HTTP request 的問題 (又是看 DK 大神的文章學知識 XD)</p>
+<p>另外，這個套件還沒公開出來，關心這個套件的開發狀況，歡迎隨時關注我們喔！</p>
+<p>如果十一月的 PostgreSQL 小講堂沒有入選的話，這應該就是今年的最後一個公開演講了，今年一次投了三個分享都有上，真的要感謝各大研討會的議程委員會。但真的是累死，之後一年最多還是投兩個就好，要不然光行前準備就花很多時間，累死了 XDDD</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckkuzeptz000a0wr4f8t91tad" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-在-ModernWeb-2020-分享的「pppr-解決-JavaScript-無法被搜尋引擎正確索引的問題」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" class="article-date">
@@ -101,7 +292,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckkuyyfph000b09ji9k942hez" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckkuzepu3000d0wr48pip4pbv" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
       
       
       
@@ -199,7 +390,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckkuyyfpe000709jie52v2vry" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckkuzeptx00070wr4hoyv1chw" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
       
       
       
@@ -249,7 +440,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="ckkuyyfpf000809jih9hp7n9v" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="ckkuzepty00080wr46arc4h6h" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
       
       
       
@@ -304,7 +495,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" data-id="ckkuyyfpb000309jid7995bp6" data-title="Funliday 重磅推出新的 prerender 套件 pppr" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" data-id="ckkuzeptu00030wr46ix4858p" data-title="Funliday 重磅推出新的 prerender 套件 pppr" class="article-share-link">Share</a>
       
       
       
@@ -359,7 +550,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="ckkuyyfpk000f09ji9da2hvhp" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="ckkuzepu7000k0wr4es8o2t77" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
       
       
       
@@ -407,7 +598,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" data-id="ckkuyyfpq000q09ji5ysmd5sf" data-title="純手工打造前端框架的 metadata 內容" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" data-id="ckkuzepud000s0wr4hr1ta4bs" data-title="純手工打造前端框架的 metadata 內容" class="article-share-link">Share</a>
       
       
       
@@ -463,154 +654,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/" data-id="ckkuyyfp8000109ji28f5cfd9" data-title="Funliday 外站文章的 App 與 Web 不同實作" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/" data-id="ckkuzeptq00010wr41hrsd18c" data-title="Funliday 外站文章的 App 與 Web 不同實作" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-GitHub-將所有核心功能都免費開放，包括協作團隊！" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2020/04/16/GitHub-%E5%B0%87%E6%89%80%E6%9C%89%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E9%83%BD%E5%85%8D%E8%B2%BB%E9%96%8B%E6%94%BE%EF%BC%8C%E5%8C%85%E6%8B%AC%E5%8D%94%E4%BD%9C%E5%9C%98%E9%9A%8A%EF%BC%81/" class="article-date">
-  <time class="dt-published" datetime="2020-04-16T01:10:59.000Z" itemprop="datePublished">2020-04-16</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2020/04/16/GitHub-%E5%B0%87%E6%89%80%E6%9C%89%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E9%83%BD%E5%85%8D%E8%B2%BB%E9%96%8B%E6%94%BE%EF%BC%8C%E5%8C%85%E6%8B%AC%E5%8D%94%E4%BD%9C%E5%9C%98%E9%9A%8A%EF%BC%81/">GitHub 將所有核心功能都免費開放，包括協作團隊！</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>小編好久沒發文了 Orz，來發個近日資訊業最大條新聞跟個人看法</p>
-<hr>
-<p>GitHub 被微軟買走之後做了蠻多事情，像是前幾個月 npm 被 GitHub 買下來，但這其實也不意外，因為這兩年 GitHub 在 JavaScript 的支援度就愈來愈高，不止可以在網頁上面做 audit，也可以做 navigate，功能蠻齊全的。被買下來之後，之後可以期待在 GitHub 上面直接 deploy npm 模組了。</p>
-<p>另外一個就是這次的 private repo 完全免費了，小編記得之前 private repo 免費好像有些限制，像是只限 5 人的樣子，但現在可說是完全不限，有富爸爸果然是不一樣！</p>
-<hr>
-<p>再來說一下個人選擇，如果是可以給一般人看的內容，小編一定是用 GitHub，畢竟資訊人誰沒有一個 GitHub 帳號呢？然後個人接案因為不能公開原始碼，所以當然放在 GitLab (以前是 Bitbucket)。現在 Funliday 的 git repo 因為原始碼不能公開，當然也是放在 GitLab。</p>
-<p>然後因為 Funliday server 是放在 Heroku 上面，Heroku 上面有個功能可以直接結合 GitHub 的 push 之後 deploy，但因為 Funliday 用的是 GitLab，所以沒辦法直接用這功能，只能繞個彎改用 dpl，把 GitLab 整合進 Heroku 裡。</p>
-<p>但也因為用了 GitLab 之後，才知道它的功能比 GitHub 多太多，對一般公司所需要的權限控制，小編是覺得比 GitHub 完整。然後對於 CI/CD 的支援度也很強大，現在還支援 build docker image 的功能。</p>
-<hr>
-<p>不過當 GitHub private 免費之後，對於沒有依賴 GitLab 權限控制或 container 功能的使用者，還蠻有可能移回 GitHub 的，畢竟能在同一個 hosting 操作當然比較方便。所以以後小編開 repo 的考量，可能就不再是 private 或 public 了，而是在於 deploy 的方便性，或是能不能 build 出 artifact 了。</p>
-<ul>
-<li>GitLab 自評與 GitHub 的差異: <a target="_blank" rel="noopener" href="https://about.gitlab.com/blog/2020/04/14/github-free-for-teams/index.html">https://about.gitlab.com/blog/2020/04/14/github-free-for-teams/index.html</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/04/16/GitHub-%E5%B0%87%E6%89%80%E6%9C%89%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E9%83%BD%E5%85%8D%E8%B2%BB%E9%96%8B%E6%94%BE%EF%BC%8C%E5%8C%85%E6%8B%AC%E5%8D%94%E4%BD%9C%E5%9C%98%E9%9A%8A%EF%BC%81/" data-id="ckkuyyfpc000409ji56mwelqs" data-title="GitHub 將所有核心功能都免費開放，包括協作團隊！" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-在-ModernWeb-2019-分享的「Google-Maps-開始收費了該怎麼辦？」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/" class="article-date">
-  <time class="dt-published" datetime="2019-08-29T06:58:02.000Z" itemprop="datePublished">2019-08-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/">在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <iframe src="//www.slideshare.net/slideshow/embed_code/key/wPtERc90dbNN0i" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/google-maps-167080995" title="Google Maps 開始收費了該怎麼辦？" target="_blank">Google Maps 開始收費了該怎麼辦？</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
-
-<p>這次在 Modern Web 的分享，主要是講開發 POI Bank 時要注意的一些內容，其中 OSM 跟 PostgreSQL 又是非常重要的一環。對開發景點資料庫有興趣的朋友，決定不能錯過！</p>
-<p>其實 POI Bank 的內容遠遠不只這些，有許多功能還沒有提到，像是 autocomplete 及搜尋，尤其搜尋又是重中之重，一直沒能好好處理。因為大家被 Google 訓練的實在太好了，POI Bank 的下一步就是要把搜尋精準度做好。這就要靠大家多多使用 Funliday，就有更多的資料可以訓練了 XDDD</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/" data-id="ckkuyyfpg000a09ji13ruhk8z" data-title="在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-Ant-在-ModernWeb-2019-分享的-Progressive-Deployment-NoDeploy" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/" class="article-date">
-  <time class="dt-published" datetime="2019-08-28T02:25:55.000Z" itemprop="datePublished">2019-08-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/">Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Ant 分享的內容總是很有意思，這場學到許多東西。連 Netflix 這麼大的公司都這樣講了，要在 production 做測試！</p>
-<p>小編最近在 Funliday 切環境的時候非常有感。新創錢不夠多，總不可能建置一模一樣的環境來做測試吧。像是現在為了省錢，所以 Elasticsearch、Redis 和 Worker 還是有部分只在 production 上運作。這樣子在做測試時還是有部分怕怕的，尤其是目前主機大都在 Heroku 上面，也還是有部分的 env 需要做調整。</p>
-<p>無論如何，還是要有錢才能把環境完全切開才行啊 Orz</p>
-<ul>
-<li>Progressive Deployment &amp; NoDeploy: <a target="_blank" rel="noopener" href="https://s.itho.me/events/2019/modernweb/2019-08-28_ModernWeb19-Ant.pdf">https://s.itho.me/events/2019/modernweb/2019-08-28_ModernWeb19-Ant.pdf</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/" data-id="ckkuyyfp2000009jie34c6u0b" data-title="Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li></ul>
 
     </footer>
   </div>
@@ -638,7 +686,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li></ul>
     </div>
   </div>
 
@@ -648,7 +696,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 16.67px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/iframe/" style="font-size: 10px;">iframe</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/modernweb/" style="font-size: 16.67px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 10px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 13.33px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 16.67px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 13.33px;">pppr</a> <a href="/tags/prerender/" style="font-size: 20px;">prerender</a> <a href="/tags/redis/" style="font-size: 16.67px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 15px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a>
     </div>
   </div>
 
@@ -657,7 +705,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -670,23 +718,23 @@
       <ul>
         
           <li>
+            <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/">在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</a>
+          </li>
+        
+          <li>
+            <a href="/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/">在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」</a>
+          </li>
+        
+          <li>
             <a href="/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/">在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」</a>
           </li>
         
           <li>
             <a href="/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/">再度最佳化推薦景點的回應時間</a>
-          </li>
-        
-          <li>
-            <a href="/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/">在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」</a>
-          </li>
-        
-          <li>
-            <a href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/">Funliday 重磅推出新的 prerender 套件 pppr</a>
-          </li>
-        
-          <li>
-            <a href="/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/">用 Prerender 解決前端框架的搜尋問題</a>
           </li>
         
       </ul>
