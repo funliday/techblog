@@ -71,6 +71,57 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-如何用-PostgreSQL-的-advisory-lock-實作推薦景點" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" class="article-date">
+  <time class="dt-published" datetime="2019-02-20T01:37:53.000Z" itemprop="datePublished">2019-02-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/">如何用 PostgreSQL 的 advisory lock 實作推薦景點</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Funliday 最近做了大改版，其中一項功能就是把去年中因為 Google 要開始收費而暫時拿掉的「推薦景點」加回來，這個功能就是提供使用者指定區域附近評價較高的景點。</p>
+<p>大家現在在使用景點瀏覽時，應該有時候會發現資料出來的速度不一致，慢的時候 (超過 5 秒，有時候會落在 10 秒以上) 代表可能有其他使用者正在查詢這個區域的「推薦景點」，思考邏輯就是在同一區域只要有一個使用者查詢過這個區域的「推薦景點」，其他同區域的使用者就會因為已經查詢過這份資料 (如熱門景點：台北 101、東京晴空塔…等) 而受惠。</p>
+<p>在目前小編能力還無法將查詢效能大幅改善的狀況之下 Orz，若同一個區域有多個使用者同時查詢，每個查詢都要花費 10 秒的話，這樣子資料庫會浪費超多時間在不必要的查詢上面。</p>
+<p>像這類無法避免的使用者行為，但又要減少資料庫無謂的同樣操作時，小編突然想到之前 Triton Ho 在上課時提到的 exclusive lock。</p>
+<p>Advisory lock 是 PostgreSQL 的一種 lock 機制，可以在 application 層操作 exclusive lock (以下稱為 X lock) 或是 shared lock (以下稱為 S lock)。當使用 X lock 時，若非同一個 session 是無法將它 unlock，而 S lock 則是任何一個 session 都可以用 S lock 拿取 (acquire) 相同的 lock，但不可以用 X lock 拿取 S lock。</p>
+<p>依小編的這個使用情境，可以在查詢「推薦景點」之前先問一次 Redis 有沒有這個區域的資料，有的話直接從 Redis 取得，沒有的話就先到 PostgreSQL acquire 一次 X lock，如果可以成功的話，則表示還沒有其他 session 正在查詢這個區域的資料，所以可以在 acquire 之後直接查詢，接著再 unlock 這個 X lock；但如果無法 acquire 的話，則表示目前有其他 session 正在查，所以直接回 client 查詢中的訊息，可以等一下再查。</p>
+<p>所以小編使用 PostgreSQL 的 advisory lock 及 Redis 就可以達成不會有同一時間查詢相同耗時的查詢了。</p>
+<p>其實再好一點的作法可能是把這類耗時的查詢丟到 MQ 裡面，讓 response 先回 client，等到 MQ 做完這個 job 之後，再用 push notification 通知 client 到 Redis 取得已經計算完的資料。或是用 polling 固定 n 秒鐘查詢一次，這都要視你的基礎設施而定。小編現在是先用 polling 的方式簡單處理，雖然方法有點笨，但在沒多餘心力 (Elasticsearch 太博大精深了 Orz) 的狀態之下就先這樣做了。</p>
+<ul>
+<li>How do PostgreSQL advisory locks work: <a target="_blank" rel="noopener" href="https://vladmihalcea.com/how-do-postgresql-advisory-locks-work/">https://vladmihalcea.com/how-do-postgresql-advisory-locks-work/</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" data-id="ckkuiil1b00001hqs0ffp2sm0" data-title="如何用 PostgreSQL 的 advisory lock 實作推薦景點" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-用-Redis-來處理-City-的-autocomplete-功能-3" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" class="article-date">
@@ -95,25 +146,25 @@
       
         <p>前兩篇分享了 Autocomplete 的實作方式及開發細節，算是少數大家迴響比較多的文章 XDD，下面就來整理一下大家的迴響好了。</p>
 <hr>
-<h2 id="1-減少傳輸量可以使用-msgpack"><a href="#1-減少傳輸量可以使用-msgpack" class="headerlink" title="1. 減少傳輸量可以使用 msgpack"></a>1. 減少傳輸量可以使用 msgpack</h2><p>我們有聽過 msgpack 但還沒實際了解這是如何運作的。剛查了一下<a target="_blank" rel="noopener" href="https://msgpack.org/">資料</a>，說是比 JSON 更省資料大小，基本上聽過的語言都有支援。</p>
+<h2 id="1-減少傳輸量可以使用-msgpack"><a href="#1-減少傳輸量可以使用-msgpack" class="headerlink" title="1. 減少傳輸量可以使用 msgpack"></a>1. 減少傳輸量可以使用 msgpack</h2><p>小編有聽過 msgpack 但還沒實際了解這是如何運作的。剛查了一下<a target="_blank" rel="noopener" href="https://msgpack.org/">資料</a>，說是比 JSON 更省資料大小，基本上聽過的語言都有支援。</p>
 <p>在前公司也用過 Avro 這類的格式，主打的也是省資料大小。但現在應該還不會考慮改用這類要另外做 serialize 的格式。</p>
 <p>主要是基於後端是以 Node.js 為主開發，JSON 已經是原生支援，再引入一種資料格式會增加前後端維護的複雜度。另外就是開發人力，新創小公司要儘量減少工作，目前可以順暢運作就好，還有其他更重要的事要做，等之後用量大了再改也不遲。</p>
 <h2 id="2-減少傳輸量可以使用-HTTP-server-的壓縮機制"><a href="#2-減少傳輸量可以使用-HTTP-server-的壓縮機制" class="headerlink" title="2. 減少傳輸量可以使用 HTTP server 的壓縮機制"></a>2. 減少傳輸量可以使用 HTTP server 的壓縮機制</h2><p>這真的是忽略了，忘了 expressjs 只是一套 web framework，在上面對資料做壓縮其實會影響到效率。讓如 nginx 之類的 HTTP server 做壓縮應該才是更好的作法。</p>
 <p>不過因為現在的 infra 是建在 heroku 上面，heroku 並沒有原生 nginx 的支援。等量大撐不住的時候，倒是可以優先考慮使用 heroku 的 buildpack 把 nginx 架上去<a target="_blank" rel="noopener" href="https://github.com/heroku/heroku-buildpack-nginx">試試</a>。</p>
 <p>另外也有提到用 CDN 做動態壓縮，這就真的沒做過了，也是可以研究的方向之一。</p>
-<h2 id="3-減少使用者打-server-的次數，加上-debounce-time"><a href="#3-減少使用者打-server-的次數，加上-debounce-time" class="headerlink" title="3. 減少使用者打 server 的次數，加上 debounce time"></a>3. 減少使用者打 server 的次數，加上 debounce time</h2><p>這大家都主推使用 debounce 方式，前端沒玩很深的我們第一次碰到這個名詞是高職的時候。記得那時上課在教 8051，老師說按按鈕時要加上 15 - 20ms 的 debounce time，避免重複送外部中斷。我們對單晶片實在不在行，但大概記得是這個意思。</p>
+<h2 id="3-減少使用者打-server-的次數，加上-debounce-time"><a href="#3-減少使用者打-server-的次數，加上-debounce-time" class="headerlink" title="3. 減少使用者打 server 的次數，加上 debounce time"></a>3. 減少使用者打 server 的次數，加上 debounce time</h2><p>這大家都主推使用 debounce 方式，前端沒玩很深的小編第一次碰到這個名詞是高職的時候。記得那時上課在教 8051，老師說按按鈕時要加上 15 - 20ms 的 debounce time，避免重複送外部中斷。小編對單晶片實在不在行，但大概記得是這個意思。</p>
 <p>剛查了一下<a target="_blank" rel="noopener" href="https://css-tricks.com/debouncing-throttling-explained-examples/">資料</a>，前端的 debounce time 大概也是類似的意思。在輸入文字後，會 delay n 秒再送出，若是在 n 秒內又有打其他內容的時候，就把之前的 request 從 queue 裡面丟棄，只關注最後一次的 request 就好。</p>
 <p>這個應該也是有效減少 request 量的作法了。</p>
 <h2 id="4-減少使用者打-request-的次數，將已經送出的-request-取消掉"><a href="#4-減少使用者打-request-的次數，將已經送出的-request-取消掉" class="headerlink" title="4. 減少使用者打 request 的次數，將已經送出的 request 取消掉"></a>4. 減少使用者打 request 的次數，將已經送出的 request 取消掉</h2><p>這也是一個不錯的作法，若 A request 已經送出去，但還沒回 response 時又送了 B request 的話，此時可以把 A request 取消。</p>
 <p>但要注意就是 A request 目前正在執行的步驟是去 DB 拿資料，或是在 server 本身處理一些基本計算。之前在使用 Java (grizzly + jersey) 開發的時候，若有這種情況發生會常在 log 裡面看到 IOException。</p>
-<p>原因是 server 已經準備好資料要回傳給 client，但發現 A request 已經取消，不知道要怎麼回傳時就會發生這個狀況。但也有可能是我們自己沒控制好收發的關係啦 XD</p>
+<p>原因是 server 已經準備好資料要回傳給 client，但發現 A request 已經取消，不知道要怎麼回傳時就會發生這個狀況。但也有可能是小編自己沒控制好收發的關係啦 XD</p>
 <hr>
 <p>關於 Autocomplete 的三篇大概就到這篇為止啦，等上線之後做了哪些調整再來分享給大家知道一下。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" data-id="ckkui84e80003zjtbgdfbfvbt" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" data-id="ckkuiil1k00041hqsf0zg7grq" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 3" class="article-share-link">Share</a>
       
       
       
@@ -149,7 +200,7 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p><a href="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/">前一篇</a> 提到了 Autocomplete 的實作方式，但仍然有許多可以調整的地方，像是如何加大 throughput、帶額外資料…等，下面就來分享一下我們的作法。</p>
+        <p><a href="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/">前一篇</a> 提到了 Autocomplete 的實作方式，但仍然有許多可以調整的地方，像是如何加大 throughput、帶額外資料…等，下面就來分享一下小編的作法。</p>
 <hr>
 <h2 id="1-減少傳輸量"><a href="#1-減少傳輸量" class="headerlink" title="1. 減少傳輸量"></a>1. 減少傳輸量</h2><p>因為 Autocomplete 的操作行為是使用者每打一個字，就要傳給 server，server 再回傳使用者一些 candidate。所以減少傳輸量是最先要處理的事情，要不然資料量太大傳輸慢會影響前端使用體驗。最簡單的作法就是改變原本回傳的 JSON 格式，如下所示：</p>
 <h3 id="調整前"><a href="#調整前" class="headerlink" title="調整前"></a>調整前</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123;<span class="attr">&quot;id&quot;</span>: <span class="number">123</span>, <span class="attr">&quot;candidate&quot;</span>: <span class="string">&quot;taipei&quot;</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">&quot;id&quot;</span>: <span class="number">456</span>, <span class="attr">&quot;candidate&quot;</span>: <span class="string">&quot;taiwan&quot;</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">&quot;id&quot;</span>: <span class="number">789</span>, <span class="attr">&quot;candidate&quot;</span>: <span class="string">&quot;tall&quot;</span>&#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
@@ -158,7 +209,7 @@
 <h2 id="2-減少傳輸量"><a href="#2-減少傳輸量" class="headerlink" title="2. 減少傳輸量"></a>2. 減少傳輸量</h2><p>沒錯！第二點也是減少傳輸量，將準備要回傳的資料用 gzip 壓縮後再回傳。</p>
 <p>以 expressjs 本身建議的 compression 套件來說，實測下來發揮不了什麼作用。因為 compression 套件預設為資料量大於 1kb 才會做壓縮，而目前的資料已經是小於 1kb 了，所以沒做任何壓縮就直接回傳。</p>
 <p>另外還發現加了 compression 套件之後，以目前開的 heroku 機器來說，回應時間會加上 5-10ms 左右。不過現在服務還沒上線，沒有使用量都不準，等上線之後再來觀察看看好了。</p>
-<h2 id="3-減少使用者打-server-的次數"><a href="#3-減少使用者打-server-的次數" class="headerlink" title="3. 減少使用者打 server 的次數"></a>3. 減少使用者打 server 的次數</h2><p>前端可以在輸入一個字元的時候不要送 request 給 server，因為經驗法則，使用者應該至少會打兩個字元之後，Autocomplete 回應給使用者 candidate，這樣對 UX 上應該會比較好吧 (我們不專業分析 XD)。不止可以降低 server 的 loading，也可以減少存入 Redis 的資料量。</p>
+<h2 id="3-減少使用者打-server-的次數"><a href="#3-減少使用者打-server-的次數" class="headerlink" title="3. 減少使用者打 server 的次數"></a>3. 減少使用者打 server 的次數</h2><p>前端可以在輸入一個字元的時候不要送 request 給 server，因為經驗法則，使用者應該至少會打兩個字元之後，Autocomplete 回應給使用者 candidate，這樣對 UX 上應該會比較好吧 (小編不專業分析 XD)。不止可以降低 server 的 loading，也可以減少存入 Redis 的資料量。</p>
 <p>但這會牽涉到 CJK 與 non-CJK 的處理方式，這就還要再看看如何處理比較好。</p>
 <h2 id="4-減少使用者打-server-的次數"><a href="#4-減少使用者打-server-的次數" class="headerlink" title="4. 減少使用者打 server 的次數"></a>4. 減少使用者打 server 的次數</h2><p>沒錯！又是減少次數。client 可以在 server 回傳資料的時候，將資料暫存在 client 的記憶體內。因為常會有輸入相同文字的時候，這時就可以直接從 client 的記憶體取出資料，就不用打到 server 了。</p>
 <p>但這個使用方式比較不好處理，需視情境而定。若是 Redis 的資料常常在變動，那這個方式會造成取不回最新的資料。或許可以在 client 放個 LRU cache 來做處理。</p>
@@ -179,12 +230,12 @@
 <li>taiwan*123</li>
 </ol>
 <p>把 123 放在 taiwan 後面，在取出 candidate 的時候再利用 split 的方式把 taiwan 跟 123 分別取出就可以了。</p>
-<h2 id="總結"><a href="#總結" class="headerlink" title="總結"></a>總結</h2><p>總結上面的幾種方式，目前我們這裡用到了 1, 2, 5, 6, 7 共五種，效果還不錯，就等上線再來看看實戰結果囉。</p>
+<h2 id="總結"><a href="#總結" class="headerlink" title="總結"></a>總結</h2><p>總結上面的幾種方式，目前小編這裡用到了 1, 2, 5, 6, 7 共五種，效果還不錯，就等上線再來看看實戰結果囉。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/" data-id="ckkui84e50001zjtbh328h9pr" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/" data-id="ckkuiil1j00031hqs0ezte95x" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 2" class="article-share-link">Share</a>
       
       
       
@@ -221,7 +272,7 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
         <p>Autocomplete 在現在的應用程式已經是個不可或缺的功能，但這個功能因為要一直發 request 到 server 上，簡直就是 DDoS 了 XDDD，對 server 是個不小的負擔。一方面要讓功能正常快速的運作，一方面又要讓 server 不會被打掛，是個不容易做的好的功能。這篇就來分享一下 Redis 的作者 antirez 是如何運用 Redis 來達到這個功能。</p>
-<p>Redis 是一個 in-memory database，讀寫的效率自然不在話下，做 Autocomplete 用這類資料庫是再正常不過了。Redis 裡面有個資料結構叫做 Sorted Set，只要塞資料 (ZADD) 進去，它就會幫你按照字母順序排列好。所以我們只要把要搜尋的資料 (這裡我們稱為 candidate) 分割成獨立的字元 (這裡我們稱為 keyword)，存進 Sorted Set 就可以完成初步的資料處理。</p>
+<p>Redis 是一個 in-memory database，讀寫的效率自然不在話下，做 Autocomplete 用這類資料庫是再正常不過了。Redis 裡面有個資料結構叫做 Sorted Set，只要塞資料 (ZADD) 進去，它就會幫你按照字母順序排列好。所以小編只要把要搜尋的資料 (這裡小編稱為 candidate) 分割成獨立的字元 (這裡小編稱為 keyword)，存進 Sorted Set 就可以完成初步的資料處理。</p>
 <p>比如想要找到 Taiwan 這個 candidate 的話就先把 Taiwan 拆成 t, ta, tai, taiw, taiwa, taiwan，把這六個 keyword 都存入 Sorted Set 裡面。最後再存入 taiwan*，表示這個 candidate 的結尾。所以 Sorted Set 的內容會變成下面這樣：</p>
 <hr>
 <ol>
@@ -250,7 +301,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" data-id="ckkui84e00000zjtb1kdx5vov" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" data-id="ckkuiil1g00011hqsbqmc83ut" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 1" class="article-share-link">Share</a>
       
       
       
@@ -277,7 +328,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
     </div>
   </div>
 
@@ -287,7 +338,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/autocomplete/" style="font-size: 20px;">autocomplete</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 20px;">autocomplete</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a> <a href="/tags/postgresql/" style="font-size: 10px;">postgresql</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a>
     </div>
   </div>
 
@@ -296,7 +347,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -307,6 +358,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/">如何用 PostgreSQL 的 advisory lock 實作推薦景點</a>
+          </li>
         
           <li>
             <a href="/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/">用 Redis 來處理 City 的 autocomplete 功能 - 3</a>
