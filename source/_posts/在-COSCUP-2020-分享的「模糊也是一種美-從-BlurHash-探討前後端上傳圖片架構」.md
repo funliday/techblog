@@ -6,7 +6,9 @@ tags:
 - coscup
 ---
 
-上星期大家都有來聽小編在 COSCUP 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」嗎？這個技術已經有實作在 Funliday 的 Web 跟 Android 囉。這個議題結束後，有朋友問了一些問題，這裡順便來統整回答一下：
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/55C8If84Cyr4CV" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/blurhash" title="模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構" target="_blank">模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+上星期大家都有來聽小編在 COSCUP 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」嗎？這個技術已經有實作在 Funliday 的 Web 跟 Android 囉。這個議題結束後，有朋友問了一些問題，這裡順便來統整回答一下。
 
 ## 1. client side upload 方式從 server 產出的 signed URL 是個什麼樣的東西？
 
@@ -29,3 +31,7 @@ signed URL 是為了讓沒有 access key 及 secret key 的 sender 也能在有�
 當然也是要感謝 gslin 大大，他在 4/26 (日) 簡單介紹了 BlurHash。小編下午看到這篇文章，馬上丟去 slack 問我們的設計師大大，看她覺得這效果如何？她過沒多久回覺得不錯，小編就在星期日的下午開始處理 server side 的實作。隔天星期一有了初步的成果，然後給我們的安卓五星上將看，星期二就完成 Android 實作並上線了！
 
 也是因為 CDN 那塊後來把原先的 lambda 改用自己寫的 server 處理，所以實作 BlurHash 才能這麼快。lambda 這塊也是血淚史，下略 10000 字，之後有機會再跟大家分享。歡迎大家對這塊有興趣的也來交流一下喔！
+
+## 影片
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/l1JVBX3tsMY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
