@@ -14,7 +14,7 @@ tags:
 
 ## 1. 減少傳輸量可以使用 msgpack
 
-我們有聽過 msgpack 但還沒實際了解這是如何運作的。剛查了一下[資料](https://msgpack.org)，說是比 JSON 更省資料大小，基本上聽過的語言都有支援。
+小編有聽過 msgpack 但還沒實際了解這是如何運作的。剛查了一下[資料](https://msgpack.org)，說是比 JSON 更省資料大小，基本上聽過的語言都有支援。
 
 在前公司也用過 Avro 這類的格式，主打的也是省資料大小。但現在應該還不會考慮改用這類要另外做 serialize 的格式。
 
@@ -30,7 +30,7 @@ tags:
 
 ## 3. 減少使用者打 server 的次數，加上 debounce time
 
-這大家都主推使用 debounce 方式，前端沒玩很深的我們第一次碰到這個名詞是高職的時候。記得那時上課在教 8051，老師說按按鈕時要加上 15 - 20ms 的 debounce time，避免重複送外部中斷。我們對單晶片實在不在行，但大概記得是這個意思。
+這大家都主推使用 debounce 方式，前端沒玩很深的小編第一次碰到這個名詞是高職的時候。記得那時上課在教 8051，老師說按按鈕時要加上 15 - 20ms 的 debounce time，避免重複送外部中斷。小編對單晶片實在不在行，但大概記得是這個意思。
 
 剛查了一下[資料](https://css-tricks.com/debouncing-throttling-explained-examples/)，前端的 debounce time 大概也是類似的意思。在輸入文字後，會 delay n 秒再送出，若是在 n 秒內又有打其他內容的時候，就把之前的 request 從 queue 裡面丟棄，只關注最後一次的 request 就好。
 
@@ -42,7 +42,7 @@ tags:
 
 但要注意就是 A request 目前正在執行的步驟是去 DB 拿資料，或是在 server 本身處理一些基本計算。之前在使用 Java (grizzly + jersey) 開發的時候，若有這種情況發生會常在 log 裡面看到 IOException。
 
-原因是 server 已經準備好資料要回傳給 client，但發現 A request 已經取消，不知道要怎麼回傳時就會發生這個狀況。但也有可能是我們自己沒控制好收發的關係啦 XD
+原因是 server 已經準備好資料要回傳給 client，但發現 A request 已經取消，不知道要怎麼回傳時就會發生這個狀況。但也有可能是小編自己沒控制好收發的關係啦 XD
 
 ---
 

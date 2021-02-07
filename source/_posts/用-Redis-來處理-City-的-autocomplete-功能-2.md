@@ -8,7 +8,7 @@ tags:
 - nodejs
 ---
 
-[前一篇](https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/) 提到了 Autocomplete 的實作方式，但仍然有許多可以調整的地方，像是如何加大 throughput、帶額外資料...等，下面就來分享一下我們的作法。
+[前一篇](https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/) 提到了 Autocomplete 的實作方式，但仍然有許多可以調整的地方，像是如何加大 throughput、帶額外資料...等，下面就來分享一下小編的作法。
 
 ---
 
@@ -44,7 +44,7 @@ tags:
 
 ## 3. 減少使用者打 server 的次數
 
-前端可以在輸入一個字元的時候不要送 request 給 server，因為經驗法則，使用者應該至少會打兩個字元之後，Autocomplete 回應給使用者 candidate，這樣對 UX 上應該會比較好吧 (我們不專業分析 XD)。不止可以降低 server 的 loading，也可以減少存入 Redis 的資料量。
+前端可以在輸入一個字元的時候不要送 request 給 server，因為經驗法則，使用者應該至少會打兩個字元之後，Autocomplete 回應給使用者 candidate，這樣對 UX 上應該會比較好吧 (小編不專業分析 XD)。不止可以降低 server 的 loading，也可以減少存入 Redis 的資料量。
 
 但這會牽涉到 CJK 與 non-CJK 的處理方式，這就還要再看看如何處理比較好。
 
@@ -86,4 +86,4 @@ tags:
 
 ## 總結
 
-總結上面的幾種方式，目前我們這裡用到了 1, 2, 5, 6, 7 共五種，效果還不錯，就等上線再來看看實戰結果囉。
+總結上面的幾種方式，目前小編這裡用到了 1, 2, 5, 6, 7 共五種，效果還不錯，就等上線再來看看實戰結果囉。
