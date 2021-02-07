@@ -71,6 +71,163 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Ant-在-ModernWeb-2019-分享的-Progressive-Deployment-NoDeploy" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/" class="article-date">
+  <time class="dt-published" datetime="2019-08-28T02:25:55.000Z" itemprop="datePublished">2019-08-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/">Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Ant 分享的內容總是很有意思，這場學到許多東西。連 Netflix 這麼大的公司都這樣講了，要在 production 做測試！</p>
+<p>小編最近在 Funliday 切環境的時候非常有感。新創錢不夠多，總不可能建置一模一樣的環境來做測試吧。像是現在為了省錢，所以 Elasticsearch、Redis 和 Worker 還是有部分只在 production 上運作。這樣子在做測試時還是有部分怕怕的，尤其是目前主機大都在 Heroku 上面，也還是有部分的 env 需要做調整。</p>
+<p>無論如何，還是要有錢才能把環境完全切開才行啊 Orz</p>
+<ul>
+<li>Progressive Deployment &amp; NoDeploy: <a target="_blank" rel="noopener" href="https://s.itho.me/events/2019/modernweb/2019-08-28_ModernWeb19-Ant.pdf">https://s.itho.me/events/2019/modernweb/2019-08-28_ModernWeb19-Ant.pdf</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/" data-id="ckkuvs4ng000009re2nsodp2r" data-title="Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-目前-Funliday-打過的怪" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/07/29/%E7%9B%AE%E5%89%8D-Funliday-%E6%89%93%E9%81%8E%E7%9A%84%E6%80%AA/" class="article-date">
+  <time class="dt-published" datetime="2019-07-29T02:08:05.000Z" itemprop="datePublished">2019-07-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/07/29/%E7%9B%AE%E5%89%8D-Funliday-%E6%89%93%E9%81%8E%E7%9A%84%E6%80%AA/">目前 Funliday 打過的怪</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>這是篇很棒的<a target="_blank" rel="noopener" href="https://lukajojo.medium.com/%E9%87%91%E9%AD%9A%E8%85%A6%E5%BE%8C%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%AF%AB%E7%9A%84%E5%A4%A7%E5%9E%8B%E7%B3%BB%E7%B5%B1%E5%85%A5%E9%96%80-329a0f51b51c">大型系統演進史</a>，是後端工程師一定要看的文章。</p>
+<p>其實台灣很多技術文章，但屬於這類偏大型系統演進史的文章，依比例來說正體中文是少之又少，看到的大都是簡體中文的內容。最近看到的另一篇是 PressPlay 從 AWS 轉到 GCP 的分享。</p>
+<p>後端是一個看到什麼怪就打什麼怪的開發模式，很難一次把架構做到位。</p>
+<ul>
+<li>熱門排行讀取速度太慢？就加 local cache</li>
+<li>熱門排行內容不一致？把 cache 改成 redis</li>
+<li>圖片讀取速度太慢？就加 CDN</li>
+<li>圖片檔案太大？就加 resize server</li>
+<li>圖片上傳太慢？MQ+redis+notification</li>
+<li>一般搜尋太慢？開 explain 加 index</li>
+<li>一般搜尋不精確？加 ElasticSearch</li>
+</ul>
+<p>隨便列幾個就是目前 Funliday 打過的怪，而且還遠遠不止咧 Orz</p>
+<p>有時候需求端也要懂得妥協，什麼功能都要的話就是錢要夠，時間要夠。天下真的沒有白吃的午餐啊！</p>
+<p>PS. 如果明年有機會的話，也希望可以在研討會分享一下 Funliday 這兩年來的技術演進史</p>
+<ul>
+<li>PressPlay從AWS搬家到GCP一年的心得: <a target="_blank" rel="noopener" href="https://bit.ly/2YpUx7O">https://bit.ly/2YpUx7O</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/07/29/%E7%9B%AE%E5%89%8D-Funliday-%E6%89%93%E9%81%8E%E7%9A%84%E6%80%AA/" data-id="ckkuvs4nr000809re3f83hmh7" data-title="目前 Funliday 打過的怪" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-POI-Bank-正式公布！" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/02/28/POI-Bank-%E6%AD%A3%E5%BC%8F%E5%85%AC%E5%B8%83%EF%BC%81/" class="article-date">
+  <time class="dt-published" datetime="2019-02-28T12:40:34.000Z" itemprop="datePublished">2019-02-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/02/28/POI-Bank-%E6%AD%A3%E5%BC%8F%E5%85%AC%E5%B8%83%EF%BC%81/">POI Bank 正式公布！</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>小編到 Funliday 之後就是專注在 POI Bank 的開發，這篇文章出來後，總算可以公布 POI Bank 這個名稱了。年前最後一個工作天把 POI Bank 弄上線真的要有很大的勇氣，過年期間果然被使用者罵很慘，搜尋搜不到、沒有圖片、一堆景點名稱都是羅馬拼音…族繁不及備載。</p>
+<p>除夕當天除了吃年夜飯跟打掃家裡以外，全部時間都拿來轉檔跟調整演算法，想辦法讓搜尋更精確，春節期間真的是整個團隊都沒好好過年。但也是這樣的壓力測試，讓 Funliday 可以快速迭代！</p>
+<p>不過過完年後看到使用者操作的真實數據後，發現 POI Bank 真的是大有可為，就像文內所舉的其中一例：</p>
+<p>「舉個例子，若我們從觀察用戶的數據資料，發現這個假期許多人計畫去某觀光景點，也許就能跟該觀光景點合作，提早讓店主掌握狀況預先處理，提供更好的旅遊品質給民眾。」</p>
+<p>其實 POI Bank 能做到的遠遠不只這個，但就讓 Funliday 賣個關子吧 XDDD</p>
+<hr>
+<p>這裡順便來聊一下搜尋精準度的問題，整整一個月除了上星期小編去東京考察以外，每天都在調整精準度。</p>
+<p>這星期回來重新思考跟測試後，發現根本就是斷詞的問題，雖然用了大家都推薦的 jieba 結巴斷詞，但沒用台灣詞庫，斷出來的結果真的是慘不忍睹。</p>
+<p>這週二 (2/26) 把用了台灣詞庫的搜尋丟上去之後，情況看來好了很多。因為搜尋精準度太難用程式量化了，所以現在加了 ab testing 上去，每幾天用工人智慧看一下大家的使用狀況後，再持續最佳化下去了。</p>
+<hr>
+<p>因為沒心力做行銷，Funliday 現在只能口耳相傳，一傳十十傳百，希望沒使用過 Funliday 的朋友看到這篇文章之後，能下載來用用看，對你出門旅遊絕對有很大的幫助，有使用過的朋友，也幫忙多拉幾個朋友來使用。</p>
+<p>Android 的共同編輯跟 Web 完整版就快要上線了，希望大家以後多多支持 Funliday 啦！</p>
+<ul>
+<li>許你一個好假期！本土研發的 Funliday 打造 POI Bank 讓你簡單規劃自由行: <a target="_blank" rel="noopener" href="https://meet.bnext.com.tw/articles/view/44542">https://meet.bnext.com.tw/articles/view/44542</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/02/28/POI-Bank-%E6%AD%A3%E5%BC%8F%E5%85%AC%E5%B8%83%EF%BC%81/" data-id="ckkuvs4nl000109reap8qagwq" data-title="POI Bank 正式公布！" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-如何用-PostgreSQL-的-advisory-lock-實作推薦景點" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" class="article-date">
@@ -108,7 +265,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" data-id="ckkuiil1b00001hqs0ffp2sm0" data-title="如何用 PostgreSQL 的 advisory lock 實作推薦景點" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" data-id="ckkuvs4nn000309re12s53ma2" data-title="如何用 PostgreSQL 的 advisory lock 實作推薦景點" class="article-share-link">Share</a>
       
       
       
@@ -164,7 +321,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" data-id="ckkuiil1k00041hqsf0zg7grq" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" data-id="ckkuvs4nq000709re8s0rf5h7" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 3" class="article-share-link">Share</a>
       
       
       
@@ -235,7 +392,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/" data-id="ckkuiil1j00031hqs0ezte95x" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/" data-id="ckkuvs4np000509ref8rwcra5" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 2" class="article-share-link">Share</a>
       
       
       
@@ -301,7 +458,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" data-id="ckkuiil1g00011hqsbqmc83ut" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" data-id="ckkuvs4no000409re2lqbhbfk" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 1" class="article-share-link">Share</a>
       
       
       
@@ -328,7 +485,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
     </div>
   </div>
 
@@ -338,7 +495,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 20px;">autocomplete</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a> <a href="/tags/postgresql/" style="font-size: 10px;">postgresql</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 20px;">autocomplete</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/modernweb/" style="font-size: 10px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/poibank/" style="font-size: 10px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 10px;">postgresql</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a>
     </div>
   </div>
 
@@ -347,7 +504,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -360,19 +517,23 @@
       <ul>
         
           <li>
+            <a href="/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/">Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/29/%E7%9B%AE%E5%89%8D-Funliday-%E6%89%93%E9%81%8E%E7%9A%84%E6%80%AA/">目前 Funliday 打過的怪</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/28/POI-Bank-%E6%AD%A3%E5%BC%8F%E5%85%AC%E5%B8%83%EF%BC%81/">POI Bank 正式公布！</a>
+          </li>
+        
+          <li>
             <a href="/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/">如何用 PostgreSQL 的 advisory lock 實作推薦景點</a>
           </li>
         
           <li>
             <a href="/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/">用 Redis 來處理 City 的 autocomplete 功能 - 3</a>
-          </li>
-        
-          <li>
-            <a href="/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/">用 Redis 來處理 City 的 autocomplete 功能 - 2</a>
-          </li>
-        
-          <li>
-            <a href="/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/">用 Redis 來處理 City 的 autocomplete 功能 - 1</a>
           </li>
         
       </ul>
