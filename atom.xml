@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Funliday Tech Blog</title>
+  <icon>https://techblog.funliday.com/icon.png</icon>
+  
+  <link href="https://techblog.funliday.com/atom.xml" rel="self"/>
+  
+  <link href="https://techblog.funliday.com/"/>
+  <updated>2021-02-08T02:45:13.453Z</updated>
+  <id>https://techblog.funliday.com/</id>
+  
+  <author>
+    <name>Kewang</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>解決瞬時大流量的 GET 請求</title>
+    <link href="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/"/>
+    <id>https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/</id>
+    <published>2021-01-12T01:47:55.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;最近 Funliday 常發一些精選旅遊回憶的 App 通知給使用者，在去年十一二月的時候發通知 Server 還能撐的了瞬時大流量的 request。&lt;/p&gt;
+&lt;p&gt;但今年開始發這類通知，總共發了三次，三次都造成 Server 被打掛，而且重開 AP</summary>
+        
+      
+    
+    
+    
+    
+    <category term="postgresql" scheme="https://techblog.funliday.com/tags/postgresql/"/>
+    
+    <category term="javascript" scheme="https://techblog.funliday.com/tags/javascript/"/>
+    
+    <category term="nodejs" scheme="https://techblog.funliday.com/tags/nodejs/"/>
+    
+    <category term="expressjs" scheme="https://techblog.funliday.com/tags/expressjs/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</title>
+    <link href="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/"/>
+    <id>https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/</id>
+    <published>2020-11-30T01:57:03.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/JAHObsopwdGJAz&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="poibank" scheme="https://techblog.funliday.com/tags/poibank/"/>
+    
+    <category term="postgresql" scheme="https://techblog.funliday.com/tags/postgresql/"/>
+    
+    <category term="newrelic" scheme="https://techblog.funliday.com/tags/newrelic/"/>
+    
+    <category term="redis" scheme="https://techblog.funliday.com/tags/redis/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」</title>
+    <link href="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/"/>
+    <id>https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/</id>
+    <published>2020-10-26T01:58:38.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/2gXeRhdmwtkpFi&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="iframe" scheme="https://techblog.funliday.com/tags/iframe/"/>
+    
+    <category term="cors" scheme="https://techblog.funliday.com/tags/cors/"/>
+    
+    <category term="hsts" scheme="https://techblog.funliday.com/tags/hsts/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」</title>
+    <link href="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/"/>
+    <id>https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/</id>
+    <published>2020-10-14T05:56:33.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/LPdWxTdodRUWyH&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="modernweb" scheme="https://techblog.funliday.com/tags/modernweb/"/>
+    
+    <category term="pppr" scheme="https://techblog.funliday.com/tags/pppr/"/>
+    
+    <category term="prerender" scheme="https://techblog.funliday.com/tags/prerender/"/>
+    
+    <category term="ssr" scheme="https://techblog.funliday.com/tags/ssr/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>再度最佳化推薦景點的回應時間</title>
+    <link href="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/"/>
+    <id>https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/</id>
+    <published>2020-09-28T02:01:10.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;img</summary>
+        
+      
+    
+    
+    
+    
+    <category term="postgresql" scheme="https://techblog.funliday.com/tags/postgresql/"/>
+    
+    <category term="newrelic" scheme="https://techblog.funliday.com/tags/newrelic/"/>
+    
+    <category term="redis" scheme="https://techblog.funliday.com/tags/redis/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」</title>
+    <link href="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/"/>
+    <id>https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/</id>
+    <published>2020-08-03T02:00:07.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/55C8If84Cyr4CV&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="blurhash" scheme="https://techblog.funliday.com/tags/blurhash/"/>
+    
+    <category term="coscup" scheme="https://techblog.funliday.com/tags/coscup/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Funliday 重磅推出新的 prerender 套件 pppr</title>
+    <link href="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/"/>
+    <id>https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/</id>
+    <published>2020-05-25T02:00:10.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;這一系列文總共有三篇，這是最後一篇。&lt;/p&gt;
+&lt;p&gt;Funliday 重磅推出新的 prerender 套件 pppr！這是一個 zero config 的 express middleware，只要 &lt;code&gt;npm install pppr&lt;/code&gt;，然後在</summary>
+        
+      
+    
+    
+    
+    
+    <category term="pppr" scheme="https://techblog.funliday.com/tags/pppr/"/>
+    
+    <category term="prerender" scheme="https://techblog.funliday.com/tags/prerender/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>用 Prerender 解決前端框架的搜尋問題</title>
+    <link href="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/"/>
+    <id>https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/</id>
+    <published>2020-05-18T02:00:29.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;img</summary>
+        
+      
+    
+    
+    
+    
+    <category term="prerender" scheme="https://techblog.funliday.com/tags/prerender/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>純手工打造前端框架的 metadata 內容</title>
+    <link href="https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/"/>
+    <id>https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/</id>
+    <published>2020-05-15T07:50:27.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;這一系列文總共有三篇，這是第一篇。&lt;/p&gt;
+&lt;p&gt;對於用 Vue, Angular, React 這類前端框架來講，如果沒有對 search engine 或 social network 特別處理的話，出來的結果一定不會如你所想的一樣。&lt;/p&gt;
+&lt;p&gt;因為 client</summary>
+        
+      
+    
+    
+    
+    
+    <category term="prerender" scheme="https://techblog.funliday.com/tags/prerender/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Funliday 外站文章的 App 與 Web 不同實作</title>
+    <link href="https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/"/>
+    <id>https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/</id>
+    <published>2020-05-04T02:00:49.000Z</published>
+    <updated>2021-02-08T02:45:13.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;iframe</summary>
+        
+      
+    
+    
+    
+    
+    <category term="著作權" scheme="https://techblog.funliday.com/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/"/>
+    
+    <category term="iframe" scheme="https://techblog.funliday.com/tags/iframe/"/>
+    
+  </entry>
+  
+</feed>
