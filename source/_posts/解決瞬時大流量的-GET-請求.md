@@ -36,9 +36,57 @@ Funliday 用了同時可承載 n 個 connection 的資料庫，而且程式碼�
 
 ---
 
-這邊來分享一下自己程式碼的寫法，圖一是原始寫法，在每個 API 都 create 一個 db client instance 來處理該 API 層的所有 db request。這是蠻單純的做法，也是 day 1 開始的處理方式。但有個小問題，就是每個 API 層都要自己 create instance，不好管理，且浪費資源。
+```js
+const express = require("express");
+const { Pool } = require("pg");
 
-後來因為想要做 graceful shutdown 的關係，所以調整了一下 db client instance 的建立方式，用 inject 將 instance 綁在 request 上面，如圖二。這樣只要在 middleware 建立 db client instance 就好，好管理，而且只要有 req 就可以取得 instance，非常方便。而這也是 1/6 時的程式碼，就從這裡開始研究吧。
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true
+});
+
+const router = express.Router();
+
+router.get("/", async (req, res) => {
+  const results = (await pool.query(QueryString.GET_ALL_DATA)).rows;
+
+  return res.success(results);
+});
+```
+
+這邊來分享一下自己程式碼的寫法，上面是原始寫法，在每個 API 都 create 一個 db client instance 來處理該 API 層的所有 db request。這是蠻單純的做法，也是 day 1 開始的處理方式。但有個小問題，就是每個 API 層都要自己 create instance，不好管理，且浪費資源。
+
+```js
+// inject-db.js
+const express = require("express");
+const { Pool } = require("pg");
+
+function InjectDb(req, res, next) {
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: true
+  });
+
+  req.pool = pool;
+
+  next();
+}
+
+module.exports = { InjectDb };
+
+// poi-recommend.js
+const express = require("express");
+
+const router = express.Router();
+
+router.get("/", async (req, res) => {
+  const results = (await req.pool.query(QueryString.GET_ALL_DATA)).rows;
+
+  return res.success(results);
+});
+```
+
+後來因為想要做 graceful shutdown 的關係，所以調整了一下 db client instance 的建立方式，用 inject 將 instance 綁在 request 上面，如第二段程式碼。這樣只要在 middleware (inject-db.js) 建立 db client instance 就好，好管理，而且只要有 req 就可以取得 instance (poi-recommend.js)，非常方便。而這也是 1/6 時的程式碼，就從這裡開始研究吧。
 
 ---
 
@@ -51,7 +99,51 @@ Funliday 用了同時可承載 n 個 connection 的資料庫，而且程式碼�
 
 ---
 
-如圖三，這是修改後的程式碼。想了一下子，覺得目前在 API 層使用 req.pool.query 還不錯，不想用官方的建議做法：先 create client，然後 query 之後，再使用 release。
+```js
+// inject-db.js
+const express = require("express");
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true,
+});
+
+function InjectDb(req, res, next) {
+  req.pool = {
+    query: async (...args) => {
+      const client = await pool.connect();
+
+      let results;
+
+      try {
+        results = await client.query(...args);
+      } finally {
+        client.release();
+      }
+
+      return results;
+    },
+  };
+
+  next();
+}
+
+module.exports = { InjectDb };
+
+// poi-recommend.js
+const express = require("express");
+
+const router = express.Router();
+
+router.get("/", async (req, res) => {
+  const results = (await req.pool.query(QueryString.GET_ALL_DATA)).rows;
+
+  return res.success(results);
+});
+```
+
+如上面, 這是修改後的程式碼。想了一下子，覺得目前在 API 層使用 req.pool.query 還不錯，不想用官方的建議做法：先 create client，然後 query 之後，再使用 release。
 
 如果照官方建議做法，API 層的程式碼會多一堆與商業邏輯無關的程式碼，也不好維護。所以在不想動到 API 層的程式碼，只能使用 monkey patch 的方式來達到這個需求。
 
@@ -67,10 +159,10 @@ monkey patch 可以將原方法利用類似 override 的方式，將整個方法
 
 ---
 
-後記：有夠丟臉，其實完全用不到圖三，只要把圖二的 pool creation 放到最外層就好了，因為 pool.query 的內部實作已經有做 connect, query, release 了。
+後記：有夠丟臉，其實完全用不到第三種的寫法，只要把第二種的 pool creation 放到最外層就好了，因為 pool.query 的內部實作已經有做 connect, query, release 了。
 
-感謝下面的 Mark T. W. Lin 及 Rui An Huang 的幫忙，實在是太搞笑了 Orz
+感謝 FB 的 Mark T. W. Lin 及 Rui An Huang 的幫忙，實在是太搞笑了 Orz
 
-* Pool 的文件：https://node-postgres.com/features/pooling
-* 官方建議寫法：https://node-postgres.com/guides/project-structure
-* pool.query 的內部實作：https://github.com/…/node-postgres/blob/master/packages/pg-…
+* Pool 的文件: https://node-postgres.com/features/pooling
+* 官方建議寫法: https://node-postgres.com/guides/project-structure
+* pool.query 的內部實作: https://github.com/brianc/node-postgres/blob/master/packages/pg-pool/index.js#L332
