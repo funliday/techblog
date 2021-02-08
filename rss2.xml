@@ -15,8 +15,39 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Mon, 08 Feb 2021 02:45:13 GMT</pubDate>
+    <pubDate>Mon, 08 Feb 2021 06:09:56 GMT</pubDate>
     <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>Funliday 的 tech blog 開張啦！</title>
+      <link>https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/</link>
+      <guid>https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/</guid>
+      <pubDate>Mon, 08 Feb 2021 06:02:41 GMT</pubDate>
+      
+        
+        
+          
+          
+      <description>&lt;img src=&quot;/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/logo.png&quot; class=&quot;&quot;&gt;
+
+&lt;p&gt;假日想說來做一個 tech</description>
+          
+        
+      
+      
+      
+      
+      
+      <category domain="https://techblog.funliday.com/tags/github/">github</category>
+      
+      <category domain="https://techblog.funliday.com/tags/hexo/">hexo</category>
+      
+      <category domain="https://techblog.funliday.com/tags/markdown/">markdown</category>
+      
+      
+      <comments>https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/#disqus_thread</comments>
+      
+    </item>
     
     <item>
       <title>解決瞬時大流量的 GET 請求</title>
@@ -274,33 +305,6 @@
       
       
       <comments>https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/#disqus_thread</comments>
-      
-    </item>
-    
-    <item>
-      <title>Funliday 外站文章的 App 與 Web 不同實作</title>
-      <link>https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/</link>
-      <guid>https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/</guid>
-      <pubDate>Mon, 04 May 2020 02:00:49 GMT</pubDate>
-      
-        
-        
-          
-          
-      <description>&lt;iframe</description>
-          
-        
-      
-      
-      
-      
-      
-      <category domain="https://techblog.funliday.com/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/">著作權</category>
-      
-      <category domain="https://techblog.funliday.com/tags/iframe/">iframe</category>
-      
-      
-      <comments>https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/#disqus_thread</comments>
       
     </item>
     
