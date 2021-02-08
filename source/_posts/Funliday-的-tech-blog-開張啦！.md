@@ -8,7 +8,7 @@ tags:
 - travisci
 ---
 
-{% asset_img logo.png %}
+{% asset_img icon.png %}
 
 假日想說來做一個 tech blog，將小編之前在[個人粉絲頁](https://www.facebook.com/kewang.information)關於 Funliday 的技術文都整理上去，這樣子也比較容易擴散，以後關於文章主文也只會在這個 blog 裡面撰寫。
 
