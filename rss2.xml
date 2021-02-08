@@ -15,7 +15,7 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Mon, 08 Feb 2021 06:09:56 GMT</pubDate>
+    <pubDate>Mon, 08 Feb 2021 06:12:29 GMT</pubDate>
     <generator>http://hexo.io/</generator>
     
     <item>
@@ -30,7 +30,7 @@
           
       <description>&lt;img src=&quot;/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/logo.png&quot; class=&quot;&quot;&gt;
 
-&lt;p&gt;假日想說來做一個 tech</description>
+&lt;p&gt;假日想說來做一個 tech blog，將小編之前在&lt;a</description>
           
         
       
@@ -43,6 +43,8 @@
       <category domain="https://techblog.funliday.com/tags/hexo/">hexo</category>
       
       <category domain="https://techblog.funliday.com/tags/markdown/">markdown</category>
+      
+      <category domain="https://techblog.funliday.com/tags/travisci/">travisci</category>
       
       
       <comments>https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/#disqus_thread</comments>
