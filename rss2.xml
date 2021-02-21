@@ -15,7 +15,7 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Sun, 21 Feb 2021 15:24:14 GMT</pubDate>
+    <pubDate>Sun, 21 Feb 2021 15:53:34 GMT</pubDate>
     <generator>http://hexo.io/</generator>
     
     <item>
@@ -36,9 +36,13 @@
       
       
       
-      <category domain="https://techblog.funliday.com/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/">行政區劃</category>
+      <category domain="https://techblog.funliday.com/tags/poibank/">poibank</category>
       
       <category domain="https://techblog.funliday.com/tags/gis/">gis</category>
+      
+      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
+      
+      <category domain="https://techblog.funliday.com/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/">行政區劃</category>
       
       
       <comments>https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/#disqus_thread</comments>
