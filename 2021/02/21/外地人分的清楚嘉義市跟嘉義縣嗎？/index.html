@@ -6,19 +6,21 @@
   
   <title>外地人分的清楚嘉義市跟嘉義縣嗎？ | Funliday Tech Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋嘉義市的時候也可以搜尋到嘉義縣的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇嘉義縣、太保市或嘉義市的時候，都可以找到「故宮南院」。 對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。">
+  <meta name="description" content="最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋嘉義市的時候也可以搜尋到嘉義縣的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇嘉義縣、太保市或嘉義市的時候，都可以找到「故宮南院」。 對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性">
 <meta property="og:type" content="article">
 <meta property="og:title" content="外地人分的清楚嘉義市跟嘉義縣嗎？">
 <meta property="og:url" content="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/index.html">
 <meta property="og:site_name" content="Funliday Tech Blog">
-<meta property="og:description" content="最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋嘉義市的時候也可以搜尋到嘉義縣的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇嘉義縣、太保市或嘉義市的時候，都可以找到「故宮南院」。 對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。">
+<meta property="og:description" content="最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋嘉義市的時候也可以搜尋到嘉義縣的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇嘉義縣、太保市或嘉義市的時候，都可以找到「故宮南院」。 對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性">
 <meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/chiayi.png">
 <meta property="article:published_time" content="2021-02-21T07:40:35.000Z">
-<meta property="article:modified_time" content="2021-02-21T15:17:04.497Z">
+<meta property="article:modified_time" content="2021-02-21T15:24:14.099Z">
 <meta property="article:author" content="Kewang">
 <meta property="article:tag" content="行政區劃">
 <meta property="article:tag" content="gis">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/chiayi.png">
   
     <link rel="alternate" href="/atom.xml" title="Funliday Tech Blog" type="application/atom+xml"><link rel="alternate" href="/rss2.xml" title="Funliday Tech Blog" type="application/rss+xml">
   
@@ -97,7 +99,9 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋<strong>嘉義市</strong>的時候也可以搜尋到<strong>嘉義縣</strong>的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇<strong>嘉義縣</strong>、<strong>太保市</strong>或<strong>嘉義市</strong>的時候，都可以找到「故宮南院」。</p>
+        <img src="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/chiayi.png" class="">
+
+<p>最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋<strong>嘉義市</strong>的時候也可以搜尋到<strong>嘉義縣</strong>的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇<strong>嘉義縣</strong>、<strong>太保市</strong>或<strong>嘉義市</strong>的時候，都可以找到「故宮南院」。</p>
 <p>對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。</p>
 <hr>
 <p>我們先來整理一下<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國的行政區劃</a>：</p>
@@ -148,7 +152,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cklfaoc5s000kzpwlhnb66796" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cklfaxk8n000kz9xv0uh679ru" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
       
       
