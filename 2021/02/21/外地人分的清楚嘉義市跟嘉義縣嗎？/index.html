@@ -4,14 +4,20 @@
   <meta charset="utf-8">
   
   
-  <title>Archives: 2020/5 | Funliday Tech Blog</title>
+  <title>外地人分的清楚嘉義市跟嘉義縣嗎？ | Funliday Tech Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Funliday Tech Blog">
-<meta property="og:url" content="https://techblog.funliday.com/archives/2020/05/index.html">
+  <meta name="description" content="最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋嘉義市的時候也可以搜尋到嘉義縣的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇嘉義縣、太保市或嘉義市的時候，都可以找到「故宮南院」。 對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="外地人分的清楚嘉義市跟嘉義縣嗎？">
+<meta property="og:url" content="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/index.html">
 <meta property="og:site_name" content="Funliday Tech Blog">
+<meta property="og:description" content="最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋嘉義市的時候也可以搜尋到嘉義縣的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇嘉義縣、太保市或嘉義市的時候，都可以找到「故宮南院」。 對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。">
 <meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2021-02-21T07:40:35.000Z">
+<meta property="article:modified_time" content="2021-02-21T15:17:04.497Z">
 <meta property="article:author" content="Kewang">
+<meta property="article:tag" content="行政區劃">
+<meta property="article:tag" content="gis">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="Funliday Tech Blog" type="application/atom+xml"><link rel="alternate" href="/rss2.xml" title="Funliday Tech Blog" type="application/rss+xml">
@@ -69,96 +75,101 @@
 </header>
 
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-05-25T02:00:10.000Z" itemprop="datePublished">5月 25</time>
+        <section id="main"><article id="post-外地人分的清楚嘉義市跟嘉義縣嗎？" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" class="article-date">
+  <time class="dt-published" datetime="2021-02-21T07:40:35.000Z" itemprop="datePublished">2021-02-21</time>
 </a>
-      
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/">Funliday 重磅推出新的 prerender 套件 pppr</a>
+    <h1 class="p-name article-title" itemprop="headline name">
+      外地人分的清楚嘉義市跟嘉義縣嗎？
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-05-18T02:00:29.000Z" itemprop="datePublished">5月 18</time>
-</a>
+    <div class="e-content article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/">用 Prerender 解決前端框架的搜尋問題</a>
-    </h1>
-  
+        <p>最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋<strong>嘉義市</strong>的時候也可以搜尋到<strong>嘉義縣</strong>的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇<strong>嘉義縣</strong>、<strong>太保市</strong>或<strong>嘉義市</strong>的時候，都可以找到「故宮南院」。</p>
+<p>對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。</p>
+<hr>
+<p>我們先來整理一下<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國的行政區劃</a>：</p>
+<ol>
+<li>省、直轄市</li>
+<li>縣、市</li>
+<li>鄉、鎮、縣轄市、直轄市山地原住民區、區</li>
+<li>村、里</li>
+<li>鄰</li>
+</ol>
+<h2 id="嘉義縣與嘉義市"><a href="#嘉義縣與嘉義市" class="headerlink" title="嘉義縣與嘉義市"></a>嘉義縣與嘉義市</h2><p><strong>嘉義市</strong>是「第二級市」，與<strong>嘉義縣</strong>無關。而<strong>嘉義縣</strong>是「第二級縣」，與<strong>嘉義市</strong>無關，兩者是平行位階。另外<strong>嘉義縣</strong>的縣治是<strong>太保市</strong>，為「第三級縣轄市」，但就算當地人也不見得搞的懂從屬關係。</p>
+<p>以行政區邊界來看，<strong>嘉義縣</strong>與<strong>嘉義市</strong>雖然是平行位階，但<strong>嘉義縣</strong>卻將<strong>嘉義市</strong>包圍起來 (<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E9%A3%9B%E5%9C%B0%E5%88%97%E8%A1%A8">嘉義市是嘉義縣的內飛地</a>)，就跟<strong>新北市</strong>及<strong>台北市</strong>雖然都是「一級直轄市」，但<strong>新北市</strong>卻將<strong>台北市</strong>包圍起來一樣的意思。</p>
+<h2 id="宜蘭縣與宜蘭市"><a href="#宜蘭縣與宜蘭市" class="headerlink" title="宜蘭縣與宜蘭市"></a>宜蘭縣與宜蘭市</h2><p><strong>宜蘭縣</strong>是「第二級縣」，而<strong>宜蘭市</strong>是「第三級縣轄市」，另外<strong>宜蘭縣</strong>的縣治正好為<strong>宜蘭市</strong>。</p>
+<p>以行政區邊界來看，因為<strong>宜蘭縣</strong>的縣治為<strong>宜蘭市</strong>，所以<strong>宜蘭縣</strong>將<strong>宜蘭市</strong>包圍起來也是很正常的事。</p>
+<h2 id="系統化需求"><a href="#系統化需求" class="headerlink" title="系統化需求"></a>系統化需求</h2><p>了解了行政區劃以及自己在 Google 上的搜尋經驗來講，使用者真的很難知道所搜尋的關鍵字，到底是屬於哪個行政區的位階，能打出「嘉義」或「宜蘭」就已經很厲害了。所以使用者在<strong>宜蘭市</strong>搜尋「羅東夜市」，或者是<strong>嘉義市</strong>搜尋「故宮南院」的時候，都應該要能搜的到正確的結果。</p>
+<p>回到開頭所講的，這裡就可以從這裡把原始需求系統化，其實就是需要一個 similar city 的功能。把 schema 整理出來之後，也就是下面這樣而已：</p>
+<table>
+<thead>
+<tr>
+<th>city</th>
+<th>similar</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>嘉義市</td>
+<td>嘉義縣</td>
+</tr>
+<tr>
+<td>宜蘭市</td>
+<td>宜蘭縣</td>
+</tr>
+</tbody></table>
+<p>所以在<strong>嘉義市</strong>搜尋的時候，必須要將<strong>嘉義縣</strong>也加進來，在 PostGIS 就是用 <code>ST_Union</code> 將兩個 bounding box 合併起來再做搜尋。</p>
+<h2 id="關於生活圈"><a href="#關於生活圈" class="headerlink" title="關於生活圈"></a>關於生活圈</h2><p>上面的這個功能雖然已經上線了，但這世界真的沒有這麼簡單。其實 similar city 不只是單純的地名相似而已，應該也要包括相似的地理位置、生活習性、交通便利度…等。以下舉幾個例子大家應該就懂意思了。</p>
+<ul>
+<li>九份：應該算基隆、新北、台北哪個城市呢？</li>
+<li>淡水老街：應該算新北、台北哪個城市呢？</li>
+<li>長庚醫院：應該算林口、桃園、龜山、新莊、蘆竹、迴龍哪個城市呢？</li>
+</ul>
+<p>從上面這些例子就知道了，其實還有很多可以改善的空間，最重要的是要把生活圈也加到 similar city 才行，還有很大的進步空間啊！</p>
+<h2 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國行政區劃</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E9%A3%9B%E5%9C%B0%E5%88%97%E8%A1%A8">台灣飛地列表</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ptt.cc/bbs/Geography/M.1358421417.A.681.html">40生活圈vs36生活圈-北部、中部</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ptt.cc/bbs/Geography/M.1358421607.A.676.html">40生活圈vs36生活圈-南部、東部</a></li>
+</ul>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-05-15T07:50:27.000Z" itemprop="datePublished">5月 15</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/">純手工打造前端框架的 metadata 內容</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-05-04T02:00:49.000Z" itemprop="datePublished">5月 4</time>
-</a>
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cklfaoc5s000kzpwlhnb66796" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/">Funliday 外站文章的 App 與 Web 不同實作</a>
-    </h1>
-  
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
 
-    </header>
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Funliday 的 tech blog 開張啦！</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
 
 
 </section>

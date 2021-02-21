@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   
   
-  <title>Archives: 2020/5 | Funliday Tech Blog</title>
+  <title>Funliday Tech Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta property="og:type" content="website">
 <meta property="og:title" content="Funliday Tech Blog">
-<meta property="og:url" content="https://techblog.funliday.com/archives/2020/05/index.html">
+<meta property="og:url" content="https://techblog.funliday.com/page/3/index.html">
 <meta property="og:site_name" content="Funliday Tech Blog">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:author" content="Kewang">
@@ -71,95 +71,78 @@
       <div class="outer">
         <section id="main">
   
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-05-25T02:00:10.000Z" itemprop="datePublished">5月 25</time>
+    <article id="post-用-Redis-來處理-City-的-autocomplete-功能-1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" class="article-date">
+  <time class="dt-published" datetime="2019-01-08T06:00:01.000Z" itemprop="datePublished">2019-01-08</time>
 </a>
-      
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
     <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/">Funliday 重磅推出新的 prerender 套件 pppr</a>
+      <a class="p-name article-title" href="/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/">用 Redis 來處理 City 的 autocomplete 功能 - 1</a>
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-05-18T02:00:29.000Z" itemprop="datePublished">5月 18</time>
-</a>
+    <div class="e-content article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/">用 Prerender 解決前端框架的搜尋問題</a>
-    </h1>
-  
+        <p>Autocomplete 在現在的應用程式已經是個不可或缺的功能，但這個功能因為要一直發 request 到 server 上，簡直就是 DDoS 了 XDDD，對 server 是個不小的負擔。一方面要讓功能正常快速的運作，一方面又要讓 server 不會被打掛，是個不容易做的好的功能。這篇就來分享一下 Redis 的作者 antirez 是如何運用 Redis 來達到這個功能。</p>
+<p>Redis 是一個 in-memory database，讀寫的效率自然不在話下，做 Autocomplete 用這類資料庫是再正常不過了。Redis 裡面有個資料結構叫做 Sorted Set，只要塞資料 (ZADD) 進去，它就會幫你按照字母順序排列好。所以小編只要把要搜尋的資料 (這裡小編稱為 candidate) 分割成獨立的字元 (這裡小編稱為 keyword)，存進 Sorted Set 就可以完成初步的資料處理。</p>
+<p>比如想要找到 Taiwan 這個 candidate 的話就先把 Taiwan 拆成 t, ta, tai, taiw, taiwa, taiwan，把這六個 keyword 都存入 Sorted Set 裡面。最後再存入 taiwan*，表示這個 candidate 的結尾。所以 Sorted Set 的內容會變成下面這樣：</p>
+<hr>
+<ol>
+<li>t</li>
+<li>ta</li>
+<li>tai</li>
+<li>taip</li>
+<li>taipe</li>
+<li>taipei</li>
+<li>taipei*</li>
+<li>taiw</li>
+<li>taiwa</li>
+<li>taiwan</li>
+<li>taiwan*</li>
+<li>tal</li>
+<li>tall</li>
+<li>tall*</li>
+</ol>
+<hr>
+<p>當使用者輸入 <kbd>t</kbd>，發送請求到 server 的時候，server 用 Redis 的搜尋指令 (ZRANK) 找出 index 為 1，然後再從 1 開始，將資料取回來 (ZRANGE) 50 筆，所以上面的 14 筆資料都會取回來。最後 server 再把這 14 筆結尾有 * 的資料過濾出來，剩下 7, 11, 14 這三筆，再把 * 濾掉回給使用者就完成這個功能了。</p>
+<p>所以使用者輸入了 t，server 就會回給使用者 taipei, taiwan, tall 這三個 candidate，這就完成最簡單的 Autocomplete 功能。但 Autocomplete 可不只有這樣而已，剩下的細節等下次有空再來分享一下好了。</p>
+<ul>
+<li>Auto Complete with Redis: <a target="_blank" rel="noopener" href="http://oldblog.antirez.com/post/autocomplete-with-redis.html">http://oldblog.antirez.com/post/autocomplete-with-redis.html</a></li>
+</ul>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-05-15T07:50:27.000Z" itemprop="datePublished">5月 15</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/">純手工打造前端框架的 metadata 內容</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-05-04T02:00:49.000Z" itemprop="datePublished">5月 4</time>
-</a>
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" data-id="cklfaoc5w000qzpwl7dkr8vm6" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 1" class="article-share-link">Share</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/">Funliday 外站文章的 App 與 Web 不同實作</a>
-    </h1>
-  
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
 
-    </header>
+    </footer>
   </div>
+  
 </article>
-  
-  
-    </div></section>
+
+
+
   
 
+
+  <nav id="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+  </nav>
 
 </section>
         
