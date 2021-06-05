@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Funliday Tech Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Funliday Tech Blog">
+<meta property="og:url" content="https://techblog.funliday.com/index.html">
+<meta property="og:site_name" content="Funliday Tech Blog">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:author" content="Kewang">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Funliday Tech Blog" type="application/atom+xml"><link rel="alternate" href="/rss2.xml" title="Funliday Tech Blog" type="application/rss+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Funliday Tech Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://techblog.funliday.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-如何最佳化中日文的關鍵字搜尋-1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" class="article-date">
+  <time class="dt-published" datetime="2021-06-05T10:27:22.000Z" itemprop="datePublished">2021-06-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Funliday 使用 Elasticsearch (以下簡稱 ES) 做為搜尋引擎的基礎設施，今天來分享一下 Funliday 最近的搜尋功能做了哪些最佳化。</p>
+<p>大家都知道日文其實包括了漢字及假名，所以同樣是輸入「台北」，實在很難了解到底是在搜尋中文的「台北」還是日文的「台北」。這時候就來<strong>簡單</strong>的講一下 ES 的搜尋原理，在將文字儲存進 ES 裡面前，ES 會用 analyzer 將文字拆解後再存入 ES。</p>
+<p>隨便舉個例子，要將「行天宮捷運站」用英文 (english) 的 analyzer 儲存進 ES 的話，會變成「行、天、宮、捷、運、站」，如果是用中文 (jieba_index) 的 analyzer 儲存進 ES 的話，則會變成「行天、行天宮、天宮、捷運、捷運站、運站」，所以選對 analyzer 是非常重要的一件事。中文跟英文可以用正規表示式來判斷到底是哪種語言，<strong>但要用程式分辨中日文真的沒有這麼容易</strong>。所以 Funliday 改用其他方式來解決這個問題。</p>
+<hr>
+<p>Funliday 無時無刻都在找尋世界上各個景點，並將內容儲存起來。如果這個景點名稱是中文的話，Funliday 會將景點名稱儲存至詞庫裡面。</p>
+<pre class="mermaid">graph TD;
+    找到的中文景點名稱 --> 存入詞庫;</pre>
+
+<p>然後將 ES 裡面所有的景點全部再重跑一次 index (將資料儲存至 ES 裡面)。在重跑 index 前，Funliday 會用一些 NLP 的技術來判斷原本在 ES 裡面的景點是中文或日文。如果是日文的話，我們會再丟入中文詞庫裡面判斷詞性，如果是名詞的話，我們就會把這個景點名稱也認定為是中文。</p>
+<pre class="mermaid">graph TD;
+    A[開始] --> B{判斷景點名是中文或日文};
+    B -->|中文| C[儲存到中文欄位];
+    C --> END[結束];
+    B -->|日文| D[儲存到日文欄位];
+    D --> E{丟入中文詞庫判斷詞性};
+    E -->|名詞| F[可能是中文];
+    F --> C[儲存到中文欄位];
+    E -->|非名詞| END[結束];</pre>
+
+<p>舉個例子，假設有一間在日本的拉麵店叫做「神鳥拉麵」，而且 NLP 判斷為這個是日文的話，就可以丟入中文詞庫取出詞性，如果是名詞的話，可以將「神鳥拉麵」也視為中文。這時我們如果分別用中日文的 analyzer 來看看結果，會發現日文 (kuromoji) 是「神、鳥、拉、麵」，而中文 (jieba_index) 是「神鳥、拉麵」。到時候在搜尋時輸入「拉麵」的話，如果沒有做判斷詞性的這個步驟，是有可能會搜不到這間拉麵店的喔，不過搜尋的細節等下一篇再來分享。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html">Text Analysis</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.unicode.org/faq/han_cjk.html#4">Q: How can I recognize from the 32 bit value of a Unicode character if this is a Chinese, Korean or Japanese character?</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/fxsjy/jieba">结巴中文分词</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckpjx667f000lzwou4e4vfutw" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-外地人分的清楚嘉義市跟嘉義縣嗎？" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" class="article-date">
+  <time class="dt-published" datetime="2021-02-21T07:40:35.000Z" itemprop="datePublished">2021-02-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/">外地人分的清楚嘉義市跟嘉義縣嗎？</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/chiayi.png" class="">
+
+<p>最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋<strong>嘉義市</strong>的時候也可以搜尋到<strong>嘉義縣</strong>的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇<strong>嘉義縣</strong>、<strong>太保市</strong>或<strong>嘉義市</strong>的時候，都可以找到「故宮南院」。</p>
+<p>對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。</p>
+<hr>
+<p>我們先來整理一下<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國的行政區劃</a>：</p>
+<ol>
+<li>省、直轄市</li>
+<li>縣、市</li>
+<li>鄉、鎮、縣轄市、直轄市山地原住民區、區</li>
+<li>村、里</li>
+<li>鄰</li>
+</ol>
+<h2 id="嘉義縣與嘉義市"><a href="#嘉義縣與嘉義市" class="headerlink" title="嘉義縣與嘉義市"></a>嘉義縣與嘉義市</h2><p><strong>嘉義市</strong>是「第二級市」，與<strong>嘉義縣</strong>無關。而<strong>嘉義縣</strong>是「第二級縣」，與<strong>嘉義市</strong>無關，兩者是平行位階。另外<strong>嘉義縣</strong>的縣治是<strong>太保市</strong>，為「第三級縣轄市」，但就算當地人也不見得搞的懂從屬關係。</p>
+<p>以行政區邊界來看，<strong>嘉義縣</strong>與<strong>嘉義市</strong>雖然是平行位階，但<strong>嘉義縣</strong>卻將<strong>嘉義市</strong>包圍起來 (<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E9%A3%9B%E5%9C%B0%E5%88%97%E8%A1%A8">嘉義市是嘉義縣的內飛地</a>)，就跟<strong>新北市</strong>及<strong>台北市</strong>雖然都是「一級直轄市」，但<strong>新北市</strong>卻將<strong>台北市</strong>包圍起來一樣的意思。</p>
+<h2 id="宜蘭縣與宜蘭市"><a href="#宜蘭縣與宜蘭市" class="headerlink" title="宜蘭縣與宜蘭市"></a>宜蘭縣與宜蘭市</h2><p><strong>宜蘭縣</strong>是「第二級縣」，而<strong>宜蘭市</strong>是「第三級縣轄市」，另外<strong>宜蘭縣</strong>的縣治正好為<strong>宜蘭市</strong>。</p>
+<p>以行政區邊界來看，因為<strong>宜蘭縣</strong>的縣治為<strong>宜蘭市</strong>，所以<strong>宜蘭縣</strong>將<strong>宜蘭市</strong>包圍起來也是很正常的事。</p>
+<h2 id="系統化需求"><a href="#系統化需求" class="headerlink" title="系統化需求"></a>系統化需求</h2><p>了解了行政區劃以及自己在 Google 上的搜尋經驗來講，使用者真的很難知道所搜尋的關鍵字，到底是屬於哪個行政區的位階，能打出「嘉義」或「宜蘭」就已經很厲害了。所以使用者在<strong>宜蘭市</strong>搜尋「羅東夜市」，或者是<strong>嘉義市</strong>搜尋「故宮南院」的時候，都應該要能搜的到正確的結果。</p>
+<p>回到開頭所講的，這裡就可以從這裡把原始需求系統化，其實就是需要一個 similar city 的功能。把 schema 整理出來之後，也就是下面這樣而已：</p>
+<table>
+<thead>
+<tr>
+<th>city</th>
+<th>similar</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>嘉義市</td>
+<td>嘉義縣</td>
+</tr>
+<tr>
+<td>宜蘭市</td>
+<td>宜蘭縣</td>
+</tr>
+</tbody></table>
+<p>所以在<strong>嘉義市</strong>搜尋的時候，必須要將<strong>嘉義縣</strong>也加進來，在 PostGIS 就是用 <code>ST_Union</code> 將兩個 bounding box 合併起來再丟去 Elasticsearch 用 <code>geo_polygon</code> 做搜尋。</p>
+<h2 id="關於生活圈"><a href="#關於生活圈" class="headerlink" title="關於生活圈"></a>關於生活圈</h2><p>上面的這個功能雖然已經上線了，但這世界真的沒有這麼簡單。其實 similar city 不只是單純的地名相似而已，應該也要包括相似的地理位置、生活習性、交通便利度…等。以下舉幾個例子大家應該就懂意思了。</p>
+<ul>
+<li>九份：應該算基隆、新北、台北哪個城市呢？</li>
+<li>淡水老街：應該算新北、台北哪個城市呢？</li>
+<li>長庚醫院：應該算林口、桃園、龜山、新莊、蘆竹、迴龍哪個城市呢？</li>
+</ul>
+<p>從上面這些例子就知道了，其實還有很多可以改善的空間，最重要的是要把生活圈也加到 similar city 才行，還有很大的進步空間啊！</p>
+<h2 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國行政區劃</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E9%A3%9B%E5%9C%B0%E5%88%97%E8%A1%A8">台灣飛地列表</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ptt.cc/bbs/Geography/M.1358421417.A.681.html">40生活圈vs36生活圈-北部、中部</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ptt.cc/bbs/Geography/M.1358421607.A.676.html">40生活圈vs36生活圈-南部、東部</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckpjx667e000kzwouaemf1iuq" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Funliday-的-tech-blog-開張啦！" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" class="article-date">
+  <time class="dt-published" datetime="2021-02-08T06:02:41.000Z" itemprop="datePublished">2021-02-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/">Funliday 的 tech blog 開張啦！</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/icon.png" class="">
+
+<p>假日想說來做一個 tech blog，將小編之前在<a target="_blank" rel="noopener" href="https://www.facebook.com/kewang.information">個人粉絲頁</a>關於 Funliday 的技術文都整理上去，這樣子也比較容易擴散，以後關於文章主文也只會在這個 blog 裡面撰寫。</p>
+<p>後來用了 GitHub pages+hexo 來處理，只要用 markdown 來寫文章就可以了，然後串接 Travis CI，push 到 GitHub 就直接發佈出去。而且客製化高，對於寫技術文來說，是個非常好的選擇！</p>
+<p>雖然現在功能只有 RSS 而已，但有空會再來把其他必備功能 (像是留言) 加上去，總之快來訂閱一下啊！</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckpjx66710003zwou22xm1gsj" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-解決瞬時大流量的-GET-請求" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" class="article-date">
+  <time class="dt-published" datetime="2021-01-12T01:47:55.000Z" itemprop="datePublished">2021-01-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>最近 Funliday 常發一些精選旅遊回憶的 App 通知給使用者，在去年十一二月的時候發通知 Server 還能撐的了瞬時大流量的 request。</p>
+<p>但今年開始發這類通知，總共發了三次，三次都造成 Server 被打掛，而且重開 AP 還緩解不了，瞬間手足無措。大概都要等過了十分鐘左右，Server 才將這些 request 消化完。</p>
+<p>這裡就來簡單整理一下時間軸，順便分享一下 Funliday 是如何解決這個問題。</p>
+<hr>
+<ul>
+<li>1/6 1900：系統排程發送精選旅遊回憶的 App 通知</li>
+<li>1/6 1900+10s 開始：Server 收到極大量的 request</li>
+<li>1/6 1900+20s：Nginx 出現錯誤訊息 1024 worker not enough，並回傳 http status code 503</li>
+<li>1/6 1900+25s：PostgreSQL 出現錯誤訊息 could not fork new process for connection (cannot allocate memory)</li>
+<li>1/6 1900+38s：Node.js 收到 PostgreSQL 的 exception。There was an error establishing an SSL connection error</li>
+<li>1/6 1900+69s：PostgreSQL 出現錯誤訊息 database system is shut down</li>
+<li>1/6 1900+546s：PostgreSQL 出現錯誤訊息 the database system is starting up</li>
+</ul>
+<hr>
+<p>看了時間軸就覺得奇怪，先不論 10s 的時候發了極大量 request，造成 20s 在 Nginx 出現 worker not enough 的錯誤訊息。而是要關注 25s 時的 PostgreSQL 出現 could not fork new process for connection 的錯誤訊息。</p>
+<p>Funliday 用了同時可承載 n 個 connection 的資料庫，而且程式碼又有加上 connection pool，理論上根本不該出現這個錯誤訊息。但整個時間軸看下來感覺就是 PostgreSQL 的 capacity 問題，造成系統無法運作。</p>
+<p>因為就算將 Nginx 的 worker connection size 再加大 10 倍，只是造成 PostgreSQL 要接受的 request 也跟著被加大 10 倍，但 PostgreSQL 那裡因為 request 變多，原本在 69s 直接關機的時間點只會提早，而無法真正緩解這個狀況。</p>
+<p>基於以上狀況，小編就開始回去看自己的程式碼是不是哪裡寫錯了。會這樣想也是覺得 PostgreSQL 應該沒這麼弱，一下就被打掛，一定是自己程式碼的問題 Orz</p>
+<hr>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">  connectionString: process.env.DATABASE_URL,</span><br><span class="line">  ssl: <span class="literal">true</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>這邊來分享一下自己程式碼的寫法，上面是原始寫法，在每個 API 都 create 一個 db client instance 來處理該 API 層的所有 db request。這是蠻單純的做法，也是 day 1 開始的處理方式。但有個小問題，就是每個 API 層都要自己 create instance，不好管理，且浪費資源。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// inject-db.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">InjectDb</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">    connectionString: process.env.DATABASE_URL,</span><br><span class="line">    ssl: <span class="literal">true</span></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  req.pool = pool;</span><br><span class="line"></span><br><span class="line">  next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; InjectDb &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// poi-recommend.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> req.pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>後來因為想要做 graceful shutdown 的關係，所以調整了一下 db client instance 的建立方式，用 inject 將 instance 綁在 request 上面，如第二段程式碼。這樣只要在 middleware (inject-db.js) 建立 db client instance 就好，好管理，而且只要有 req 就可以取得 instance (poi-recommend.js)，非常方便。而這也是 1/6 時的程式碼，就從這裡開始研究吧。</p>
+<hr>
+<p>直接切入 node-postgres 的文件，認真讀了一下 pool 有下面兩種使用方式：</p>
+<ol>
+<li>pool.connect, pool.release：文件寫著 checkout, use, and return，光看描述就應該用這個沒錯。</li>
+<li>pool.query：適用於不需要 pool 的連線方式，文件上也清楚寫著內部實作是直接 call client.query，所以用了這個方式是完全跟 pool 扯不上邊。</li>
+</ol>
+<p>但偏偏小編從 day 1 用的就是第 2 種方式 Orz，雖然看起來應該是寫錯，但也是要修改後實測，才知道是不是真的可以解決問題。</p>
+<hr>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// inject-db.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">  connectionString: process.env.DATABASE_URL,</span><br><span class="line">  ssl: <span class="literal">true</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">InjectDb</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  req.pool = &#123;</span><br><span class="line">    query: <span class="keyword">async</span> (...args) =&gt; &#123;</span><br><span class="line">      <span class="keyword">const</span> client = <span class="keyword">await</span> pool.connect();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">let</span> results;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        results = <span class="keyword">await</span> client.query(...args);</span><br><span class="line">      &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        client.release();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> results;</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; InjectDb &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// poi-recommend.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> req.pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如上面，這是修改後的程式碼。想了一下子，覺得目前在 API 層使用 req.pool.query 還不錯，不想用官方的建議做法：先 create client，然後 query 之後，再使用 release。</p>
+<p>如果照官方建議做法，API 層的程式碼會多一堆與商業邏輯無關的程式碼，也不好維護。所以在不想動到 API 層的程式碼，只能使用 monkey patch 的方式來達到這個需求。</p>
+<p>monkey patch 可以將原方法利用類似 override 的方式，將整個方法改掉，而不改變 caller 的程式碼，這也是 JavaScript, Ruby, Python 這類動態語言的特性之一，但真的要慎用，一不小心就會把原方法改成完全不同意義的方法了。</p>
+<p>所以原本應該要在 API 層實作 connect, query, release 一大堆程式碼，可以用 monkey patch 完美解決這一大堆程式碼。</p>
+<hr>
+<p>在 dev 壓測後至少 capacity 可以達到原本的 4 倍以上，隔天實際上 production 之後也確實如壓測般的數據，可以承載目前的流量。</p>
+<p>其實這篇分享的重點只有一點，文件看仔細才是最重要的事啦！如果沒把文件看仔細，然後開發經驗也不足的話，什麼 RCA、monkey patch 都幫不上忙啦！</p>
+<hr>
+<p>後記：有夠丟臉，其實完全用不到第三種的寫法，只要把第二種的 pool creation 放到最外層就好了，因為 pool.query 的內部實作已經有做 connect, query, release 了。</p>
+<p>感謝 FB 的 Mark T. W. Lin 及 Rui An Huang 的幫忙，實在是太搞笑了 Orz</p>
+<ul>
+<li>Pool 的文件: <a target="_blank" rel="noopener" href="https://node-postgres.com/features/pooling">https://node-postgres.com/features/pooling</a></li>
+<li>官方建議寫法: <a target="_blank" rel="noopener" href="https://node-postgres.com/guides/project-structure">https://node-postgres.com/guides/project-structure</a></li>
+<li>pool.query 的內部實作: <a target="_blank" rel="noopener" href="https://github.com/brianc/node-postgres/blob/master/packages/pg-pool/index.js#L332">https://github.com/brianc/node-postgres/blob/master/packages/pg-pool/index.js#L332</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckpjx668f003jzwou179sexar" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-在-PostgreSQL-TW-分享的「大解密！用-PostgreSQL-提升-350-倍的-Funliday-推薦景點計算速度」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2020-11-30T01:57:03.000Z" itemprop="datePublished">2020-11-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/">在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/JAHObsopwdGJAz" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/postgresql-350-funliday" title="大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度" target="_blank">大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>今年最後一次的公開演講，一年講四次不一樣的題目真的很累人 XDDD。這次到 PostgreSQL.TW 來分享一下 Funliday-旅遊規劃 是如何做推薦景點的，也是之前筆記的投影片版本。</p>
+<p>這兩年推薦景點的改版學到不少東西，除了投影片裡面提到的技術面，其他部分小編也來分享一下：</p>
+<ol>
+<li>資料庫是存資料用的，不要陷入正規化迷思</li>
+<li>APM 很好用，建議 day 1 就加上去</li>
+<li>即時是相對的，不強求每次都取得最新資料</li>
+<li>技術很重要，但技術是滿足業務需求</li>
+<li>定期檢視原程式碼，有時問題是資料量大才會出現</li>
+</ol>
+<p>PS. 沒想到這次場地的仁愛路小樹屋，旁邊居然就是 iCHEF 資廚 的新辦公室，真是太巧了 XD</p>
+<ul>
+<li>文字筆記: <a href="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/">https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckpjx667d000izwou9azy5oei" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-在-MOPCON-2020-分享的「如何使用-iframe-製作一個易於更新及更安全的前端套件」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2020-10-26T01:58:38.000Z" itemprop="datePublished">2020-10-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/">在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/2gXeRhdmwtkpFi" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/iframe-238967650" title="如何使用 iframe 製作一個易於更新及更安全的前端套件" target="_blank">如何使用 iframe 製作一個易於更新及更安全的前端套件</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>這是小編在這次 MOPCON 分享的內容「如何使用 iframe 製作一個易於更新及更安全的前端套件」，來聽的人跟預期的差不多，應該都被吸去 R1 聽游舒帆大大的分享了 XD。</p>
+<p>不過要反省一下，這個題目已經改過一次了，但還是取的不好，這個確實要好好檢討。雖然改名後的題目名為「前端套件」，但內容主要是在講後端的安全性，要對前端做些保護，主要有下面幾點：</p>
+<ul>
+<li>CORS：要加上 Access-Control-Allow-Origin</li>
+<li>api key 外流：加上 referer 做允許名單的驗證</li>
+<li>網域偽造：使用 HTTPS 及 HSTS</li>
+</ul>
+<p>最後分享了如何把網域加到 HSTS preload list 以及目前還在草案中的 SVCB/HTTPS 如何解決首次 HTTP request 的問題 (又是看 DK 大神的文章學知識 XD)</p>
+<p>另外，這個套件還沒公開出來，關心這個套件的開發狀況，歡迎隨時關注我們喔！</p>
+<p>如果十一月的 PostgreSQL 小講堂沒有入選的話，這應該就是今年的最後一個公開演講了，今年一次投了三個分享都有上，真的要感謝各大研討會的議程委員會。但真的是累死，之後一年最多還是投兩個就好，要不然光行前準備就花很多時間，累死了 XDDD</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckpjx6677000bzwou9k463ujg" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-在-ModernWeb-2020-分享的「pppr-解決-JavaScript-無法被搜尋引擎正確索引的問題」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2020-10-14T05:56:33.000Z" itemprop="datePublished">2020-10-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/">在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/LPdWxTdodRUWyH" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/pppr-javascript-238751058" title="pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題" target="_blank">pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>這次在 Modern Web 分享的 pppr 就是之前在處理 SSR 所開發的一個後端套件，可以讓前端工程師不用改任何一行程式碼，純粹在後端就可以把這個難搞的問題完美解決。</p>
+<p>內容包括 CSR 及 SSR 的比較，以及 pppr 在開發時所遇到的問題，以及如何解決這些問題。如果前端在處理 SSR 時遇到不少問題，可以來試試 pppr，一定會讓你節省不少時間！</p>
+<h2 id="影片"><a href="#影片" class="headerlink" title="影片"></a>影片</h2><iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2F1057917687569856%2Fvideos%2F206200431041773&width=500&show_text=false&appId=481027911976374&height=281" width="500" height="281" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen="true"></iframe>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckpjx667b000fzwouep0jdnbm" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-再度最佳化推薦景點的回應時間" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" class="article-date">
+  <time class="dt-published" datetime="2020-09-28T02:01:10.000Z" itemprop="datePublished">2020-09-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/">再度最佳化推薦景點的回應時間</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/recommend.png" class="">
+
+<p>現在大家使用 Funliday 在「景點瀏覽」輸入城市，或者是移動地圖出現的推薦景點，應該都是即時出現，也是最近花了一些時間的成果。下面先筆記一下推薦景點開發的歷程，之後如果有機會應該可以到 PostgreSQL.TW 分享一下完整的內容。</p>
+<p>簡單來說，就是一個從 70000ms 的 response time，提升到 200ms 的 response time 過程。</p>
+<hr>
+<h2 id="2019-02-推薦景點第一版"><a href="#2019-02-推薦景點第一版" class="headerlink" title="2019/02 推薦景點第一版"></a>2019/02 推薦景點第一版</h2><p><a href="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/">如何用 PostgreSQL 的 advisory lock 實作推薦景點</a></p>
+<h2 id="2019-09-late-加上使用者查詢的-poi-history-到推薦景點"><a href="#2019-09-late-加上使用者查詢的-poi-history-到推薦景點" class="headerlink" title="2019/09 late 加上使用者查詢的 poi history 到推薦景點"></a>2019/09 late 加上使用者查詢的 poi history 到推薦景點</h2><ol>
+<li>如果該 city 最近 30 天的 poi history 景點超過 10 個，則直接使用</li>
+<li>如果該 city 最近 30 天的 poi history 景點小於等於 10 個，則加上 KNN+rating 算法所取出的 poi 一起回傳給使用者</li>
+<li>使用網路上找到的 uniq，將 poi history 的景點及 KNN+rating 算法的景點去除重覆資料</li>
+<li>會將計算後取出的 poi id 存入 Redis，TTL 為 1 天</li>
+</ol>
+<h2 id="2020-06-late-加快查詢速度"><a href="#2020-06-late-加快查詢速度" class="headerlink" title="2020/06 late 加快查詢速度"></a>2020/06 late 加快查詢速度</h2><ol>
+<li>將原本要從 poi_data (超過 2500 萬筆的 POI) 取得 city 的 bbox，改從 city_data (約 200 萬筆的 city) 取得，加快查詢速度</li>
+</ol>
+<h2 id="2020-07-late-刪除不正確的-poi"><a href="#2020-07-late-刪除不正確的-poi" class="headerlink" title="2020/07 late 刪除不正確的 poi"></a>2020/07 late 刪除不正確的 poi</h2><ol>
+<li>刪除該 city 經過 poi history 計算後 count 為 0 的 poi</li>
+<li>刪除部分不該出現在推薦景點上的景點類型，如：飲水機、球場、停車場…等</li>
+<li>將 KNN+rating 的景點 TTL 設定為 14 天，而從 poi history 計算出來的景點 TTL 一樣為 1 天</li>
+</ol>
+<h2 id="2020-09-late-重構推薦景點功能，並加上-L2-L3-cache"><a href="#2020-09-late-重構推薦景點功能，並加上-L2-L3-cache" class="headerlink" title="2020/09 late 重構推薦景點功能，並加上 L2, L3 cache"></a>2020/09 late 重構推薦景點功能，並加上 L2, L3 cache</h2><h3 id="2020-09-22-late-重構推薦景點功能"><a href="#2020-09-22-late-重構推薦景點功能" class="headerlink" title="2020/09/22 late 重構推薦景點功能"></a>2020/09/22 late 重構推薦景點功能</h3><ol>
+<li>先從 Redis 取出確認該 city 是否有 cache，有的話就直接回傳，沒有的話寫入 refresh = true 的 flag 到 city_data table，表示該 city 資料必須更新</li>
+<li>從 DB 取出確認該 city 是否有 cache，有的話就直接回傳，沒有的話就必須即時計算該 city 的推薦景點</li>
+<li>推薦景點的算法與之前相同，包括了 poi history 及 KNN+rating，但移除 uniq，改用 Set 的寫法去除重覆資料</li>
+<li>計算完該 city 的推薦景點之後，直接將資料存回 Redis 及 DB，並且回傳計算完的推薦景點</li>
+<li>期望這樣跑下來後，之後使用者就算在 Redis 找不到 cache (因為過期)，也可以從 DB 找到 cache (因為不會消失)</li>
+<li>每天固定跑 scheduler，掃出 refresh flag 為 true 的 city，在 background job 將最新的推薦景點寫回 Redis 及 DB，並將 refresh flag 設定為 false</li>
+</ol>
+<h3 id="2020-09-23-early-加快預熱-cache-到-DB-的速度"><a href="#2020-09-23-early-加快預熱-cache-到-DB-的速度" class="headerlink" title="2020/09/23 early 加快預熱 cache 到 DB 的速度"></a>2020/09/23 early 加快預熱 cache 到 DB 的速度</h3><ol>
+<li>因為目前在 Redis 還有部分 city 的 cache，如果要等一天 (TTL) 之後這些 cache 失效後才能啟動 L2 cache 機制會有點浪費</li>
+<li>所以增加若在 Redis 確認該 city 有 cache 且 DB 沒 cache 的話，就將該 cache 寫回 DB，並且回傳</li>
+</ol>
+<h3 id="2020-09-23-middle-確認是否有最佳化空間"><a href="#2020-09-23-middle-確認是否有最佳化空間" class="headerlink" title="2020/09/23 middle 確認是否有最佳化空間"></a>2020/09/23 middle 確認是否有最佳化空間</h3><ol>
+<li>延長 city Redis cache 的 TTL 從 1 天增加到 14 天，避免部分活動過於熱門，導致該區域的推薦景點都被該活動洗掉</li>
+</ol>
+<h3 id="2020-09-24-early-加上-new-relic"><a href="#2020-09-24-early-加上-new-relic" class="headerlink" title="2020/09/24 early 加上 new relic"></a>2020/09/24 early 加上 new relic</h3><ol>
+<li>加上 new relic 的 custom attributes，記錄該 city 的 IO 相關讀取時間</li>
+</ol>
+<h3 id="2020-09-24-middle-加上-local-cache"><a href="#2020-09-24-middle-加上-local-cache" class="headerlink" title="2020/09/24 middle 加上 local cache"></a>2020/09/24 middle 加上 local cache</h3><ol>
+<li>因為從 Redis 或 DB 取回來的 id 要再經過一次 DB 查詢，才能組合完整的 response 回傳</li>
+<li>所以加上 city id 及使用者語言做為 local cache key，加快同 city id 且同語言的資料回傳速度</li>
+<li>如果 city id 或使用者語言在該 cache 找不到，再回 DB 查詢</li>
+<li>加上 new relic 的 custom segment，方便判讀 request 的瓶頸是在哪一段</li>
+</ol>
+<h3 id="2020-09-24-late-調整-poi-history-的執行速度"><a href="#2020-09-24-late-調整-poi-history-的執行速度" class="headerlink" title="2020/09/24 late 調整 poi history 的執行速度"></a>2020/09/24 late 調整 poi history 的執行速度</h3><ol>
+<li>將原本使用 where + group 取得最近 30 的 poi history 語法，改為先做 where，再做 group，將原本放在同一個 CTE 的 query 拆成兩個 CTE 執行</li>
+<li>速度從原本的 40 ~ 50 秒，甚至到 70 秒，下降到約 10 秒左右</li>
+</ol>
+<h3 id="2020-09-25-early-移除不必要的-middleware"><a href="#2020-09-25-early-移除不必要的-middleware" class="headerlink" title="2020/09/25 early 移除不必要的 middleware"></a>2020/09/25 early 移除不必要的 middleware</h3><ol>
+<li>在整整一年前將 poi recommend 及 search 拆開成不同檔案的時候，沒有仔細確認，所以每次 request 都要到 Redis 做兩次的 auth check</li>
+<li>所以將其中一個 auth check 拿掉，加快約 1ms</li>
+</ol>
+<h3 id="2020-09-27-early-再次檢視-poi-history-計算方式是否有最佳化空間"><a href="#2020-09-27-early-再次檢視-poi-history-計算方式是否有最佳化空間" class="headerlink" title="2020/09/27 early 再次檢視 poi history 計算方式是否有最佳化空間"></a>2020/09/27 early 再次檢視 poi history 計算方式是否有最佳化空間</h3><ol>
+<li>原本在使用經緯度計算是哪個 city 時，查詢速度大約都 400ms 左右，加上 GiST index 之後，查詢速度提升 1000x，變成只要 0.4ms 就能算出來</li>
+<li>整整一年前導入 poi history 到推薦景點時，資料量還沒這麼大，所以在計算時速度都蠻快的</li>
+<li>但 poi history 現在資料筆數已經超過 2500 萬筆，都變成 Seq Scan，雖然 planner 會判斷成 Parallel Seq Scan，但速度還是很慢</li>
+<li>因為是使用近 30 天的資料做計算，所以將 created_at 加入 index，速度從 10 秒左右降到 1 秒左右</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckpjx66750008zwou9u6w5nip" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-在-COSCUP-2020-分享的「模糊也是一種美-從-BlurHash-探討前後端上傳圖片架構」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2020-08-03T02:00:07.000Z" itemprop="datePublished">2020-08-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/">在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/55C8If84Cyr4CV" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/blurhash" title="模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構" target="_blank">模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>上星期大家都有來聽小編在 COSCUP 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」嗎？這個技術已經有實作在 Funliday 的 Web 跟 Android 囉。這個議題結束後，有朋友問了一些問題，這裡順便來統整回答一下。</p>
+<h2 id="1-client-side-upload-方式從-server-產出的-signed-URL-是個什麼樣的東西？"><a href="#1-client-side-upload-方式從-server-產出的-signed-URL-是個什麼樣的東西？" class="headerlink" title="1. client side upload 方式從 server 產出的 signed URL 是個什麼樣的東西？"></a>1. client side upload 方式從 server 產出的 signed URL 是個什麼樣的東西？</h2><p>signed URL 是為了讓沒有 access key 及 secret key 的 sender 也能在有權限管理的保護下做 S3 的檔案處理，而 Funliday 在這裡的實作是不用原檔名做 key，改用 UUID 產生避免檔名衝突。</p>
+<h2 id="2-client-BlurHash-decode-的效率如何？"><a href="#2-client-BlurHash-decode-的效率如何？" class="headerlink" title="2. client BlurHash decode 的效率如何？"></a>2. client BlurHash decode 的效率如何？</h2><p>在做 BlurHash decode 的時候因為用到的是 CPU 運算，而且 JavaScript 又是 single thread 的關係，所以在 decode 同時移動畫面的話，可能會造成 CPU 不夠力的 client 會有極短暫的延遲時間。這時候可以考慮把 decode 丟到 web worker 處理，避免卡到 UI thread 的順暢度。用 Android 的術語來說就是開 AsyncTask 啦！</p>
+<h2 id="3-你們後來是使用哪種方式做上傳呢？"><a href="#3-你們後來是使用哪種方式做上傳呢？" class="headerlink" title="3. 你們後來是使用哪種方式做上傳呢？"></a>3. 你們後來是使用哪種方式做上傳呢？</h2><p>原先是使用 server side (2) 的方式，但在處理 MQ 上傳後的 notify 花了不少時間，而且上傳到 S3 也沒這麼快，所以後來改用 client side 的方式做上傳功能，運作上也比原先的方式順暢。</p>
+<h2 id="4-為什麼不用-medium-的方式處理-blur？"><a href="#4-為什麼不用-medium-的方式處理-blur？" class="headerlink" title="4. 為什麼不用 medium 的方式處理 blur？"></a>4. 為什麼不用 medium 的方式處理 blur？</h2><p>因為 medium 檔案比 BlurHash 的字串大很多，而且要多發一次 request，成本比 BlurHash 高出不少，所以我們認為用 BlurHash 會是比較好的。</p>
+<hr>
+<p>當然也是要感謝 gslin 大大，他在 4/26 (日) 簡單介紹了 BlurHash。小編下午看到這篇文章，馬上丟去 slack 問我們的設計師大大，看她覺得這效果如何？她過沒多久回覺得不錯，小編就在星期日的下午開始處理 server side 的實作。隔天星期一有了初步的成果，然後給我們的安卓五星上將看，星期二就完成 Android 實作並上線了！</p>
+<p>也是因為 CDN 那塊後來把原先的 lambda 改用自己寫的 server 處理，所以實作 BlurHash 才能這麼快。lambda 這塊也是血淚史，下略 10000 字，之後有機會再跟大家分享。歡迎大家對這塊有興趣的也來交流一下喔！</p>
+<h2 id="影片"><a href="#影片" class="headerlink" title="影片"></a>影片</h2><iframe width="560" height="315" src="https://www.youtube.com/embed/l1JVBX3tsMY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="ckpjx6676000azwou8atq17yd" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Funliday-重磅推出新的-prerender-套件-pppr" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" class="article-date">
+  <time class="dt-published" datetime="2020-05-25T02:00:10.000Z" itemprop="datePublished">2020-05-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/">Funliday 重磅推出新的 prerender 套件 pppr</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>這一系列文總共有三篇，這是最後一篇。</p>
+<p>Funliday 重磅推出新的 prerender 套件 pppr！這是一個 zero config 的 express middleware，只要 <code>npm install pppr</code>，然後在 <code>app.js</code> 裡面加一行 <code>app.use(pppr())</code> 就可以直接拿來用了。</p>
+<hr>
+<p>原本在使用 prerender.io 這個套件有時候會出現 504 timeout 的問題，後來發現這個套件用的是比較底層的 API (Chrome DevTools Protocol, CDP)，研究它的原始碼後發現 render HTML 的 timeout 判斷上有些怪怪的，本來想試著去改這塊，但對 CDP 不熟，所以用 puppeteer 重寫一套 prerender service，pppr 也就應運而生。</p>
+<p>簡單先解釋一下，puppeteer 是基於 CDP 封裝後成為比較容易使用的 API。因為 client side rendering (CSR) 的流行，所以現在要做網路爬蟲的話，愈來愈多會選擇用 puppeteer 來處理。這裡來分享一下在開發 pppr 的時候，有哪些東西要注意的。</p>
+<h2 id="1-把-URL-放到像是-50-人的-LINE-熱門群組，prerender-會遭到大量的-request"><a href="#1-把-URL-放到像是-50-人的-LINE-熱門群組，prerender-會遭到大量的-request" class="headerlink" title="1. 把 URL 放到像是 50 人的 LINE 熱門群組，prerender 會遭到大量的 request"></a>1. 把 URL 放到像是 50 人的 LINE 熱門群組，prerender 會遭到大量的 request</h2><p>因為每個使用者接收到這個訊息之後，因為要顯示 og data，所以就會去打一次 prerender。這裡姑且先稱之為 OG-DDoS 好了 XD，所以一定要做 cache，讓第一個 request 把 HTML 產生出來之後就放到 cache 裡面。然後可以用 LRU cache 來處理，因為這類 URL 都是短時間會被大量使用，之後就很少被用了，用 LRU cache 剛剛好。</p>
+<h3 id="其實這一段實作還有一些問題"><a href="#其實這一段實作還有一些問題" class="headerlink" title="其實這一段實作還有一些問題"></a>其實這一段實作還有一些問題</h3><p>如果在第一個 request 還沒產生出 HTML 之前，第二個同樣 request 就進來了，這樣子 cache 可以說是根本沒作用，還要再找時間來處理 lock 機制才行。</p>
+<h2 id="2-每一個-request-要新開一個-page-才行"><a href="#2-每一個-request-要新開一個-page-才行" class="headerlink" title="2. 每一個 request 要新開一個 page 才行"></a>2. 每一個 request 要新開一個 page 才行</h2><p>如果沒有每個 request 都開新 page 的話，會造成 A request 還沒處理完，B request 就用同一個 page 做 render，這樣子 A request 就會 504 timeout 了。所以一定要記得每個 request 都要新開 page。</p>
+<h2 id="3-調整-User-Agent"><a href="#3-調整-User-Agent" class="headerlink" title="3. 調整 User Agent"></a>3. 調整 User Agent</h2><p>因為 headless chrome 的 user agent 就叫做 HeadlessChrome，為了避免在 render 的時候會出現意料外的狀況，保險一點還是把 HeadlessChrome 改成 Chrome 會比較好。</p>
+<h2 id="4-注意-redirect"><a href="#4-注意-redirect" class="headerlink" title="4. 注意 redirect"></a>4. 注意 redirect</h2><p>因為 expressjs 跟 puppeter 是兩個不同的 context，對於 redirection 來說，expressjs 會回傳 3xx 系列的狀態碼，但 puppeteer 則會直接執行完成。所以把 puppeteer 放在 expressjs 裡面執行的話，必須要處理 redirect chain，讓 expressjs 能回給 client 正確的狀態碼才行。</p>
+<h2 id="5-取得完整的-URL"><a href="#5-取得完整的-URL" class="headerlink" title="5. 取得完整的 URL"></a>5. 取得完整的 URL</h2><p>pppr 因為是發想自 prerender.io，所以 interface 也一樣是 <code>/render?url=https://example.com</code>。但有時候原始的 url 後面會包含 query string，所以 expressjs 要用 URLSearchParams 另外做些處理，才能取得完整的 url。</p>
+<p>開發 pppr 基本要注意的事項大概就這樣，總之記得給星，有任何問題歡迎發 issue 跟 pr 喔！</p>
+<ul>
+<li>pppr: <a target="_blank" rel="noopener" href="https://github.com/funliday/pppr">https://github.com/funliday/pppr</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" data-id="ckpjx66720004zwou2n5e24tz" data-title="Funliday 重磅推出新的 prerender 套件 pppr" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+
+
+  <nav id="page-nav">
+    
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 12.5px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12.5px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/jieba/" style="font-size: 10px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 17.5px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a>
+          </li>
+        
+          <li>
+            <a href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/">外地人分的清楚嘉義市跟嘉義縣嗎？</a>
+          </li>
+        
+          <li>
+            <a href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/">Funliday 的 tech blog 開張啦！</a>
+          </li>
+        
+          <li>
+            <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/">在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 Kewang<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+
+
+  <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({theme: 'forest'});
+    }
+  </script>
+
+  </div>
+</body>
+</html>

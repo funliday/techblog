@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Funliday Tech Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Funliday Tech Blog">
+<meta property="og:url" content="https://techblog.funliday.com/page/2/index.html">
+<meta property="og:site_name" content="Funliday Tech Blog">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:author" content="Kewang">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Funliday Tech Blog" type="application/atom+xml"><link rel="alternate" href="/rss2.xml" title="Funliday Tech Blog" type="application/rss+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Funliday Tech Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://techblog.funliday.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-用-Prerender-解決前端框架的搜尋問題" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" class="article-date">
+  <time class="dt-published" datetime="2020-05-18T02:00:29.000Z" itemprop="datePublished">2020-05-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/">用 Prerender 解決前端框架的搜尋問題</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/prerender.jpg" class="">
+
+<p>這一系列文總共有三篇，這是第二篇。</p>
+<p>上一篇解決了 social network 抓取 head tag 裡面的 title, og data 等問題，但其實還有 search engine 要解決，因為 social network 只看 head，但 search engine 除了 head 以外也會看 body，所以這篇要來解決 body 一模一樣的問題。</p>
+<p>傳統的 web 開發方式通常是一條龍開發 (你就是那條龍！)，後端取得資料庫的內容，然後組成 HTML 之後丟到瀏覽器上顯示。現代的 web 開發方式通常就是一個前端配一個後端，後端專注於把資料送給前端，前端專注於取得資料後在瀏覽器上面顯示漂漂亮亮的。而傳統方式稱為 server side rendering (SSR)，現代方式就稱為 client side rendering (CSR)。兩者開發方式各有優缺，蠻多文章有提過，這裡也就不另外說明了。</p>
+<p>比較簡單判斷 CSR/SSR 的方式可以直接在你想知道的網頁，按下 <kbd>Ctrl+u</kbd> (Windows, Linux) 打開原始碼，看看實際上顯示的內容跟原始碼是不是差異過大。如果網頁內容很豐富，但原始碼才十幾二十行而已，那可以很粗略的說這是 CSR，如果基本上一致那就可以說是 SSR。</p>
+<p>而 search engine 就是靠著原始碼把網頁內容做索引，所以如果谷歌大神到 CSR 的網站爬網頁內容，最後爬到的 body 當然都是同一份內容，這樣子對於 SEO 上是不合格的，所以這裡就要分享一下 Funliday-旅遊規劃 是如何處理這塊的。</p>
+<p>第一種方式，可以用 VAR 這三套前端框架各自支援的 SSR 方案來處理，像是 Nuxt.js, Next.js, Angular Universal，這些內容已經有許多前輩分享，這裡就不另外說明了。但要注意一點，就是導入這類的解決方案通常會影響到原本的開發模式，像是 webpack 跟 bootstrapping 的方式就一定會動到，小編是建議對框架真的很熟悉之後，再來用這方式會比較好。</p>
+<p>第二種方式，就是這次的重頭戲 prerender 了。prerender 也不是什麼魔法，就是一句話「讓爬蟲看到它應該要看的內容」。如圖所示，當 Nginx 收到 request 之後，發現 user agent 是 googlebot 就轉送到 prerender service，如果是一般 request 就直接丟到後面原本的 web server。</p>
+<p>而 prerender service 接到 request 之後，就執行 headless chrome (用程式控制沒介面的 Google Chrome)，把原本的網頁用 CSR 處理完之後，再把 HTML 的完整資料傳回給 googlebot，這樣子就達到「讓爬蟲看到它應該要看的內容」的功能了。原本的程式完全不用改，只要在 Nginx 做處理就可以了，也是負擔相對較小的方式。</p>
+<p>另外，用了 prerender 之後，原本第一篇為了 title, og data 所做的調整也可以拿掉了。因為 CSR 本來就可以改 title, og data，所以避免重複做一樣的事，<code>app.get(&quot;*&quot;)</code> 這個 route 裡面關於 metadata 的功能也可以直接刪掉了。</p>
+<p>那為什麼還會有第三篇？因為 Funliday 實際在應用 prerender.io 似乎有些問題，所以我們就改成自己寫 prerender 了，原因下回說明。</p>
+<ul>
+<li>Prerender.io: <a target="_blank" rel="noopener" href="https://prerender.io/">https://prerender.io</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="ckpjx667i000qzwou3gl2aby4" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-純手工打造前端框架的-metadata-內容" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" class="article-date">
+  <time class="dt-published" datetime="2020-05-15T07:50:27.000Z" itemprop="datePublished">2020-05-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/">純手工打造前端框架的 metadata 內容</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>這一系列文總共有三篇，這是第一篇。</p>
+<p>對於用 Vue, Angular, React 這類前端框架來講，如果沒有對 search engine 或 social network 特別處理的話，出來的結果一定不會如你所想的一樣。</p>
+<p>因為 client side rendering (CSR) 的作用域通常是在 body 裡面的 container，所以對於 search engine 或 social network 來說，container 外的 head tag 只是一層皮，裡面的資料基本上沒有什麼用，因為解析出來的內容都一模一樣，沒有獨特性。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; fstat &#125; = <span class="built_in">require</span>(<span class="string">&quot;fs&quot;</span>);</span><br><span class="line"></span><br><span class="line">app.get(<span class="string">&quot;*&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> urlPath = req.url;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> loadMetaDataFunction = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// load data function</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> obj <span class="keyword">of</span> mathRoutes(Routes, req.path)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (obj.route.loadData) &#123;</span><br><span class="line">      loadMetaDataFunction = obj.route.loadData;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">const</span> keys = [];</span><br><span class="line">      <span class="keyword">const</span> regexp = pathToRegexp(obj.route.path, keys);</span><br><span class="line">      <span class="keyword">const</span> result = regexp.exec(req.path);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (result) &#123;</span><br><span class="line">        req.params = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">        keys.forEach(<span class="function">(<span class="params">key, index</span>) =&gt;</span> &#123;</span><br><span class="line">          req.params[key.name] = result[index + <span class="number">1</span>];</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> content;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!templateHtml) &#123;</span><br><span class="line">    templateHtml = <span class="keyword">await</span> fs.readFile(<span class="string">&quot;public/index.htm&quot;</span>, <span class="string">&quot;utf-8&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (loadMetaDataFunction) &#123;</span><br><span class="line">    <span class="keyword">const</span> metaDataResult = <span class="keyword">await</span> loadMetaDataFunction(</span><br><span class="line">      urlPath,</span><br><span class="line">      req.qpery,</span><br><span class="line">      req.params,</span><br><span class="line">      req.headers</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    content = buildMeta(templateHtml, metaDataResult.metaData);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    content = buildMeta(templateHtml, defaultMetaTagsString(urlPath));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  res.set(<span class="string">&quot;Cache-Control&quot;</span>, <span class="string">&quot;no-cache&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.send(content);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>為了要讓每一頁的 head tag 都不一樣，最簡單的方式就是在 web 這一層的 expressjs server 多加一個特殊的 route，去 catch 所有 web 的 get request，類似上面的程式碼。</p>
+<p>然後搭配 <code>path-to-regexp</code> 來設定特定 url pattern 做不同的 head tag 設計，比如 <code>kewang/trips/123</code> 的 title 叫做 “kewang 的台北二天一夜行程”，<code>kewang/journals/456</code> 的 title 叫做 “kewang 的宜蘭三日遊記”，當然這裡的例子舉的很簡單，正規的做法應該要搭配資料庫來取得對應的 title 跟 og data 才對，也就是附圖程式裡面的 <code>loadMetaDataFunction</code>。</p>
+<p>只要做好這類的處理，在 social network 上面應該就可以所向無敵了。但這世界可不只有 social network，更恐怖的谷歌大神還在後面等著你咧！</p>
+<p>下一篇就來講一下如何對付搜尋引擎吧。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" data-id="ckpjx668e003izwou0zq5fq5z" data-title="純手工打造前端框架的 metadata 內容" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Funliday-外站文章的-App-與-Web-不同實作" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/" class="article-date">
+  <time class="dt-published" datetime="2020-05-04T02:00:49.000Z" itemprop="datePublished">2020-05-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/">Funliday 外站文章的 App 與 Web 不同實作</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2F1671274149815619%2Fvideos%2F240193833737580&width=500&show_text=false&appId=481027911976374&height=893" width="500" height="893" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen="true"></iframe>
+
+<p>Funliday 身處武漢肺炎疫情最慘重的觀光業中心，雖然大家都不出去旅遊，但我們也趁著這個時間增強自己的核心功能，小編今天來聊一下其中一個功能的技術議題。</p>
+<p>Funliday 有個功能是把外部文章直接顯示在 Funliday 的 App 跟 Web 上，但遇到了一些技術性及著作權的問題，相信應該也有朋友遇到過類似的狀況，今天就來分享一下吧。</p>
+<p>在 Funliday App 上的顯示還算好處理，直接用 WebView 呈現就好，但在 Funliday Web 上就很難處理，這邊整理一下技術上可以實作的幾種方式。</p>
+<h2 id="1-iframe-original-url"><a href="#1-iframe-original-url" class="headerlink" title="1. iframe + original url"></a>1. iframe + original url</h2><p>最暴力的方式，直接用 iframe 嵌入對方網址，但會有一些問題。像是無法讓 Google 大神爬內容、HTTP 網址無法嵌入、如果有設定 x-frame-options 為 SAMEORIGIN 的話就無法嵌入、CSP 的設定也有可能造成無法嵌入</p>
+<h2 id="2-iframe-proxy-funliday-url"><a href="#2-iframe-proxy-funliday-url" class="headerlink" title="2. iframe + proxy + funliday url"></a>2. iframe + proxy + funliday url</h2><p>改善了第 1 種方式，直接在 Funliday server 這裡做 proxy，但還是會有無法讓 Google 大神爬內容以及內容網址如果是相對路徑時的導頁問題 (這應該好解決)</p>
+<h2 id="3-寫爬蟲抓內容"><a href="#3-寫爬蟲抓內容" class="headerlink" title="3. 寫爬蟲抓內容"></a>3. 寫爬蟲抓內容</h2><p>比如 A 站就固定抓 <code>&lt;div class=&quot;content&quot;&gt;</code>，B 站就固定抓 <code>&lt;article&gt;</code> 的內容，然後直接顯示在 Funliday Web 上，但畫面可能會亂掉，所以要想辦法把 A 站跟 B 站的 CSS 也拿來用，在 CSS 前面也要想辦法加上 namespace 避免衝突</p>
+<h2 id="4-remote-render"><a href="#4-remote-render" class="headerlink" title="4. remote render"></a>4. remote render</h2><p>類似 2+3 的方式，就是把要顯示的網頁用 headless chrome render 完之後，再跟原本的內容一起顯示，但畫面應該是會亂掉。</p>
+<hr>
+<p>技術面可以的解法都確認了之後，再來就是適法性的問題了，因為 234 會把對方的資料落地到 Funliday 上，所以可能會有著作權的問題。對科技及法律這塊當然要問有研究的 ant 啦，請教了 ant 之後也得到了一些結論。</p>
+<p>234 都會有著作權法的問題，所以基本上是不可行的，但只要著作權人有同意的話，則不在此限。</p>
+<p>最後 Funliday Web 的實作方式跟 1234 都無關，而是改用類似預覽頁的方式在 Funliday Web 顯示原連結的 og:title 及 og:image，應該會再加上簡單如「以上內容未經重製與改作，來源均援引來源網頁內容」的聲明。</p>
+<p>對於技術這部分也不複雜，在後台上稿時先取得原網頁的 og 資料，跟原本的 234 相比簡單太多了 XD</p>
+<hr>
+<p>有經過 ant 同意，認為這個問題應該蠻多人都會遇到，所以分享給大家看看啦！</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/" data-id="ckpjx666y0001zwoucgu3ff40" data-title="Funliday 外站文章的 App 與 Web 不同實作" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-GitHub-將所有核心功能都免費開放，包括協作團隊！" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/04/16/GitHub-%E5%B0%87%E6%89%80%E6%9C%89%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E9%83%BD%E5%85%8D%E8%B2%BB%E9%96%8B%E6%94%BE%EF%BC%8C%E5%8C%85%E6%8B%AC%E5%8D%94%E4%BD%9C%E5%9C%98%E9%9A%8A%EF%BC%81/" class="article-date">
+  <time class="dt-published" datetime="2020-04-16T01:10:59.000Z" itemprop="datePublished">2020-04-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/04/16/GitHub-%E5%B0%87%E6%89%80%E6%9C%89%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E9%83%BD%E5%85%8D%E8%B2%BB%E9%96%8B%E6%94%BE%EF%BC%8C%E5%8C%85%E6%8B%AC%E5%8D%94%E4%BD%9C%E5%9C%98%E9%9A%8A%EF%BC%81/">GitHub 將所有核心功能都免費開放，包括協作團隊！</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>小編好久沒發文了 Orz，來發個近日資訊業最大條新聞跟個人看法</p>
+<hr>
+<p>GitHub 被微軟買走之後做了蠻多事情，像是前幾個月 npm 被 GitHub 買下來，但這其實也不意外，因為這兩年 GitHub 在 JavaScript 的支援度就愈來愈高，不止可以在網頁上面做 audit，也可以做 navigate，功能蠻齊全的。被買下來之後，之後可以期待在 GitHub 上面直接 deploy npm 模組了。</p>
+<p>另外一個就是這次的 private repo 完全免費了，小編記得之前 private repo 免費好像有些限制，像是只限 5 人的樣子，但現在可說是完全不限，有富爸爸果然是不一樣！</p>
+<hr>
+<p>再來說一下個人選擇，如果是可以給一般人看的內容，小編一定是用 GitHub，畢竟資訊人誰沒有一個 GitHub 帳號呢？然後個人接案因為不能公開原始碼，所以當然放在 GitLab (以前是 Bitbucket)。現在 Funliday 的 git repo 因為原始碼不能公開，當然也是放在 GitLab。</p>
+<p>然後因為 Funliday server 是放在 Heroku 上面，Heroku 上面有個功能可以直接結合 GitHub 的 push 之後 deploy，但因為 Funliday 用的是 GitLab，所以沒辦法直接用這功能，只能繞個彎改用 dpl，把 GitLab 整合進 Heroku 裡。</p>
+<p>但也因為用了 GitLab 之後，才知道它的功能比 GitHub 多太多，對一般公司所需要的權限控制，小編是覺得比 GitHub 完整。然後對於 CI/CD 的支援度也很強大，現在還支援 build docker image 的功能。</p>
+<hr>
+<p>不過當 GitHub private 免費之後，對於沒有依賴 GitLab 權限控制或 container 功能的使用者，還蠻有可能移回 GitHub 的，畢竟能在同一個 hosting 操作當然比較方便。所以以後小編開 repo 的考量，可能就不再是 private 或 public 了，而是在於 deploy 的方便性，或是能不能 build 出 artifact 了。</p>
+<ul>
+<li>GitLab 自評與 GitHub 的差異: <a target="_blank" rel="noopener" href="https://about.gitlab.com/blog/2020/04/14/github-free-for-teams/index.html">https://about.gitlab.com/blog/2020/04/14/github-free-for-teams/index.html</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2020/04/16/GitHub-%E5%B0%87%E6%89%80%E6%9C%89%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E9%83%BD%E5%85%8D%E8%B2%BB%E9%96%8B%E6%94%BE%EF%BC%8C%E5%8C%85%E6%8B%AC%E5%8D%94%E4%BD%9C%E5%9C%98%E9%9A%8A%EF%BC%81/" data-id="ckpjx66730005zwou2bcwfyah" data-title="GitHub 將所有核心功能都免費開放，包括協作團隊！" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-在-ModernWeb-2019-分享的「Google-Maps-開始收費了該怎麼辦？」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2019-08-29T06:58:02.000Z" itemprop="datePublished">2019-08-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/">在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/wPtERc90dbNN0i" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/google-maps-167080995" title="Google Maps 開始收費了該怎麼辦？" target="_blank">Google Maps 開始收費了該怎麼辦？</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>這次在 Modern Web 的分享，主要是講開發 POI Bank 時要注意的一些內容，其中 OSM 跟 PostgreSQL 又是非常重要的一環。對開發景點資料庫有興趣的朋友，決定不能錯過！</p>
+<p>其實 POI Bank 的內容遠遠不只這些，有許多功能還沒有提到，像是 autocomplete 及搜尋，尤其搜尋又是重中之重，一直沒能好好處理。因為大家被 Google 訓練的實在太好了，POI Bank 的下一步就是要把搜尋精準度做好。這就要靠大家多多使用 Funliday，就有更多的資料可以訓練了 XDDD</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/" data-id="ckpjx667a000dzwoucvv6dew5" data-title="在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Ant-在-ModernWeb-2019-分享的-Progressive-Deployment-NoDeploy" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/" class="article-date">
+  <time class="dt-published" datetime="2019-08-28T02:25:55.000Z" itemprop="datePublished">2019-08-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/">Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Ant 分享的內容總是很有意思，這場學到許多東西。連 Netflix 這麼大的公司都這樣講了，要在 production 做測試！</p>
+<p>小編最近在 Funliday 切環境的時候非常有感。新創錢不夠多，總不可能建置一模一樣的環境來做測試吧。像是現在為了省錢，所以 Elasticsearch、Redis 和 Worker 還是有部分只在 production 上運作。這樣子在做測試時還是有部分怕怕的，尤其是目前主機大都在 Heroku 上面，也還是有部分的 env 需要做調整。</p>
+<p>無論如何，還是要有錢才能把環境完全切開才行啊 Orz</p>
+<ul>
+<li>Progressive Deployment &amp; NoDeploy: <a target="_blank" rel="noopener" href="https://s.itho.me/events/2019/modernweb/2019-08-28_ModernWeb19-Ant.pdf">https://s.itho.me/events/2019/modernweb/2019-08-28_ModernWeb19-Ant.pdf</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/" data-id="ckpjx666t0000zwou1shradu1" data-title="Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-目前-Funliday-打過的怪" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/07/29/%E7%9B%AE%E5%89%8D-Funliday-%E6%89%93%E9%81%8E%E7%9A%84%E6%80%AA/" class="article-date">
+  <time class="dt-published" datetime="2019-07-29T02:08:05.000Z" itemprop="datePublished">2019-07-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/07/29/%E7%9B%AE%E5%89%8D-Funliday-%E6%89%93%E9%81%8E%E7%9A%84%E6%80%AA/">目前 Funliday 打過的怪</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>這是篇很棒的<a target="_blank" rel="noopener" href="https://lukajojo.medium.com/%E9%87%91%E9%AD%9A%E8%85%A6%E5%BE%8C%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%AF%AB%E7%9A%84%E5%A4%A7%E5%9E%8B%E7%B3%BB%E7%B5%B1%E5%85%A5%E9%96%80-329a0f51b51c">大型系統演進史</a>，是後端工程師一定要看的文章。</p>
+<p>其實台灣很多技術文章，但屬於這類偏大型系統演進史的文章，依比例來說正體中文是少之又少，看到的大都是簡體中文的內容。最近看到的另一篇是 PressPlay 從 AWS 轉到 GCP 的分享。</p>
+<p>後端是一個看到什麼怪就打什麼怪的開發模式，很難一次把架構做到位。</p>
+<ul>
+<li>熱門排行讀取速度太慢？就加 local cache</li>
+<li>熱門排行內容不一致？把 cache 改成 redis</li>
+<li>圖片讀取速度太慢？就加 CDN</li>
+<li>圖片檔案太大？就加 resize server</li>
+<li>圖片上傳太慢？MQ+redis+notification</li>
+<li>一般搜尋太慢？開 explain 加 index</li>
+<li>一般搜尋不精確？加 ElasticSearch</li>
+</ul>
+<p>隨便列幾個就是目前 Funliday 打過的怪，而且還遠遠不止咧 Orz</p>
+<p>有時候需求端也要懂得妥協，什麼功能都要的話就是錢要夠，時間要夠。天下真的沒有白吃的午餐啊！</p>
+<p>PS. 如果明年有機會的話，也希望可以在研討會分享一下 Funliday 這兩年來的技術演進史</p>
+<ul>
+<li>PressPlay從AWS搬家到GCP一年的心得: <a target="_blank" rel="noopener" href="https://bit.ly/2YpUx7O">https://bit.ly/2YpUx7O</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/07/29/%E7%9B%AE%E5%89%8D-Funliday-%E6%89%93%E9%81%8E%E7%9A%84%E6%80%AA/" data-id="ckpjx667l000wzwou8d244z26" data-title="目前 Funliday 打過的怪" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-POI-Bank-正式公布！" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/02/28/POI-Bank-%E6%AD%A3%E5%BC%8F%E5%85%AC%E5%B8%83%EF%BC%81/" class="article-date">
+  <time class="dt-published" datetime="2019-02-28T12:40:34.000Z" itemprop="datePublished">2019-02-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/02/28/POI-Bank-%E6%AD%A3%E5%BC%8F%E5%85%AC%E5%B8%83%EF%BC%81/">POI Bank 正式公布！</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>小編到 Funliday 之後就是專注在 POI Bank 的開發，這篇文章出來後，總算可以公布 POI Bank 這個名稱了。年前最後一個工作天把 POI Bank 弄上線真的要有很大的勇氣，過年期間果然被使用者罵很慘，搜尋搜不到、沒有圖片、一堆景點名稱都是羅馬拼音…族繁不及備載。</p>
+<p>除夕當天除了吃年夜飯跟打掃家裡以外，全部時間都拿來轉檔跟調整演算法，想辦法讓搜尋更精確，春節期間真的是整個團隊都沒好好過年。但也是這樣的壓力測試，讓 Funliday 可以快速迭代！</p>
+<p>不過過完年後看到使用者操作的真實數據後，發現 POI Bank 真的是大有可為，就像文內所舉的其中一例：</p>
+<p>「舉個例子，若我們從觀察用戶的數據資料，發現這個假期許多人計畫去某觀光景點，也許就能跟該觀光景點合作，提早讓店主掌握狀況預先處理，提供更好的旅遊品質給民眾。」</p>
+<p>其實 POI Bank 能做到的遠遠不只這個，但就讓 Funliday 賣個關子吧 XDDD</p>
+<hr>
+<p>這裡順便來聊一下搜尋精準度的問題，整整一個月除了上星期小編去東京考察以外，每天都在調整精準度。</p>
+<p>這星期回來重新思考跟測試後，發現根本就是斷詞的問題，雖然用了大家都推薦的 jieba 結巴斷詞，但沒用台灣詞庫，斷出來的結果真的是慘不忍睹。</p>
+<p>這週二 (2/26) 把用了台灣詞庫的搜尋丟上去之後，情況看來好了很多。因為搜尋精準度太難用程式量化了，所以現在加了 ab testing 上去，每幾天用工人智慧看一下大家的使用狀況後，再持續最佳化下去了。</p>
+<hr>
+<p>因為沒心力做行銷，Funliday 現在只能口耳相傳，一傳十十傳百，希望沒使用過 Funliday 的朋友看到這篇文章之後，能下載來用用看，對你出門旅遊絕對有很大的幫助，有使用過的朋友，也幫忙多拉幾個朋友來使用。</p>
+<p>Android 的共同編輯跟 Web 完整版就快要上線了，希望大家以後多多支持 Funliday 啦！</p>
+<ul>
+<li>許你一個好假期！本土研發的 Funliday 打造 POI Bank 讓你簡單規劃自由行: <a target="_blank" rel="noopener" href="https://meet.bnext.com.tw/articles/view/44542">https://meet.bnext.com.tw/articles/view/44542</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/02/28/POI-Bank-%E6%AD%A3%E5%BC%8F%E5%85%AC%E5%B8%83%EF%BC%81/" data-id="ckpjx66740007zwou4go7e6md" data-title="POI Bank 正式公布！" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-如何用-PostgreSQL-的-advisory-lock-實作推薦景點" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" class="article-date">
+  <time class="dt-published" datetime="2019-02-20T01:37:53.000Z" itemprop="datePublished">2019-02-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/">如何用 PostgreSQL 的 advisory lock 實作推薦景點</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Funliday 最近做了大改版，其中一項功能就是把去年中因為 Google 要開始收費而暫時拿掉的「推薦景點」加回來，這個功能就是提供使用者指定區域附近評價較高的景點。</p>
+<p>大家現在在使用景點瀏覽時，應該有時候會發現資料出來的速度不一致，慢的時候 (超過 5 秒，有時候會落在 10 秒以上) 代表可能有其他使用者正在查詢這個區域的「推薦景點」，思考邏輯就是在同一區域只要有一個使用者查詢過這個區域的「推薦景點」，其他同區域的使用者就會因為已經查詢過這份資料 (如熱門景點：台北 101、東京晴空塔…等) 而受惠。</p>
+<p>在目前小編能力還無法將查詢效能大幅改善的狀況之下 Orz，若同一個區域有多個使用者同時查詢，每個查詢都要花費 10 秒的話，這樣子資料庫會浪費超多時間在不必要的查詢上面。</p>
+<p>像這類無法避免的使用者行為，但又要減少資料庫無謂的同樣操作時，小編突然想到之前 Triton Ho 在上課時提到的 exclusive lock。</p>
+<p>Advisory lock 是 PostgreSQL 的一種 lock 機制，可以在 application 層操作 exclusive lock (以下稱為 X lock) 或是 shared lock (以下稱為 S lock)。當使用 X lock 時，若非同一個 session 是無法將它 unlock，而 S lock 則是任何一個 session 都可以用 S lock 拿取 (acquire) 相同的 lock，但不可以用 X lock 拿取 S lock。</p>
+<p>依小編的這個使用情境，可以在查詢「推薦景點」之前先問一次 Redis 有沒有這個區域的資料，有的話直接從 Redis 取得，沒有的話就先到 PostgreSQL acquire 一次 X lock，如果可以成功的話，則表示還沒有其他 session 正在查詢這個區域的資料，所以可以在 acquire 之後直接查詢，接著再 unlock 這個 X lock；但如果無法 acquire 的話，則表示目前有其他 session 正在查，所以直接回 client 查詢中的訊息，可以等一下再查。</p>
+<p>所以小編使用 PostgreSQL 的 advisory lock 及 Redis 就可以達成不會有同一時間查詢相同耗時的查詢了。</p>
+<p>其實再好一點的作法可能是把這類耗時的查詢丟到 MQ 裡面，讓 response 先回 client，等到 MQ 做完這個 job 之後，再用 push notification 通知 client 到 Redis 取得已經計算完的資料。或是用 polling 固定 n 秒鐘查詢一次，這都要視你的基礎設施而定。小編現在是先用 polling 的方式簡單處理，雖然方法有點笨，但在沒多餘心力 (Elasticsearch 太博大精深了 Orz) 的狀態之下就先這樣做了。</p>
+<ul>
+<li>How do PostgreSQL advisory locks work: <a target="_blank" rel="noopener" href="https://vladmihalcea.com/how-do-postgresql-advisory-locks-work/">https://vladmihalcea.com/how-do-postgresql-advisory-locks-work/</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" data-id="ckpjx667h000ozwou6umz5kfu" data-title="如何用 PostgreSQL 的 advisory lock 實作推薦景點" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-用-Redis-來處理-City-的-autocomplete-功能-3" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" class="article-date">
+  <time class="dt-published" datetime="2019-01-10T06:00:33.000Z" itemprop="datePublished">2019-01-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/">用 Redis 來處理 City 的 autocomplete 功能 - 3</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>前兩篇分享了 Autocomplete 的實作方式及開發細節，算是少數大家迴響比較多的文章 XDD，下面就來整理一下大家的迴響好了。</p>
+<hr>
+<h2 id="1-減少傳輸量可以使用-msgpack"><a href="#1-減少傳輸量可以使用-msgpack" class="headerlink" title="1. 減少傳輸量可以使用 msgpack"></a>1. 減少傳輸量可以使用 msgpack</h2><p>小編有聽過 msgpack 但還沒實際了解這是如何運作的。剛查了一下<a target="_blank" rel="noopener" href="https://msgpack.org/">資料</a>，說是比 JSON 更省資料大小，基本上聽過的語言都有支援。</p>
+<p>在前公司也用過 Avro 這類的格式，主打的也是省資料大小。但現在應該還不會考慮改用這類要另外做 serialize 的格式。</p>
+<p>主要是基於後端是以 Node.js 為主開發，JSON 已經是原生支援，再引入一種資料格式會增加前後端維護的複雜度。另外就是開發人力，新創小公司要儘量減少工作，目前可以順暢運作就好，還有其他更重要的事要做，等之後用量大了再改也不遲。</p>
+<h2 id="2-減少傳輸量可以使用-HTTP-server-的壓縮機制"><a href="#2-減少傳輸量可以使用-HTTP-server-的壓縮機制" class="headerlink" title="2. 減少傳輸量可以使用 HTTP server 的壓縮機制"></a>2. 減少傳輸量可以使用 HTTP server 的壓縮機制</h2><p>這真的是忽略了，忘了 expressjs 只是一套 web framework，在上面對資料做壓縮其實會影響到效率。讓如 nginx 之類的 HTTP server 做壓縮應該才是更好的作法。</p>
+<p>不過因為現在的 infra 是建在 heroku 上面，heroku 並沒有原生 nginx 的支援。等量大撐不住的時候，倒是可以優先考慮使用 heroku 的 buildpack 把 nginx 架上去<a target="_blank" rel="noopener" href="https://github.com/heroku/heroku-buildpack-nginx">試試</a>。</p>
+<p>另外也有提到用 CDN 做動態壓縮，這就真的沒做過了，也是可以研究的方向之一。</p>
+<h2 id="3-減少使用者打-server-的次數，加上-debounce-time"><a href="#3-減少使用者打-server-的次數，加上-debounce-time" class="headerlink" title="3. 減少使用者打 server 的次數，加上 debounce time"></a>3. 減少使用者打 server 的次數，加上 debounce time</h2><p>這大家都主推使用 debounce 方式，前端沒玩很深的小編第一次碰到這個名詞是高職的時候。記得那時上課在教 8051，老師說按按鈕時要加上 15 - 20ms 的 debounce time，避免重複送外部中斷。小編對單晶片實在不在行，但大概記得是這個意思。</p>
+<p>剛查了一下<a target="_blank" rel="noopener" href="https://css-tricks.com/debouncing-throttling-explained-examples/">資料</a>，前端的 debounce time 大概也是類似的意思。在輸入文字後，會 delay n 秒再送出，若是在 n 秒內又有打其他內容的時候，就把之前的 request 從 queue 裡面丟棄，只關注最後一次的 request 就好。</p>
+<p>這個應該也是有效減少 request 量的作法了。</p>
+<h2 id="4-減少使用者打-request-的次數，將已經送出的-request-取消掉"><a href="#4-減少使用者打-request-的次數，將已經送出的-request-取消掉" class="headerlink" title="4. 減少使用者打 request 的次數，將已經送出的 request 取消掉"></a>4. 減少使用者打 request 的次數，將已經送出的 request 取消掉</h2><p>這也是一個不錯的作法，若 A request 已經送出去，但還沒回 response 時又送了 B request 的話，此時可以把 A request 取消。</p>
+<p>但要注意就是 A request 目前正在執行的步驟是去 DB 拿資料，或是在 server 本身處理一些基本計算。之前在使用 Java (grizzly + jersey) 開發的時候，若有這種情況發生會常在 log 裡面看到 IOException。</p>
+<p>原因是 server 已經準備好資料要回傳給 client，但發現 A request 已經取消，不知道要怎麼回傳時就會發生這個狀況。但也有可能是小編自己沒控制好收發的關係啦 XD</p>
+<hr>
+<p>關於 Autocomplete 的三篇大概就到這篇為止啦，等上線之後做了哪些調整再來分享給大家知道一下。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" data-id="ckpjx667k000vzwou749k3fyf" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 3" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+
+
+  <nav id="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
+  </nav>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 12.5px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12.5px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/jieba/" style="font-size: 10px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 17.5px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a>
+          </li>
+        
+          <li>
+            <a href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/">外地人分的清楚嘉義市跟嘉義縣嗎？</a>
+          </li>
+        
+          <li>
+            <a href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/">Funliday 的 tech blog 開張啦！</a>
+          </li>
+        
+          <li>
+            <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/">在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 Kewang<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+
+
+  <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({theme: 'forest'});
+    }
+  </script>
+
+  </div>
+</body>
+</html>
