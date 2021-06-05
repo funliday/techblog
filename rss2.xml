@@ -15,8 +15,35 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Sun, 21 Feb 2021 15:53:34 GMT</pubDate>
+    <pubDate>Sat, 05 Jun 2021 15:07:41 GMT</pubDate>
     <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>如何最佳化中日文的關鍵字搜尋 - 1</title>
+      <link>https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/</link>
+      <guid>https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/</guid>
+      <pubDate>Sat, 05 Jun 2021 10:27:22 GMT</pubDate>
+      
+        
+        
+          
+          
+      <description>&lt;p&gt;Funliday 使用 Elasticsearch (以下簡稱 ES) 做為搜尋引擎的基礎設施，今天來分享一下 Funliday</description>
+          
+        
+      
+      
+      
+      
+      
+      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
+      
+      <category domain="https://techblog.funliday.com/tags/jieba/">jieba</category>
+      
+      
+      <comments>https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/#disqus_thread</comments>
+      
+    </item>
     
     <item>
       <title>外地人分的清楚嘉義市跟嘉義縣嗎？</title>
@@ -286,31 +313,6 @@
       
       
       <comments>https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/#disqus_thread</comments>
-      
-    </item>
-    
-    <item>
-      <title>用 Prerender 解決前端框架的搜尋問題</title>
-      <link>https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/</link>
-      <guid>https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/</guid>
-      <pubDate>Mon, 18 May 2020 02:00:29 GMT</pubDate>
-      
-        
-        
-          
-          
-      <description>&lt;img</description>
-          
-        
-      
-      
-      
-      
-      
-      <category domain="https://techblog.funliday.com/tags/prerender/">prerender</category>
-      
-      
-      <comments>https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/#disqus_thread</comments>
       
     </item>
     
