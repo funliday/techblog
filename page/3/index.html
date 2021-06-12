@@ -71,6 +71,62 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-用-Redis-來處理-City-的-autocomplete-功能-3" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" class="article-date">
+  <time class="dt-published" datetime="2019-01-10T06:00:33.000Z" itemprop="datePublished">2019-01-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/">用 Redis 來處理 City 的 autocomplete 功能 - 3</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>前兩篇分享了 Autocomplete 的實作方式及開發細節，算是少數大家迴響比較多的文章 XDD，下面就來整理一下大家的迴響好了。</p>
+<hr>
+<h2 id="1-減少傳輸量可以使用-msgpack"><a href="#1-減少傳輸量可以使用-msgpack" class="headerlink" title="1. 減少傳輸量可以使用 msgpack"></a>1. 減少傳輸量可以使用 msgpack</h2><p>小編有聽過 msgpack 但還沒實際了解這是如何運作的。剛查了一下<a target="_blank" rel="noopener" href="https://msgpack.org/">資料</a>，說是比 JSON 更省資料大小，基本上聽過的語言都有支援。</p>
+<p>在前公司也用過 Avro 這類的格式，主打的也是省資料大小。但現在應該還不會考慮改用這類要另外做 serialize 的格式。</p>
+<p>主要是基於後端是以 Node.js 為主開發，JSON 已經是原生支援，再引入一種資料格式會增加前後端維護的複雜度。另外就是開發人力，新創小公司要儘量減少工作，目前可以順暢運作就好，還有其他更重要的事要做，等之後用量大了再改也不遲。</p>
+<h2 id="2-減少傳輸量可以使用-HTTP-server-的壓縮機制"><a href="#2-減少傳輸量可以使用-HTTP-server-的壓縮機制" class="headerlink" title="2. 減少傳輸量可以使用 HTTP server 的壓縮機制"></a>2. 減少傳輸量可以使用 HTTP server 的壓縮機制</h2><p>這真的是忽略了，忘了 expressjs 只是一套 web framework，在上面對資料做壓縮其實會影響到效率。讓如 nginx 之類的 HTTP server 做壓縮應該才是更好的作法。</p>
+<p>不過因為現在的 infra 是建在 heroku 上面，heroku 並沒有原生 nginx 的支援。等量大撐不住的時候，倒是可以優先考慮使用 heroku 的 buildpack 把 nginx 架上去<a target="_blank" rel="noopener" href="https://github.com/heroku/heroku-buildpack-nginx">試試</a>。</p>
+<p>另外也有提到用 CDN 做動態壓縮，這就真的沒做過了，也是可以研究的方向之一。</p>
+<h2 id="3-減少使用者打-server-的次數，加上-debounce-time"><a href="#3-減少使用者打-server-的次數，加上-debounce-time" class="headerlink" title="3. 減少使用者打 server 的次數，加上 debounce time"></a>3. 減少使用者打 server 的次數，加上 debounce time</h2><p>這大家都主推使用 debounce 方式，前端沒玩很深的小編第一次碰到這個名詞是高職的時候。記得那時上課在教 8051，老師說按按鈕時要加上 15 - 20ms 的 debounce time，避免重複送外部中斷。小編對單晶片實在不在行，但大概記得是這個意思。</p>
+<p>剛查了一下<a target="_blank" rel="noopener" href="https://css-tricks.com/debouncing-throttling-explained-examples/">資料</a>，前端的 debounce time 大概也是類似的意思。在輸入文字後，會 delay n 秒再送出，若是在 n 秒內又有打其他內容的時候，就把之前的 request 從 queue 裡面丟棄，只關注最後一次的 request 就好。</p>
+<p>這個應該也是有效減少 request 量的作法了。</p>
+<h2 id="4-減少使用者打-request-的次數，將已經送出的-request-取消掉"><a href="#4-減少使用者打-request-的次數，將已經送出的-request-取消掉" class="headerlink" title="4. 減少使用者打 request 的次數，將已經送出的 request 取消掉"></a>4. 減少使用者打 request 的次數，將已經送出的 request 取消掉</h2><p>這也是一個不錯的作法，若 A request 已經送出去，但還沒回 response 時又送了 B request 的話，此時可以把 A request 取消。</p>
+<p>但要注意就是 A request 目前正在執行的步驟是去 DB 拿資料，或是在 server 本身處理一些基本計算。之前在使用 Java (grizzly + jersey) 開發的時候，若有這種情況發生會常在 log 裡面看到 IOException。</p>
+<p>原因是 server 已經準備好資料要回傳給 client，但發現 A request 已經取消，不知道要怎麼回傳時就會發生這個狀況。但也有可能是小編自己沒控制好收發的關係啦 XD</p>
+<hr>
+<p>關於 Autocomplete 的三篇大概就到這篇為止啦，等上線之後做了哪些調整再來分享給大家知道一下。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" data-id="ckptt357z000wzcsp7xyocvbz" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 3" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-用-Redis-來處理-City-的-autocomplete-功能-2" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/" class="article-date">
@@ -128,7 +184,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/" data-id="ckpl4ilu5000tzoqt13c367nw" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/" data-id="ckptt357y000vzcsp2zj8gqhe" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 2" class="article-share-link">Share</a>
       
       
       
@@ -194,7 +250,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" data-id="ckpl4ilu4000szoqt4m4peo9s" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" data-id="ckptt357x000tzcsp5w5ghhq1" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 1" class="article-share-link">Share</a>
       
       
       
@@ -236,7 +292,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cjk/" style="font-size: 10px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 12.5px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12.5px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/jieba/" style="font-size: 10px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 17.5px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cjk/" style="font-size: 10px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12.5px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/jieba/" style="font-size: 10px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 17.5px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
     </div>
   </div>
 
@@ -258,6 +314,10 @@
       <ul>
         
           <li>
+            <a href="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a>
+          </li>
+        
+          <li>
             <a href="/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a>
           </li>
         
@@ -271,10 +331,6 @@
         
           <li>
             <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
-          </li>
-        
-          <li>
-            <a href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/">在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</a>
           </li>
         
       </ul>

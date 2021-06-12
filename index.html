@@ -71,6 +71,67 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-如何最佳化中日文的關鍵字搜尋-2" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" class="article-date">
+  <time class="dt-published" datetime="2021-06-12T06:29:11.000Z" itemprop="datePublished">2021-06-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/SERP.png" class="" width="400">
+
+<p>上一篇提到了 Funliday 最近如何最佳化中日文的關鍵字搜尋，其實最佳化一直都在做，但一直找不到突破口。後來是因為最近上了一個新功能，才讓最佳化有了新的發展。</p>
+<p>大家一定都有用過搜尋引擎，搜尋完的結果頁都會將你在這篇搜尋到的關鍵字，用紅色字標示出來，這就叫 highlight。原本 Funliday 沒這個功能，有時候使用者覺得這搜尋結果怎麼這麼爛，搜尋出來的內容都不是我想要的，所以我們最近就加了這功能。</p>
+<p>有了這功能，至少可以讓使用者在結果頁看到內容確實是有關鍵字出現，可能是在標題，也可能是在內文。一般來說，如果<strong>兩者都有符合</strong>的話應該要放最前面，第二是<strong>只有標題符合</strong>，最後則是<strong>只有內文符合</strong>。然後再加上其他的參數，比如是不是被精選過，留言數多不多…等，但這些參數不在這次的討論範圍，就不多提了。</p>
+<p>我們在上了 highlight 功能之後，發現其實也可以拿來做為搜尋精準度的驗證。簡單說，當使用者搜尋「<strong>新竹</strong>」，結果頁可能會出現「<strong>新竹</strong>米粉」、「今天我們從台北出發去<strong>新竹</strong>玩」這類的內容，但也發現了「<strong>新</strong>聖地では･･･？世界観がそのまんま！鬼滅の刃の聖地巡礼スポット11選【全国】」這類內容，而且 highlight 的部分在新聖地的「<strong>新</strong>」。這實在非常奇怪，出現一篇跟「<strong>新竹</strong>」完全無關的內容，於是就開始查問題在哪裡了。</p>
+<img src="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/analyzer-1.png" class="">
+
+<img src="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/analyzer-2.png" class="">
+
+<p>查搜尋結果當然要用 ES 的 explain 功能啦，細節就不多提了，總之後來發現是因為「新聖地では･･･？世界観がそのまんま！鬼滅の刃の聖地巡礼スポット11選【全国】」用的是日文斷詞 (kuromoji)，所以「新聖地」會被斷成「<strong>新</strong>、聖地」，而「新竹」會被斷成「<strong>新</strong>、竹」，最後在搜尋時就比對成功了，所以要修正這個問題。</p>
+<hr>
+<p>解決這個問題的做法，我們是先用 NLP 技術判斷關鍵字的語言是什麼 (「新竹」判斷為 <code>zh</code>)，然後搜尋時決定要搜尋 <code>title_zh</code> 或是 <code>title_ja</code>，因為「新聖地…」是放在 <code>title_ja</code>，所以搜尋時就不會搜尋到這篇文章了。</p>
+<p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
+<p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
+<hr>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#101;&#119;&#97;&#110;&#x67;&#x40;&#102;&#117;&#110;&#x6c;&#105;&#100;&#x61;&#x79;&#46;&#99;&#x6f;&#109;">&#x6b;&#101;&#119;&#97;&#110;&#x67;&#x40;&#102;&#117;&#110;&#x6c;&#105;&#100;&#x61;&#x79;&#46;&#99;&#x6f;&#109;</a> 喔！</p>
+<ul>
+<li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="ckptt357u000ozcsp7szxg0z4" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-如何最佳化中日文的關鍵字搜尋-1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" class="article-date">
@@ -126,7 +187,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckpl4ilu0000lzoqt3mj0bduh" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckptt357t000lzcsp454uh72b" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
@@ -215,7 +276,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckpl4iltz000kzoqthwh34kyw" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckptt357s000kzcsp8ey4hdl1" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
       
       
@@ -260,7 +321,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckpl4iltm0003zoqthyog99x7" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckptt357e0003zcsp0thhc84w" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
       
       
       
@@ -347,7 +408,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckpl4ilu9000zzoqt8lia5aa7" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckptt35820010zcsp0r1d5ijp" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
       
       
       
@@ -402,7 +463,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckpl4ilty000izoqte4lud3sk" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckptt357r000izcspgydohjap" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
       
       
       
@@ -454,7 +515,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckpl4iltr000bzoqt095n5nul" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckptt357m000bzcspa3y5efd8" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
       
       
       
@@ -498,7 +559,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckpl4iltw000fzoqt5kzlcscz" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckptt357q000fzcspc9lthoav" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
       
       
       
@@ -596,7 +657,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckpl4iltq0008zoqt7bddg8cz" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckptt357j0008zcsp52q7c2ve" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
       
       
       
@@ -646,66 +707,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="ckpl4iltr000azoqtf6e103l0" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="ckptt357l000azcsp3c6vhllt" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-Funliday-重磅推出新的-prerender-套件-pppr" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" class="article-date">
-  <time class="dt-published" datetime="2020-05-25T02:00:10.000Z" itemprop="datePublished">2020-05-25</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/">Funliday 重磅推出新的 prerender 套件 pppr</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>這一系列文總共有三篇，這是最後一篇。</p>
-<p>Funliday 重磅推出新的 prerender 套件 pppr！這是一個 zero config 的 express middleware，只要 <code>npm install pppr</code>，然後在 <code>app.js</code> 裡面加一行 <code>app.use(pppr())</code> 就可以直接拿來用了。</p>
-<hr>
-<p>原本在使用 prerender.io 這個套件有時候會出現 504 timeout 的問題，後來發現這個套件用的是比較底層的 API (Chrome DevTools Protocol, CDP)，研究它的原始碼後發現 render HTML 的 timeout 判斷上有些怪怪的，本來想試著去改這塊，但對 CDP 不熟，所以用 puppeteer 重寫一套 prerender service，pppr 也就應運而生。</p>
-<p>簡單先解釋一下，puppeteer 是基於 CDP 封裝後成為比較容易使用的 API。因為 client side rendering (CSR) 的流行，所以現在要做網路爬蟲的話，愈來愈多會選擇用 puppeteer 來處理。這裡來分享一下在開發 pppr 的時候，有哪些東西要注意的。</p>
-<h2 id="1-把-URL-放到像是-50-人的-LINE-熱門群組，prerender-會遭到大量的-request"><a href="#1-把-URL-放到像是-50-人的-LINE-熱門群組，prerender-會遭到大量的-request" class="headerlink" title="1. 把 URL 放到像是 50 人的 LINE 熱門群組，prerender 會遭到大量的 request"></a>1. 把 URL 放到像是 50 人的 LINE 熱門群組，prerender 會遭到大量的 request</h2><p>因為每個使用者接收到這個訊息之後，因為要顯示 og data，所以就會去打一次 prerender。這裡姑且先稱之為 OG-DDoS 好了 XD，所以一定要做 cache，讓第一個 request 把 HTML 產生出來之後就放到 cache 裡面。然後可以用 LRU cache 來處理，因為這類 URL 都是短時間會被大量使用，之後就很少被用了，用 LRU cache 剛剛好。</p>
-<h3 id="其實這一段實作還有一些問題"><a href="#其實這一段實作還有一些問題" class="headerlink" title="其實這一段實作還有一些問題"></a>其實這一段實作還有一些問題</h3><p>如果在第一個 request 還沒產生出 HTML 之前，第二個同樣 request 就進來了，這樣子 cache 可以說是根本沒作用，還要再找時間來處理 lock 機制才行。</p>
-<h2 id="2-每一個-request-要新開一個-page-才行"><a href="#2-每一個-request-要新開一個-page-才行" class="headerlink" title="2. 每一個 request 要新開一個 page 才行"></a>2. 每一個 request 要新開一個 page 才行</h2><p>如果沒有每個 request 都開新 page 的話，會造成 A request 還沒處理完，B request 就用同一個 page 做 render，這樣子 A request 就會 504 timeout 了。所以一定要記得每個 request 都要新開 page。</p>
-<h2 id="3-調整-User-Agent"><a href="#3-調整-User-Agent" class="headerlink" title="3. 調整 User Agent"></a>3. 調整 User Agent</h2><p>因為 headless chrome 的 user agent 就叫做 HeadlessChrome，為了避免在 render 的時候會出現意料外的狀況，保險一點還是把 HeadlessChrome 改成 Chrome 會比較好。</p>
-<h2 id="4-注意-redirect"><a href="#4-注意-redirect" class="headerlink" title="4. 注意 redirect"></a>4. 注意 redirect</h2><p>因為 expressjs 跟 puppeter 是兩個不同的 context，對於 redirection 來說，expressjs 會回傳 3xx 系列的狀態碼，但 puppeteer 則會直接執行完成。所以把 puppeteer 放在 expressjs 裡面執行的話，必須要處理 redirect chain，讓 expressjs 能回給 client 正確的狀態碼才行。</p>
-<h2 id="5-取得完整的-URL"><a href="#5-取得完整的-URL" class="headerlink" title="5. 取得完整的 URL"></a>5. 取得完整的 URL</h2><p>pppr 因為是發想自 prerender.io，所以 interface 也一樣是 <code>/render?url=https://example.com</code>。但有時候原始的 url 後面會包含 query string，所以 expressjs 要用 URLSearchParams 另外做些處理，才能取得完整的 url。</p>
-<p>開發 pppr 基本要注意的事項大概就這樣，總之記得給星，有任何問題歡迎發 issue 跟 pr 喔！</p>
-<ul>
-<li>pppr: <a target="_blank" rel="noopener" href="https://github.com/funliday/pppr">https://github.com/funliday/pppr</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" data-id="ckpl4iltn0004zoqtfnmr6iio" data-title="Funliday 重磅推出新的 prerender 套件 pppr" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li></ul>
 
     </footer>
   </div>
@@ -743,7 +749,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cjk/" style="font-size: 10px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 12.5px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12.5px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/jieba/" style="font-size: 10px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 17.5px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cjk/" style="font-size: 10px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12.5px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/jieba/" style="font-size: 10px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 17.5px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
     </div>
   </div>
 
@@ -765,6 +771,10 @@
       <ul>
         
           <li>
+            <a href="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a>
+          </li>
+        
+          <li>
             <a href="/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a>
           </li>
         
@@ -778,10 +788,6 @@
         
           <li>
             <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
-          </li>
-        
-          <li>
-            <a href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/">在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</a>
           </li>
         
       </ul>
