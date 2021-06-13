@@ -15,7 +15,7 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Sun, 13 Jun 2021 07:07:23 GMT</pubDate>
+    <pubDate>Sun, 13 Jun 2021 18:14:23 GMT</pubDate>
     <generator>http://hexo.io/</generator>
     
     <item>
@@ -37,6 +37,8 @@
       
       
       <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
+      
+      <category domain="https://techblog.funliday.com/tags/cjk/">cjk</category>
       
       
       <comments>https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/#disqus_thread</comments>
