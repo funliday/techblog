@@ -1,3 +1,4 @@
+google_analytics: G-BSRWWXDXXF
 mermaid: ## mermaid url https://github.com/knsv/mermaid
   enable: true  # default true
   version: "7.1.2" # default v7.1.2
