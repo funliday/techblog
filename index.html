@@ -3,6 +3,17 @@
 <head>
   <meta charset="utf-8">
   
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSRWWXDXXF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-BSRWWXDXXF');
+</script>
+<!-- End Google Analytics -->
+
   
   <title>Funliday Tech Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -128,7 +139,7 @@
 <hr>
 <p>從 <code>pattern_replace</code> filter 改成 <code>stop</code> filter 之後的結果一樣，但意義不太一樣。而且 ES 在搜尋時好像還可以對 stop word 做一些額外的處理，但這是後話，目前也還沒研究到那裡，有機會再來分享吧。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#97;&#110;&#103;&#64;&#102;&#117;&#x6e;&#x6c;&#x69;&#x64;&#97;&#121;&#x2e;&#99;&#111;&#109;">&#107;&#101;&#119;&#97;&#110;&#103;&#64;&#102;&#117;&#x6e;&#x6c;&#x69;&#x64;&#97;&#121;&#x2e;&#99;&#111;&#109;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#x65;&#119;&#x61;&#x6e;&#x67;&#64;&#x66;&#x75;&#110;&#x6c;&#105;&#x64;&#x61;&#x79;&#x2e;&#99;&#x6f;&#109;">&#107;&#x65;&#119;&#x61;&#x6e;&#x67;&#64;&#x66;&#x75;&#110;&#x6c;&#105;&#x64;&#x61;&#x79;&#x2e;&#99;&#x6f;&#109;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer-anatomy.html">Anatomy of an analyzer | Elasticsearch Guide [7.13] | Elastic</a></li>
@@ -140,7 +151,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="ckpwd4i67000q24y4di01hyez" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="ckpwtpl28000qzdqucxag8l55" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
       
       
       
@@ -192,7 +203,7 @@
 <p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
 <p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#101;&#119;&#x61;&#x6e;&#x67;&#64;&#x66;&#x75;&#x6e;&#x6c;&#x69;&#x64;&#97;&#x79;&#46;&#99;&#x6f;&#109;">&#x6b;&#101;&#119;&#x61;&#x6e;&#x67;&#64;&#x66;&#x75;&#x6e;&#x6c;&#x69;&#x64;&#97;&#x79;&#46;&#99;&#x6f;&#109;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#x65;&#119;&#x61;&#x6e;&#103;&#64;&#x66;&#117;&#x6e;&#x6c;&#105;&#x64;&#97;&#x79;&#46;&#99;&#111;&#x6d;">&#107;&#x65;&#119;&#x61;&#x6e;&#103;&#64;&#x66;&#117;&#x6e;&#x6c;&#105;&#x64;&#97;&#x79;&#46;&#99;&#111;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
@@ -201,7 +212,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="ckpwd4i66000o24y42c5ie2bp" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="ckpwtpl27000ozdqufr278zk4" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
       
       
       
@@ -270,7 +281,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckpwd4i65000l24y4clf7d2tb" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckpwtpl26000lzdquf3s03z38" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
@@ -359,7 +370,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckpwd4i64000k24y4932nasa0" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckpwtpl25000kzdqu25pk3kl1" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
       
       
@@ -404,7 +415,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckpwd4i5q000324y4eiyl12qi" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckpwtpl1q0003zdqu640tgqi9" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
       
       
       
@@ -491,7 +502,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckpwd4i78003z24y432u4fbdn" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckpwtpl3a003zzdqubgua3952" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
       
       
       
@@ -546,7 +557,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckpwd4i63000i24y43bic13xq" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckpwtpl24000izdqu88121qah" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
       
       
       
@@ -598,7 +609,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckpwd4i5z000b24y46l88gw5f" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckpwtpl1z000bzdqu7oy6g4f9" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
       
       
       
@@ -642,7 +653,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckpwd4i62000f24y4aw328vxo" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckpwtpl22000fzdqu6p7a6q29" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
       
       
       
@@ -740,7 +751,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckpwd4i5w000824y4f87668ti" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckpwtpl1w0008zdqu0ppm76ey" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
       
       
       
