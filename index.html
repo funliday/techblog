@@ -71,6 +71,86 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-如何最佳化中日文的關鍵字搜尋-3" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" class="article-date">
+  <time class="dt-published" datetime="2021-06-13T17:45:13.000Z" itemprop="datePublished">2021-06-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/">如何最佳化中日文的關鍵字搜尋 - 3</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/SERP.png" class="" width="400">
+
+<p>續上篇，其實在 highlight 功能上線後，給我們設計師測試，一開始測都沒問題，但後來測到「台北 美食」就出現狀況了，發現出來一堆無關的內容 (如圖的第一個結果)，而且畫面上也沒有任何 highlight，這實在太怪了，所以今天就來分享一下我們怎麼解決這個問題。</p>
+<p>這篇不會提到日文，但相同邏輯也可以套用在日文斷詞喔。進入正題，我們用了中文斷詞 (jieba_index)，會發現「台北 美食」被斷成了「台北、(空白)、美食」，而其他被搜尋的內容，只要有參雜 (空白) 的內容，也因為比對成功所以被搜尋出來了。而 highlight 也因為 (空白) 無法上色，所以當然沒有紅色標示啦。</p>
+<p>後來才發現，其實是因為 jieba 只負責斷詞，至於文字裡面是否有包含標點符號、(空白)…等，jieba 完全不在意，所以如果要解決這個問題，必須要從 ES 本身著手。</p>
+<pre class="mermaid">graph TD;
+    A[char filter 1] --> B[char filter 2];
+    B --> C[char filter 3];
+    C --> D[char filter N];
+    D --> E[tokenizer];
+    E --> F[token filter 1];
+    F --> G[token filter 2];
+    G --> H[token filter 3];
+    H --> I[token filter N];
+    style E fill:#ff9;</pre>
+
+<p>其實 ES 提供了很多的 filter 與 tokenizer 做結合，結合起來才叫做 analyzer，而在 tokenize 之前所執行的是 char filter，在 tokenize 之後執行的叫做 token filter，所以我們可以利用這些 filter 將標點符號跟 (空白) 過濾掉。</p>
+<h2 id="使用-pattern-replace-filter"><a href="#使用-pattern-replace-filter" class="headerlink" title="使用 pattern_replace filter"></a>使用 pattern_replace filter</h2><pre class="mermaid">graph TD;
+    A["台北(空白)美食"] -->|pattern_replace filter|B["台北美食"];
+    B -->|tokenizer|C["台北、美食"];</pre>
+
+<p>我們第一版採用的是 char filter 裡面的 <code>pattern_replace</code> filter，顧名思義這個 filter 就是把文字做替換，以我們的需求來說，就是要把標點符號跟 (空白) 轉成空字串，所以可以寫成下面這個樣子。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> settings = &#123;</span><br><span class="line">  analysis: &#123;</span><br><span class="line">    char_filter: &#123;</span><br><span class="line">      jieba_char_filter: &#123;</span><br><span class="line">        type: <span class="string">&#x27;pattern_replace&#x27;</span>,</span><br><span class="line">        pattern: <span class="string">&#x27;[\\t\\s!$%^&amp;*()\\[\\]&#123;&#125;&lt;&gt;|:;\\\\\&#x27;&quot;,.?/˙‥‧‵、。﹐﹒﹔﹕！＃＄％＆＊，．：；？＠～•…·¡¿¦¨¯´·¸º‽‼⁏※†‡ˉ˘⁇⁈⁉ˆ⁊⸘]&#x27;</span>,</span><br><span class="line">        replacement: <span class="string">&#x27;&#x27;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    analyzer: &#123;</span><br><span class="line">      jieba_search_normalize: &#123;</span><br><span class="line">        char_filter: [<span class="string">&#x27;jieba_char_filter&#x27;</span>],</span><br><span class="line">        tokenizer: <span class="string">&#x27;jieba_search&#x27;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但後來看了幾篇文章後，發現 <code>pattern_replace</code> filter 用在這裡會有點怪，它是拿來用在像 emoji 轉成文字、特定的正規表示式轉換…等，所以也要注意正規表示式沒寫好的話，其實很容易造成效能瓶頸，所以要慎用。</p>
+<pre class="mermaid">graph TD;
+    A["台北(空白)美食"] -->|tokenizer|B["台北、(空白)、美食"];
+    B["台北、(空白)、美食"] -->|stop filter|C["台北、美食"];</pre>
+
+<h2 id="使用-stop-filter"><a href="#使用-stop-filter" class="headerlink" title="使用 stop filter"></a>使用 stop filter</h2><p>後來發現其實應該要用 token filter 來處理才對，把經過 tokenizer 處理完的 token stream 再做二次處理，而這裡就要用到 token filter 裡面一拖拉庫 filter 的其中一個 <code>stop</code> filter。</p>
+<p><code>stop</code> filter 的功能是將 token stream 裡面屬於 stop word (停用詞) 的 token 移除，對於英文來說，停用詞就是「this、that、the、a、on」這類單字；而中文來說其實就是「的、啊」這類字，當然也可以將標點符號及 (空白) 加上去。所以改用 <code>stop</code> filter 之後，就寫成下面這個樣子。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> settings = &#123;</span><br><span class="line">  analysis: &#123;</span><br><span class="line">    analyzer: &#123;</span><br><span class="line">      jieba_search_normalize: &#123;</span><br><span class="line">        tokenizer: <span class="string">&#x27;jieba_search&#x27;</span>,</span><br><span class="line">        filter: [<span class="string">&#x27;jieba_stop&#x27;</span>, <span class="string">&#x27;whitespace_stop&#x27;</span>]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    filter: &#123;</span><br><span class="line">      jieba_stop: &#123;</span><br><span class="line">        type: <span class="string">&#x27;stop&#x27;</span>,</span><br><span class="line">        stopwords_path: <span class="string">&#x27;stopwords/stopwords.txt&#x27;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      whitespace_stop: &#123;</span><br><span class="line">        type: <span class="string">&#x27;stop&#x27;</span>,</span><br><span class="line">        stopwords: [<span class="string">&#x27; &#x27;</span>, <span class="string">&#x27;　&#x27;</span>] <span class="comment">// 前面是半型空白，後面是全型空白</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>大家可能發現到為什麼會有兩個 <code>stop</code> filter，我們在測試的時候，發現 (空白) 似乎沒辦法用檔案的型式 (<code>stopwords_path</code>) 讀取，所以直接寫死在 <code>stopwords</code> 陣列，這樣就可以了。</p>
+<hr>
+<p>從 <code>pattern_replace</code> filter 改成 <code>stop</code> filter 之後的結果一樣，但意義不太一樣。而且 ES 在搜尋時好像還可以對 stop word 做一些額外的處理，但這是後話，目前也還沒研究到那裡，有機會再來分享吧。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer-anatomy.html">Anatomy of an analyzer | Elasticsearch Guide [7.13] | Elastic</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-pattern-replace-charfilter.html">Pattern replace character filter | Elasticsearch Guide [7.13] | Elastic</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%81%9C%E7%94%A8%E8%AF%8D">停用詞 - 維基百科，自由的百科全書</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-stop-tokenfilter.html">Stop token filter | Elasticsearch Guide [7.13] | Elastic</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="ckpwcepbe000q2ir78etk15uc" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cjk/" rel="tag">cjk</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-如何最佳化中日文的關鍵字搜尋-2" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" class="article-date">
@@ -109,7 +189,7 @@
 <p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
 <p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#101;&#119;&#97;&#110;&#x67;&#x40;&#102;&#x75;&#110;&#x6c;&#105;&#x64;&#97;&#121;&#46;&#99;&#111;&#109;">&#x6b;&#101;&#119;&#97;&#110;&#x67;&#x40;&#102;&#x75;&#110;&#x6c;&#105;&#x64;&#97;&#121;&#46;&#99;&#111;&#109;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#x65;&#x77;&#97;&#110;&#x67;&#x40;&#102;&#117;&#110;&#x6c;&#105;&#100;&#x61;&#x79;&#46;&#99;&#x6f;&#x6d;">&#x6b;&#x65;&#x77;&#97;&#110;&#x67;&#x40;&#102;&#117;&#110;&#x6c;&#105;&#100;&#x61;&#x79;&#46;&#99;&#x6f;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
@@ -118,7 +198,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="ckpvibt93000o10rf6hk641mc" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="ckpwcepbd000o2ir7d19a4ldf" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
       
       
       
@@ -187,7 +267,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckpvibt91000l10rfcuw04cl9" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckpwcepbc000l2ir73n80e3cn" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
@@ -276,7 +356,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckpvibt91000k10rffwuc0g1w" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckpwcepbb000k2ir74hoq62b9" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
       
       
@@ -321,7 +401,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckpvibt8l000310rfezyxdug5" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckpwcepax00032ir7d3ob0yi0" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
       
       
       
@@ -408,7 +488,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckpvibta6003s10rfearj2xcl" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckpwcepch003z2ir7akrqaomx" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
       
       
       
@@ -463,7 +543,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckpvibt90000i10rf470ngf1n" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckpwcepba000i2ir7g8kbfy96" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
       
       
       
@@ -515,7 +595,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckpvibt8u000b10rf02j2c03i" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckpwcepb5000b2ir7fpjtcwrp" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
       
       
       
@@ -559,7 +639,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckpvibt8y000f10rfaw9d7hm9" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="ckpwcepb9000f2ir72ryw2r6e" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
       
       
       
@@ -657,61 +737,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckpvibt8r000810rf64lo0miq" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="ckpwcepb300082ir70mc3fqhg" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-在-COSCUP-2020-分享的「模糊也是一種美-從-BlurHash-探討前後端上傳圖片架構」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" class="article-date">
-  <time class="dt-published" datetime="2020-08-03T02:00:07.000Z" itemprop="datePublished">2020-08-03</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/">在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <iframe src="//www.slideshare.net/slideshow/embed_code/key/55C8If84Cyr4CV" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/blurhash" title="模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構" target="_blank">模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
-
-<p>上星期大家都有來聽小編在 COSCUP 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」嗎？這個技術已經有實作在 Funliday 的 Web 跟 Android 囉。這個議題結束後，有朋友問了一些問題，這裡順便來統整回答一下。</p>
-<h2 id="1-client-side-upload-方式從-server-產出的-signed-URL-是個什麼樣的東西？"><a href="#1-client-side-upload-方式從-server-產出的-signed-URL-是個什麼樣的東西？" class="headerlink" title="1. client side upload 方式從 server 產出的 signed URL 是個什麼樣的東西？"></a>1. client side upload 方式從 server 產出的 signed URL 是個什麼樣的東西？</h2><p>signed URL 是為了讓沒有 access key 及 secret key 的 sender 也能在有權限管理的保護下做 S3 的檔案處理，而 Funliday 在這裡的實作是不用原檔名做 key，改用 UUID 產生避免檔名衝突。</p>
-<h2 id="2-client-BlurHash-decode-的效率如何？"><a href="#2-client-BlurHash-decode-的效率如何？" class="headerlink" title="2. client BlurHash decode 的效率如何？"></a>2. client BlurHash decode 的效率如何？</h2><p>在做 BlurHash decode 的時候因為用到的是 CPU 運算，而且 JavaScript 又是 single thread 的關係，所以在 decode 同時移動畫面的話，可能會造成 CPU 不夠力的 client 會有極短暫的延遲時間。這時候可以考慮把 decode 丟到 web worker 處理，避免卡到 UI thread 的順暢度。用 Android 的術語來說就是開 AsyncTask 啦！</p>
-<h2 id="3-你們後來是使用哪種方式做上傳呢？"><a href="#3-你們後來是使用哪種方式做上傳呢？" class="headerlink" title="3. 你們後來是使用哪種方式做上傳呢？"></a>3. 你們後來是使用哪種方式做上傳呢？</h2><p>原先是使用 server side (2) 的方式，但在處理 MQ 上傳後的 notify 花了不少時間，而且上傳到 S3 也沒這麼快，所以後來改用 client side 的方式做上傳功能，運作上也比原先的方式順暢。</p>
-<h2 id="4-為什麼不用-medium-的方式處理-blur？"><a href="#4-為什麼不用-medium-的方式處理-blur？" class="headerlink" title="4. 為什麼不用 medium 的方式處理 blur？"></a>4. 為什麼不用 medium 的方式處理 blur？</h2><p>因為 medium 檔案比 BlurHash 的字串大很多，而且要多發一次 request，成本比 BlurHash 高出不少，所以我們認為用 BlurHash 會是比較好的。</p>
-<hr>
-<p>當然也是要感謝 gslin 大大，他在 4/26 (日) 簡單介紹了 BlurHash。小編下午看到這篇文章，馬上丟去 slack 問我們的設計師大大，看她覺得這效果如何？她過沒多久回覺得不錯，小編就在星期日的下午開始處理 server side 的實作。隔天星期一有了初步的成果，然後給我們的安卓五星上將看，星期二就完成 Android 實作並上線了！</p>
-<p>也是因為 CDN 那塊後來把原先的 lambda 改用自己寫的 server 處理，所以實作 BlurHash 才能這麼快。lambda 這塊也是血淚史，下略 10000 字，之後有機會再跟大家分享。歡迎大家對這塊有興趣的也來交流一下喔！</p>
-<h2 id="影片"><a href="#影片" class="headerlink" title="影片"></a>影片</h2><iframe width="560" height="315" src="https://www.youtube.com/embed/l1JVBX3tsMY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="ckpvibt8t000a10rf4cno6cuq" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li></ul>
 
     </footer>
   </div>
@@ -749,7 +779,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cjk/" style="font-size: 12.5px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12.5px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/jieba/" style="font-size: 10px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 17.5px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 15px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/cjk/" style="font-size: 15px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 17.5px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12.5px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12.5px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12.5px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12.5px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/modernweb/" style="font-size: 15px;">modernweb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12.5px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.5px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 17.5px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12.5px;">pppr</a> <a href="/tags/prerender/" style="font-size: 17.5px;">prerender</a> <a href="/tags/redis/" style="font-size: 17.5px;">redis</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
     </div>
   </div>
 
@@ -771,6 +801,10 @@
       <ul>
         
           <li>
+            <a href="/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/">如何最佳化中日文的關鍵字搜尋 - 3</a>
+          </li>
+        
+          <li>
             <a href="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a>
           </li>
         
@@ -784,10 +818,6 @@
         
           <li>
             <a href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/">Funliday 的 tech blog 開張啦！</a>
-          </li>
-        
-          <li>
-            <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
           </li>
         
       </ul>
