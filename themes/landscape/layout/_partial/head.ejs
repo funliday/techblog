@@ -20,7 +20,11 @@
   %>
   <title><% if (title){ %><%= title %> | <% } %><%= config.title %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <%- open_graph({twitter_id: theme.twitter, fb_admins: theme.fb_admins, fb_app_id: theme.fb_app_id}) %>
+  <% if (page.ogimage) { %>
+    <%- open_graph({image: page.ogimage, twitter_id: theme.twitter, fb_admins: theme.fb_admins, fb_app_id: theme.fb_app_id}) %>
+  <% } else { %>
+    <%- open_graph({twitter_id: theme.twitter, fb_admins: theme.fb_admins, fb_app_id: theme.fb_app_id}) %>
+  <% } %>
   <% if (config.feed) { %>
     <%- feed_tag() %>
   <% } else if (theme.rss) { %>

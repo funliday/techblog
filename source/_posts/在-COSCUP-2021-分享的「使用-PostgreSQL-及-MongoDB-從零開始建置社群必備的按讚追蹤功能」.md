@@ -1,5 +1,6 @@
 ---
 title: 在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」
+ogimage: ogimage.png
 date: 2021-08-02 12:47:39
 tags:
 - postgresql
