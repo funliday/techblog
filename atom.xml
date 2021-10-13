@@ -6,7 +6,7 @@
   <link href="https://techblog.funliday.com/atom.xml" rel="self"/>
   
   <link href="https://techblog.funliday.com/"/>
-  <updated>2021-08-02T06:16:24.125Z</updated>
+  <updated>2021-10-13T16:55:52.328Z</updated>
   <id>https://techblog.funliday.com/</id>
   
   <author>
@@ -17,11 +17,42 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」</title>
+    <link href="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/"/>
+    <id>https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/</id>
+    <published>2021-10-13T14:41:15.000Z</published>
+    <updated>2021-10-13T16:55:52.328Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/AIC2t5nj9WvSx3&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="postgresql" scheme="https://techblog.funliday.com/tags/postgresql/"/>
+    
+    <category term="flyway" scheme="https://techblog.funliday.com/tags/flyway/"/>
+    
+    <category term="nodejs" scheme="https://techblog.funliday.com/tags/nodejs/"/>
+    
+    <category term="postgis" scheme="https://techblog.funliday.com/tags/postgis/"/>
+    
+    <category term="blurhash" scheme="https://techblog.funliday.com/tags/blurhash/"/>
+    
+  </entry>
+  
+  <entry>
     <title>在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」</title>
     <link href="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/"/>
     <id>https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/</id>
     <published>2021-08-02T04:47:39.000Z</published>
-    <updated>2021-08-02T06:16:24.125Z</updated>
+    <updated>2021-10-13T16:55:52.328Z</updated>
     
     
       
@@ -52,7 +83,7 @@
     <link href="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/"/>
     <id>https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/</id>
     <published>2021-07-14T01:41:36.000Z</published>
-    <updated>2021-08-02T06:16:24.137Z</updated>
+    <updated>2021-10-13T16:55:52.344Z</updated>
     
     
       
@@ -79,7 +110,7 @@
     <link href="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/"/>
     <id>https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/</id>
     <published>2021-06-13T17:45:13.000Z</published>
-    <updated>2021-08-02T06:16:24.133Z</updated>
+    <updated>2021-10-13T16:55:52.336Z</updated>
     
     
       
@@ -106,7 +137,7 @@
     <link href="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/"/>
     <id>https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/</id>
     <published>2021-06-12T06:29:11.000Z</published>
-    <updated>2021-08-02T06:16:24.129Z</updated>
+    <updated>2021-10-13T16:55:52.332Z</updated>
     
     
       
@@ -131,7 +162,7 @@
     <link href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/"/>
     <id>https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/</id>
     <published>2021-06-05T10:27:22.000Z</published>
-    <updated>2021-08-02T06:16:24.129Z</updated>
+    <updated>2021-10-13T16:55:52.332Z</updated>
     
     
       
@@ -158,7 +189,7 @@
     <link href="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/"/>
     <id>https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/</id>
     <published>2021-02-21T07:40:35.000Z</published>
-    <updated>2021-08-02T06:16:24.125Z</updated>
+    <updated>2021-10-13T16:55:52.328Z</updated>
     
     
       
@@ -187,7 +218,7 @@
     <link href="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/"/>
     <id>https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/</id>
     <published>2021-02-08T06:02:41.000Z</published>
-    <updated>2021-08-02T06:16:24.125Z</updated>
+    <updated>2021-10-13T16:55:52.328Z</updated>
     
     
       
@@ -218,7 +249,7 @@
     <link href="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/"/>
     <id>https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/</id>
     <published>2021-01-12T01:47:55.000Z</published>
-    <updated>2021-08-02T06:16:24.137Z</updated>
+    <updated>2021-10-13T16:55:52.344Z</updated>
     
     
       
@@ -235,9 +266,9 @@
     
     <category term="postgresql" scheme="https://techblog.funliday.com/tags/postgresql/"/>
     
-    <category term="javascript" scheme="https://techblog.funliday.com/tags/javascript/"/>
-    
     <category term="nodejs" scheme="https://techblog.funliday.com/tags/nodejs/"/>
+    
+    <category term="javascript" scheme="https://techblog.funliday.com/tags/javascript/"/>
     
     <category term="expressjs" scheme="https://techblog.funliday.com/tags/expressjs/"/>
     
@@ -248,7 +279,7 @@
     <link href="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/"/>
     <id>https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/</id>
     <published>2020-11-30T01:57:03.000Z</published>
-    <updated>2021-08-02T06:16:24.125Z</updated>
+    <updated>2021-10-13T16:55:52.328Z</updated>
     
     
       
@@ -269,33 +300,6 @@
     <category term="newrelic" scheme="https://techblog.funliday.com/tags/newrelic/"/>
     
     <category term="redis" scheme="https://techblog.funliday.com/tags/redis/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」</title>
-    <link href="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/"/>
-    <id>https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/</id>
-    <published>2020-10-26T01:58:38.000Z</published>
-    <updated>2021-08-02T06:16:24.125Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/2gXeRhdmwtkpFi&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="iframe" scheme="https://techblog.funliday.com/tags/iframe/"/>
-    
-    <category term="cors" scheme="https://techblog.funliday.com/tags/cors/"/>
-    
-    <category term="hsts" scheme="https://techblog.funliday.com/tags/hsts/"/>
     
   </entry>
   

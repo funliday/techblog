@@ -84,6 +84,67 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-到保哥直播分享「老司機帶你上手-PostgreSQL-關聯式資料庫系統」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2021-10-13T14:41:15.000Z" itemprop="datePublished">2021-10-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/">到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/AIC2t5nj9WvSx3" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/postgresql-250366908" title="老司機帶你上手 PostgreSQL 關聯式資料庫系統" target="_blank">老司機帶你上手 PostgreSQL 關聯式資料庫系統</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>一個月前上了保哥的直播，主要是分享一下 Funliday 如何使用 PostgreSQL。</p>
+<p>其實一開始會選擇 PostgreSQL 主要有兩點，第一點是 Funliday 是放在 Heroku 上面，而 Heroku 配置的資料庫就是 PostgreSQL，第二點是 POI Bank 儲存的內容是一堆的景點資料，用 PostgreSQL 內附的 PostGIS 操作當然是更適合，所以當時也沒考慮用其他的資料庫。</p>
+<p>這次接到保哥邀請的時候，小編真的想了很久，到底要跟大家講什麼才好。講語法？CRUD 大家都會，這沒什麼好講的；講效能評估？這也不是小編的專長，主要都是看各位神人的文章來做調校；講如何安裝？這直接上網找教學文章就有了，在直播講這個實在太浪費時間。所以後來想了一下，還是以 Funliday 如何使用 PostgreSQL 為主，然後分享了五個部分，這裡簡單整理一下</p>
+<h2 id="1-Migration-資料庫版本管理"><a href="#1-Migration-資料庫版本管理" class="headerlink" title="1. Migration 資料庫版本管理"></a>1. Migration 資料庫版本管理</h2><p>在程式開發過程中，如果有做任何變更資料庫結構動作 (也就是 DDL) 的話，記得要做 migration。小編第一次看到這個概念是 RoR 正紅的時候學到的，任何的資料庫結構變更都要有 tear down 以及 set up，後來學的幾套 web framework 好像也都有類似的機制，所以在使用 PostgreSQL 的時候就直接拿來用。</p>
+<p>但 Express.js 這個 web framework 其實沒有內建 migration 的功能，找了一些 Node.js 的套件也沒看到比較好的。所以後來就找了這套 Java 開發的 Flyway，完全可以達到我們的需求，所以後來就一直沿用下去了。</p>
+<h2 id="2-Node-js-整合"><a href="#2-Node-js-整合" class="headerlink" title="2. Node.js 整合"></a>2. Node.js 整合</h2><p>這部分是在分享如何把 Node.js 與 node-postgres 套件整合在一起，其實寫久已經習慣了，但一開始在用這個套件的時候，光是為了要找如何把 array 塞到 SQL 語法裡面就花了好多時間。這個在影片裡面有介紹到，大家可以直接去看看。</p>
+<h2 id="3-PostGIS-實務應用"><a href="#3-PostGIS-實務應用" class="headerlink" title="3. PostGIS 實務應用"></a>3. PostGIS 實務應用</h2><p>這是將之前在 PostgreSQL.TW 以及 ModernWeb 2019 分享的內容再整理了一下，簡單舉了幾個 PostGIS 使用的例子，也分享如何在 pgadmin 上面用 OpenStreetMap 直接顯示結果，還蠻好用的！</p>
+<h2 id="4-DB-儲存資料用"><a href="#4-DB-儲存資料用" class="headerlink" title="4. DB 儲存資料用"></a>4. DB 儲存資料用</h2><p>這其實也是把 PostgreSQL.TW 的內容整理了一下，然後再加上最近實作的方式分享出來。其實就是想強調一點，資料庫主要還是存資料為主，有做正規化當然很好，但也是要看當時的資源跟時間是否允許。像影片中有提到因為 Redis 比較貴，所以把一部分的 cache 負擔丟給 PostgreSQL，這樣也比較省錢。</p>
+<h2 id="5-Blurhash-顯示"><a href="#5-Blurhash-顯示" class="headerlink" title="5. Blurhash 顯示"></a>5. Blurhash 顯示</h2><p>Blurhash 好像是這次迴響比較大的部分，其實在去年的 COSCUP 2020 就有提到這個套件了。就是把一張 client 要顯示的圖片，運用演算法計算出 20 個 byte 的字串，因為這個字串短，所以可以直接存在資料庫裡面。而 client 將這個字串 decode 之後，就可以顯示一個具有象徵意義的色塊，而不是傳統的 image placeholder。</p>
+<p>這個 Blurhash 在 Funliday 上面已經運用在 Web 跟 Android，大家可以實際去使用看看效果，小編是覺得還不錯。</p>
+<hr>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.facebook.com/will.fans/videos/145266924463322">保哥的直播影片</a></li>
+<li><a target="_blank" rel="noopener" href="https://flywaydb.org/">Homepage - Flyway</a></li>
+<li><a target="_blank" rel="noopener" href="https://node-postgres.com/">Welcome | node-postgres</a></li>
+<li><a href="/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」">在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」</a></li>
+<li><a href="/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/" title="在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」">在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」</a></li>
+<li><a href="/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」">在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="ckupr96ii000a0un2hiybg6cd" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/flyway/" rel="tag">flyway</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgis/" rel="tag">postgis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-在-COSCUP-2021-分享的「使用-PostgreSQL-及-MongoDB-從零開始建置社群必備的按讚追蹤功能」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" class="article-date">
@@ -124,7 +185,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="ckru8p1ap000b0ao70kkc8sum" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="ckupr96il000d0un28mltfarr" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
       
       
       
@@ -227,7 +288,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="ckru8p1b600100ao78851cp68" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="ckupr96j500130un2cwdhdnu3" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
       
       
       
@@ -298,7 +359,7 @@
 <hr>
 <p>從 <code>pattern_replace</code> filter 改成 <code>stop</code> filter 之後的結果一樣，但意義不太一樣。而且 ES 在搜尋時好像還可以對 stop word 做一些額外的處理，但這是後話，目前也還沒研究到那裡，有機會再來分享吧。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#x61;&#x6e;&#x67;&#64;&#102;&#x75;&#110;&#x6c;&#x69;&#100;&#x61;&#121;&#46;&#x63;&#x6f;&#x6d;">&#107;&#101;&#119;&#x61;&#x6e;&#x67;&#64;&#102;&#x75;&#110;&#x6c;&#x69;&#100;&#x61;&#121;&#46;&#x63;&#x6f;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#x65;&#119;&#97;&#110;&#103;&#x40;&#102;&#117;&#x6e;&#x6c;&#105;&#100;&#x61;&#121;&#46;&#x63;&#x6f;&#x6d;">&#x6b;&#x65;&#119;&#97;&#110;&#103;&#x40;&#102;&#117;&#x6e;&#x6c;&#105;&#100;&#x61;&#121;&#46;&#x63;&#x6f;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer-anatomy.html">Anatomy of an analyzer | Elasticsearch Guide [7.13] | Elastic</a></li>
@@ -310,7 +371,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="ckru8p1b1000s0ao73t1a5uek" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="ckupr96ix000t0un20e6vbva7" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
       
       
       
@@ -362,7 +423,7 @@
 <p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
 <p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#97;&#110;&#x67;&#64;&#102;&#x75;&#x6e;&#108;&#105;&#x64;&#x61;&#121;&#x2e;&#99;&#111;&#x6d;">&#107;&#101;&#119;&#97;&#110;&#x67;&#64;&#102;&#x75;&#x6e;&#108;&#105;&#x64;&#x61;&#121;&#x2e;&#99;&#111;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#x61;&#110;&#103;&#x40;&#x66;&#x75;&#110;&#x6c;&#x69;&#100;&#x61;&#x79;&#x2e;&#x63;&#x6f;&#109;">&#107;&#101;&#119;&#x61;&#110;&#103;&#x40;&#x66;&#x75;&#110;&#x6c;&#x69;&#100;&#x61;&#x79;&#x2e;&#x63;&#x6f;&#109;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
@@ -371,7 +432,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="ckru8p1b0000q0ao7bmkl8wqd" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="ckupr96iw000s0un2f2jtecz7" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
       
       
       
@@ -440,7 +501,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckru8p1az000o0ao7f1i4aqsx" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="ckupr96iu000q0un2bnvycsh6" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
@@ -529,7 +590,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckru8p1ax000l0ao79h3n3vlj" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="ckupr96it000o0un2dud1h1wp" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
       
       
@@ -574,7 +635,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckru8p1ak00030ao7foex20wr" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="ckupr96ib00030un2eeqs5np9" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
       
       
       
@@ -661,7 +722,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckru8p1c9004h0ao78hpifxo0" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="ckupr96kb004q0un25in542lp" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
       
       
       
@@ -716,63 +777,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckru8p1aw000k0ao7dbqw576r" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="ckupr96is000l0un25kpl50ja" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-在-MOPCON-2020-分享的「如何使用-iframe-製作一個易於更新及更安全的前端套件」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" class="article-date">
-  <time class="dt-published" datetime="2020-10-26T01:58:38.000Z" itemprop="datePublished">2020-10-26</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/">在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <iframe src="//www.slideshare.net/slideshow/embed_code/key/2gXeRhdmwtkpFi" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/iframe-238967650" title="如何使用 iframe 製作一個易於更新及更安全的前端套件" target="_blank">如何使用 iframe 製作一個易於更新及更安全的前端套件</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
-
-<p>這是小編在這次 MOPCON 分享的內容「如何使用 iframe 製作一個易於更新及更安全的前端套件」，來聽的人跟預期的差不多，應該都被吸去 R1 聽游舒帆大大的分享了 XD。</p>
-<p>不過要反省一下，這個題目已經改過一次了，但還是取的不好，這個確實要好好檢討。雖然改名後的題目名為「前端套件」，但內容主要是在講後端的安全性，要對前端做些保護，主要有下面幾點：</p>
-<ul>
-<li>CORS：要加上 Access-Control-Allow-Origin</li>
-<li>api key 外流：加上 referer 做允許名單的驗證</li>
-<li>網域偽造：使用 HTTPS 及 HSTS</li>
-</ul>
-<p>最後分享了如何把網域加到 HSTS preload list 以及目前還在草案中的 SVCB/HTTPS 如何解決首次 HTTP request 的問題 (又是看 DK 大神的文章學知識 XD)</p>
-<p>另外，這個套件還沒公開出來，關心這個套件的開發狀況，歡迎隨時關注我們喔！</p>
-<p>如果十一月的 PostgreSQL 小講堂沒有入選的話，這應該就是今年的最後一個公開演講了，今年一次投了三個分享都有上，真的要感謝各大研討會的議程委員會。但真的是累死，之後一年最多還是投兩個就好，要不然光行前準備就花很多時間，累死了 XDDD</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="ckru8p1ar000d0ao78w43ckyd" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li></ul>
 
     </footer>
   </div>
@@ -800,7 +809,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bullmq/" rel="tag">bullmq</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cjk/" rel="tag">cjk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/messagequeue/" rel="tag">messagequeue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redlock/" rel="tag">redlock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bullmq/" rel="tag">bullmq</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cjk/" rel="tag">cjk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flyway/" rel="tag">flyway</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/messagequeue/" rel="tag">messagequeue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgis/" rel="tag">postgis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redlock/" rel="tag">redlock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
     </div>
   </div>
 
@@ -810,7 +819,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 16px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 10px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 14px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 16px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 14px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 16px;">poibank</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12px;">pppr</a> <a href="/tags/prerender/" style="font-size: 16px;">prerender</a> <a href="/tags/redis/" style="font-size: 18px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 10px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 16px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 12px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 14px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 16px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 14px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 16px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12px;">pppr</a> <a href="/tags/prerender/" style="font-size: 16px;">prerender</a> <a href="/tags/redis/" style="font-size: 18px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 10px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
     </div>
   </div>
 
@@ -819,7 +828,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -830,6 +839,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/">到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」</a>
+          </li>
         
           <li>
             <a href="/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/">在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」</a>
@@ -845,10 +858,6 @@
         
           <li>
             <a href="/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a>
-          </li>
-        
-          <li>
-            <a href="/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a>
           </li>
         
       </ul>
