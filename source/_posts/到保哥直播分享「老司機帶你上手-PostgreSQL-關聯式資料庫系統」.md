@@ -2,6 +2,11 @@
 title: 到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」
 date: 2021-10-13 22:41:15
 tags:
+- postgresql
+- flyway
+- nodejs
+- postgis
+- blurhash
 ---
 
 <iframe src="//www.slideshare.net/slideshow/embed_code/key/AIC2t5nj9WvSx3" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/postgresql-250366908" title="老司機帶你上手 PostgreSQL 關聯式資料庫系統" target="_blank">老司機帶你上手 PostgreSQL 關聯式資料庫系統</a> </strong> from <strong><a href="https://www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
@@ -37,3 +42,10 @@ Blurhash 好像是這次迴響比較大的部分，其實在去年的 COSCUP 202
 這個 Blurhash 在 Funliday 上面已經運用在 Web 跟 Android，大家可以實際去使用看看效果，小編是覺得還不錯。
 
 ---
+
+* [保哥的直播影片](https://www.facebook.com/will.fans/videos/145266924463322)
+* [Homepage - Flyway](https://flywaydb.org/)
+* [Welcome | node-postgres](https://node-postgres.com/)
+* {% post_link 在-PostgreSQL-TW-分享的「大解密！用-PostgreSQL-提升-350-倍的-Funliday-推薦景點計算速度」 "在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" %}
+* {% post_link 在-ModernWeb-2019-分享的「Google-Maps-開始收費了該怎麼辦？」 "在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」" %}
+* {% post_link 在-COSCUP-2020-分享的「模糊也是一種美-從-BlurHash-探討前後端上傳圖片架構」 "在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" %}
