@@ -1,5 +1,6 @@
 ---
 title: 到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」
+ogimage: ogimage.png
 date: 2021-10-13 22:41:15
 tags:
 - postgresql
