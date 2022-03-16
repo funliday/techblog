@@ -5,6 +5,8 @@ tags:
 - 徵才
 ---
 
+{% asset_img hiring.jpg %}
+
 Funliday 最近誠徵前端工程師以及軟體實習生，有興趣的快來 [CakeResume](https://www.cakeresume.com/companies/funliday) 投履歷喔！
 
 ## 前端工程師
