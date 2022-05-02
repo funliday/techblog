@@ -84,6 +84,205 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-用-Redis-來處理熱門景點的-autocomplete-功能" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" class="article-date">
+  <time class="dt-published" datetime="2022-05-01T14:40:49.000Z" itemprop="datePublished">2022-05-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/">用 Redis 來處理熱門景點的 autocomplete 功能</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/screenshot.png" class="" width="400">
+
+<p>又是一篇關於 Autocomplete 的文章，不過這次我們來講如何用 Redis 來處理熱門景點的 autocomplete。Funliday 是一個排行程的服務，當然會有使用者在安排時的熱門景點，所以當使用者輸入「北門」的時候，如果在 autocomplete 可以出現下面這些 candidates 的話，對使用者一定更方便。</p>
+<table>
+  <thead>
+    <tr>
+      <th>
+        Name
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>北門口肉圓</td>
+    </tr>
+    <tr>
+      <td>北門綠豆沙</td>
+    </tr>
+    <tr>
+      <td>北門肉羹</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>即使如此，這些 candidate 也一定有先後順序，所以加上熱門程度 (可以用加入或觀看的次數做為基礎) 之後就會變成下面這樣。</p>
+<table>
+  <thead>
+    <tr>
+      <th>
+        Name
+      </th>
+      <th>
+        Hot
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>北門口肉圓</td>
+      <td>79</td>
+    </tr>
+    <tr>
+      <td>北門綠豆沙</td>
+      <td>84</td>
+    </tr>
+    <tr>
+      <td>北門肉羹</td>
+      <td>82</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="寫入階段"><a href="#寫入階段" class="headerlink" title="寫入階段"></a>寫入階段</h2><p>以前在 <a href="/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" title="用 Redis 來處理 City 的 autocomplete 功能 - 1">用 Redis 來處理 City 的 autocomplete 功能 - 1</a> 的時候有提過，在做 Autocomplete 的時候，我們可以利用 sorted set 來處理字母順序的問題，而 sorted set 在新增元素的時候，其實也可以加分數 (score) 上去，以上面為例，我們可以使用 <code>ZADD</code> 這樣處理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">ZADD ac_poi:北 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口肉 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口肉圓 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北門 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北門綠 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北門綠豆 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北門綠豆沙 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北 82 北門肉羹</span><br><span class="line">ZADD ac_poi:北門 82 北門肉羹</span><br><span class="line">ZADD ac_poi:北門肉 82 北門肉羹</span><br><span class="line">ZADD ac_poi:北門肉羹 82 北門肉羹</span><br></pre></td></tr></table></figure>
+<h3 id="兩種不同的寫入方式"><a href="#兩種不同的寫入方式" class="headerlink" title="兩種不同的寫入方式"></a>兩種不同的寫入方式</h3><p>大家應該有發現到這裡的儲存方式和以前不同，之前在儲存的時候是固定的 key 搭配不同的 member prefix，以及固定為 0 的 score。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以前</span></span><br><span class="line">ZADD ac_city 0 台</span><br><span class="line">ZADD ac_city 0 台北</span><br><span class="line">ZADD ac_city 0 台北市</span><br><span class="line">ZADD ac_city 0 台北市*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 現在</span></span><br><span class="line">ZADD ac_poi:北 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口肉 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口肉圓 79 北門口肉圓</span><br></pre></td></tr></table></figure>
+<p>主要是為了可以讓 score 做排序，所以將 prefix 移往 key。雖然 key 看起來會有點奇怪，但這是一個還蠻巧妙的設計。</p>
+<h3 id="寫入後的結果"><a href="#寫入後的結果" class="headerlink" title="寫入後的結果"></a>寫入後的結果</h3><p>內容排不下，我們就以「北門口」為例，存到 redis 之後會變成下面這樣子。</p>
+<table>
+  <thead>
+    <tr>
+      <th colspan="2">
+        ac_poi:北
+      </th>
+      <th colspan="2">
+        ac_poi:北門
+      </th>
+      <th colspan="2">
+        ac_poi:北門口
+      </th>
+    </tr>
+    <tr>
+      <th>
+        score
+      </th>
+      <th>
+        member
+      </th>
+      <th>
+        score
+      </th>
+      <th>
+        member
+      </th>
+      <th>
+        score
+      </th>
+      <th>
+        member
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        79
+      </td>
+      <td>
+        北門口肉圓
+      </td>
+      <td>
+        79
+      </td>
+      <td>
+        北門口肉圓
+      </td>
+      <td>
+        79
+      </td>
+      <td>
+        北門口肉圓
+      </td>
+    </tr>
+    <tr>
+      <td>
+        82
+      </td>
+      <td>
+        北門肉羹
+      </td>
+      <td>
+        82
+      </td>
+      <td>
+        北門肉羹
+      </td>
+    </tr>
+    <tr>
+      <td>
+        84
+      </td>
+      <td>
+        北門綠豆沙
+      </td>
+      <td>
+        84
+      </td>
+      <td>
+        北門綠豆沙
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>所以 sorted set 在同一個 key 存入不同 member 之後，會以 score 由小排到大。到這邊為止，算是寫入階段完成。</p>
+<h2 id="查詢階段"><a href="#查詢階段" class="headerlink" title="查詢階段"></a>查詢階段</h2><p>在搜尋的時候就是仿照 City 那邊的做法，只不過會將原本需要用 <code>ZRANK</code> 將 cursor 定位至特定的 member 再往後用 <code>ZRANGE</code> 取得資料，現在只要直接用 <code>ZRANGE</code> 取得就可以了。雖然 City 也可以用 Lua 來達成 atomic operation，但為了讓系統單純一點，這裡就先不這樣處理了。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以前</span></span><br><span class="line">pos = ZRANK ac_city 北門</span><br><span class="line">results = ZRANGE ac_city pos + 1 pos + 1 + 50</span><br><span class="line"></span><br><span class="line"><span class="comment"># 現在</span></span><br><span class="line">results = ZRANGE ac_poi:北門 +INF -INF BYSCORE REV LIMIT 0 50</span><br></pre></td></tr></table></figure>
+<p>取回來的 <code>results</code> 會變下面這樣子 score 由大排到小，然後再做一些處理，就可以輸出回前端了。</p>
+<ul>
+<li>84 北門綠豆沙</li>
+<li>82 北門肉羹</li>
+<li>79 北門口肉圓</li>
+</ul>
+<h2 id="結論"><a href="#結論" class="headerlink" title="結論"></a>結論</h2><p>原文章還有提到可以用 <code>ZINCRBY</code> 來更新 score，但 Funliday 的使用情境其實不用到這麼即時，所以我們的做法是每天重新產生新的 autocomplete 資料。</p>
+<p>現在這個功能也已經出現在最新版的 App 了，大家可以在首頁點進「住宿」做搜尋，就會看到這個功能囉。至於原本的「景點瀏覽」要再給我們一些時間，會儘快將這個功能上線！</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/">用 Redis 來處理 City 的 autocomplete 功能 - 1</a></li>
+<li><a target="_blank" rel="noopener" href="http://oldblog.antirez.com/post/autocomplete-with-redis.html">Auto Complete with Redis</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" data-id="cl2ocw35u0016anlz7au56d76" data-title="用 Redis 來處理熱門景點的 autocomplete 功能" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Funliday-2022-誠徵前端工程師及實習生" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" class="article-date">
@@ -180,7 +379,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" data-id="cl0tf755d0001bkl84yxx2ze1" data-title="Funliday 2022 誠徵前端工程師及實習生" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" data-id="cl2ocw34x0001anlz3bpk0zd8" data-title="Funliday 2022 誠徵前端工程師及實習生" class="article-share-link">Share</a>
       
       
       
@@ -241,7 +440,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="cl0tf755n000bbkl8cw6zhv3s" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="cl2ocw355000banlzh5ge62cv" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
       
       
       
@@ -295,7 +494,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="cl0tf755r000fbkl89761aec3" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="cl2ocw359000fanlzdemy8jgt" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
       
       
       
@@ -398,7 +597,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="cl0tf75660014bkl807ywa5wn" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="cl2ocw35t0014anlz85428ek2" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
       
       
       
@@ -469,7 +668,7 @@
 <hr>
 <p>從 <code>pattern_replace</code> filter 改成 <code>stop</code> filter 之後的結果一樣，但意義不太一樣。而且 ES 在搜尋時好像還可以對 stop word 做一些額外的處理，但這是後話，目前也還沒研究到那裡，有機會再來分享吧。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#x77;&#x61;&#x6e;&#103;&#64;&#102;&#x75;&#110;&#x6c;&#x69;&#x64;&#97;&#x79;&#x2e;&#x63;&#x6f;&#109;">&#107;&#101;&#x77;&#x61;&#x6e;&#103;&#64;&#102;&#x75;&#110;&#x6c;&#x69;&#x64;&#97;&#x79;&#x2e;&#x63;&#x6f;&#109;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#x65;&#x77;&#97;&#x6e;&#x67;&#64;&#102;&#x75;&#x6e;&#108;&#105;&#100;&#x61;&#121;&#46;&#99;&#111;&#109;">&#x6b;&#x65;&#x77;&#97;&#x6e;&#x67;&#64;&#102;&#x75;&#x6e;&#108;&#105;&#100;&#x61;&#121;&#46;&#99;&#111;&#109;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer-anatomy.html">Anatomy of an analyzer | Elasticsearch Guide [7.13] | Elastic</a></li>
@@ -481,7 +680,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="cl0tf7561000wbkl8eof20sb3" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="cl2ocw35m000wanlzavz2gayl" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
       
       
       
@@ -533,7 +732,7 @@
 <p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
 <p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#x65;&#x77;&#x61;&#x6e;&#103;&#64;&#x66;&#117;&#x6e;&#x6c;&#105;&#100;&#97;&#121;&#x2e;&#99;&#x6f;&#x6d;">&#x6b;&#x65;&#x77;&#x61;&#x6e;&#103;&#64;&#x66;&#117;&#x6e;&#x6c;&#105;&#100;&#97;&#121;&#x2e;&#99;&#x6f;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#x61;&#x6e;&#103;&#64;&#102;&#x75;&#x6e;&#x6c;&#x69;&#x64;&#97;&#121;&#46;&#x63;&#x6f;&#x6d;">&#107;&#101;&#119;&#x61;&#x6e;&#103;&#64;&#102;&#x75;&#x6e;&#x6c;&#x69;&#x64;&#97;&#121;&#46;&#x63;&#x6f;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
@@ -542,7 +741,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="cl0tf7560000tbkl8c299gvlg" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="cl2ocw35l000tanlzems0hni9" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
       
       
       
@@ -611,7 +810,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="cl0tf755y000rbkl81za0097v" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="cl2ocw35i000ranlzcmq68og5" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
@@ -700,7 +899,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cl0tf755x000pbkl89awaande" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cl2ocw35h000panlz4ezq3n8n" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
       
       
@@ -745,98 +944,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="cl0tf755h0004bkl8bwdfhgd2" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="cl2ocw3510004anlz4fwp1v0e" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-解決瞬時大流量的-GET-請求" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" class="article-date">
-  <time class="dt-published" datetime="2021-01-12T01:47:55.000Z" itemprop="datePublished">2021-01-12</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/">解決瞬時大流量的 GET 請求</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>最近 Funliday 常發一些精選旅遊回憶的 App 通知給使用者，在去年十一二月的時候發通知 Server 還能撐的了瞬時大流量的 request。</p>
-<p>但今年開始發這類通知，總共發了三次，三次都造成 Server 被打掛，而且重開 AP 還緩解不了，瞬間手足無措。大概都要等過了十分鐘左右，Server 才將這些 request 消化完。</p>
-<p>這裡就來簡單整理一下時間軸，順便分享一下 Funliday 是如何解決這個問題。</p>
-<hr>
-<ul>
-<li>1/6 1900：系統排程發送精選旅遊回憶的 App 通知</li>
-<li>1/6 1900+10s 開始：Server 收到極大量的 request</li>
-<li>1/6 1900+20s：Nginx 出現錯誤訊息 1024 worker not enough，並回傳 http status code 503</li>
-<li>1/6 1900+25s：PostgreSQL 出現錯誤訊息 could not fork new process for connection (cannot allocate memory)</li>
-<li>1/6 1900+38s：Node.js 收到 PostgreSQL 的 exception。There was an error establishing an SSL connection error</li>
-<li>1/6 1900+69s：PostgreSQL 出現錯誤訊息 database system is shut down</li>
-<li>1/6 1900+546s：PostgreSQL 出現錯誤訊息 the database system is starting up</li>
-</ul>
-<hr>
-<p>看了時間軸就覺得奇怪，先不論 10s 的時候發了極大量 request，造成 20s 在 Nginx 出現 worker not enough 的錯誤訊息。而是要關注 25s 時的 PostgreSQL 出現 could not fork new process for connection 的錯誤訊息。</p>
-<p>Funliday 用了同時可承載 n 個 connection 的資料庫，而且程式碼又有加上 connection pool，理論上根本不該出現這個錯誤訊息。但整個時間軸看下來感覺就是 PostgreSQL 的 capacity 問題，造成系統無法運作。</p>
-<p>因為就算將 Nginx 的 worker connection size 再加大 10 倍，只是造成 PostgreSQL 要接受的 request 也跟著被加大 10 倍，但 PostgreSQL 那裡因為 request 變多，原本在 69s 直接關機的時間點只會提早，而無法真正緩解這個狀況。</p>
-<p>基於以上狀況，小編就開始回去看自己的程式碼是不是哪裡寫錯了。會這樣想也是覺得 PostgreSQL 應該沒這麼弱，一下就被打掛，一定是自己程式碼的問題 Orz</p>
-<hr>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">  connectionString: process.env.DATABASE_URL,</span><br><span class="line">  ssl: <span class="literal">true</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>這邊來分享一下自己程式碼的寫法，上面是原始寫法，在每個 API 都 create 一個 db client instance 來處理該 API 層的所有 db request。這是蠻單純的做法，也是 day 1 開始的處理方式。但有個小問題，就是每個 API 層都要自己 create instance，不好管理，且浪費資源。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// inject-db.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">InjectDb</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">    connectionString: process.env.DATABASE_URL,</span><br><span class="line">    ssl: <span class="literal">true</span></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  req.pool = pool;</span><br><span class="line"></span><br><span class="line">  next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; InjectDb &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// poi-recommend.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> req.pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>後來因為想要做 graceful shutdown 的關係，所以調整了一下 db client instance 的建立方式，用 inject 將 instance 綁在 request 上面，如第二段程式碼。這樣只要在 middleware (inject-db.js) 建立 db client instance 就好，好管理，而且只要有 req 就可以取得 instance (poi-recommend.js)，非常方便。而這也是 1/6 時的程式碼，就從這裡開始研究吧。</p>
-<hr>
-<p>直接切入 node-postgres 的文件，認真讀了一下 pool 有下面兩種使用方式：</p>
-<ol>
-<li>pool.connect, pool.release：文件寫著 checkout, use, and return，光看描述就應該用這個沒錯。</li>
-<li>pool.query：適用於不需要 pool 的連線方式，文件上也清楚寫著內部實作是直接 call client.query，所以用了這個方式是完全跟 pool 扯不上邊。</li>
-</ol>
-<p>但偏偏小編從 day 1 用的就是第 2 種方式 Orz，雖然看起來應該是寫錯，但也是要修改後實測，才知道是不是真的可以解決問題。</p>
-<hr>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// inject-db.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">  connectionString: process.env.DATABASE_URL,</span><br><span class="line">  ssl: <span class="literal">true</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">InjectDb</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  req.pool = &#123;</span><br><span class="line">    query: <span class="keyword">async</span> (...args) =&gt; &#123;</span><br><span class="line">      <span class="keyword">const</span> client = <span class="keyword">await</span> pool.connect();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">let</span> results;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        results = <span class="keyword">await</span> client.query(...args);</span><br><span class="line">      &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        client.release();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> results;</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; InjectDb &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// poi-recommend.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> req.pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>如上面，這是修改後的程式碼。想了一下子，覺得目前在 API 層使用 req.pool.query 還不錯，不想用官方的建議做法：先 create client，然後 query 之後，再使用 release。</p>
-<p>如果照官方建議做法，API 層的程式碼會多一堆與商業邏輯無關的程式碼，也不好維護。所以在不想動到 API 層的程式碼，只能使用 monkey patch 的方式來達到這個需求。</p>
-<p>monkey patch 可以將原方法利用類似 override 的方式，將整個方法改掉，而不改變 caller 的程式碼，這也是 JavaScript, Ruby, Python 這類動態語言的特性之一，但真的要慎用，一不小心就會把原方法改成完全不同意義的方法了。</p>
-<p>所以原本應該要在 API 層實作 connect, query, release 一大堆程式碼，可以用 monkey patch 完美解決這一大堆程式碼。</p>
-<hr>
-<p>在 dev 壓測後至少 capacity 可以達到原本的 4 倍以上，隔天實際上 production 之後也確實如壓測般的數據，可以承載目前的流量。</p>
-<p>其實這篇分享的重點只有一點，文件看仔細才是最重要的事啦！如果沒把文件看仔細，然後開發經驗也不足的話，什麼 RCA、monkey patch 都幫不上忙啦！</p>
-<hr>
-<p>後記：有夠丟臉，其實完全用不到第三種的寫法，只要把第二種的 pool creation 放到最外層就好了，因為 pool.query 的內部實作已經有做 connect, query, release 了。</p>
-<p>感謝 FB 的 Mark T. W. Lin 及 Rui An Huang 的幫忙，實在是太搞笑了 Orz</p>
-<ul>
-<li>Pool 的文件: <a target="_blank" rel="noopener" href="https://node-postgres.com/features/pooling">https://node-postgres.com/features/pooling</a></li>
-<li>官方建議寫法: <a target="_blank" rel="noopener" href="https://node-postgres.com/guides/project-structure">https://node-postgres.com/guides/project-structure</a></li>
-<li>pool.query 的內部實作: <a target="_blank" rel="noopener" href="https://github.com/brianc/node-postgres/blob/master/packages/pg-pool/index.js#L332">https://github.com/brianc/node-postgres/blob/master/packages/pg-pool/index.js#L332</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="cl0tf756a001bbkl8bulc51ep" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
 
     </footer>
   </div>
@@ -874,7 +986,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 16px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 12px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 14px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 16px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 14px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 16px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12px;">pppr</a> <a href="/tags/prerender/" style="font-size: 16px;">prerender</a> <a href="/tags/redis/" style="font-size: 18px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 10px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 16.67px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 11.67px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 13.33px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 11.67px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 11.67px;">iframe</a> <a href="/tags/javascript/" style="font-size: 11.67px;">javascript</a> <a href="/tags/jieba/" style="font-size: 11.67px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 13.33px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 11.67px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 13.33px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 15px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 11.67px;">pppr</a> <a href="/tags/prerender/" style="font-size: 15px;">prerender</a> <a href="/tags/redis/" style="font-size: 18.33px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 11.67px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
     </div>
   </div>
 
@@ -883,7 +995,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -894,6 +1006,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/">用 Redis 來處理熱門景點的 autocomplete 功能</a>
+          </li>
         
           <li>
             <a href="/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/">Funliday 2022 誠徵前端工程師及實習生</a>
@@ -909,10 +1025,6 @@
         
           <li>
             <a href="/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/">用 Redis 來處理 City 的 autocomplete 功能 - 4</a>
-          </li>
-        
-          <li>
-            <a href="/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/">如何最佳化中日文的關鍵字搜尋 - 3</a>
           </li>
         
       </ul>

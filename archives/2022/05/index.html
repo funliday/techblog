@@ -15,22 +15,15 @@
 <!-- End Google Analytics -->
 
   
-  <title>如何用 PostgreSQL 的 advisory lock 實作推薦景點 | Funliday Tech Blog</title>
+  <title>Archives: 2022/5 | Funliday Tech Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-    <meta name="description" content="Funliday 最近做了大改版，其中一項功能就是把去年中因為 Google 要開始收費而暫時拿掉的「推薦景點」加回來，這個功能就是提供使用者指定區域附近評價較高的景點。 大家現在在使用景點瀏覽時，應該有時候會發現資料出來的速度不一致，慢的時候 (超過 5 秒，有時候會落在 10 秒以上) 代表可能有其他使用者正在查詢這個區域的「推薦景點」，思考邏輯就是在同一區域只要有一個使用者查詢過這個區域的「">
-<meta property="og:type" content="article">
-<meta property="og:title" content="如何用 PostgreSQL 的 advisory lock 實作推薦景點">
-<meta property="og:url" content="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/index.html">
+    <meta property="og:type" content="website">
+<meta property="og:title" content="Funliday Tech Blog">
+<meta property="og:url" content="https://techblog.funliday.com/archives/2022/05/index.html">
 <meta property="og:site_name" content="Funliday Tech Blog">
-<meta property="og:description" content="Funliday 最近做了大改版，其中一項功能就是把去年中因為 Google 要開始收費而暫時拿掉的「推薦景點」加回來，這個功能就是提供使用者指定區域附近評價較高的景點。 大家現在在使用景點瀏覽時，應該有時候會發現資料出來的速度不一致，慢的時候 (超過 5 秒，有時候會落在 10 秒以上) 代表可能有其他使用者正在查詢這個區域的「推薦景點」，思考邏輯就是在同一區域只要有一個使用者查詢過這個區域的「">
 <meta property="og:locale" content="zh_TW">
-<meta property="article:published_time" content="2019-02-20T01:37:53.000Z">
-<meta property="article:modified_time" content="2022-05-02T06:43:59.917Z">
 <meta property="article:author" content="Kewang">
-<meta property="article:tag" content="postgresql">
-<meta property="article:tag" content="lock">
-<meta property="article:tag" content="advisorylock">
 <meta name="twitter:card" content="summary">
   
   
@@ -89,74 +82,39 @@
 </header>
 
       <div class="outer">
-        <section id="main"><article id="post-如何用-PostgreSQL-的-advisory-lock-實作推薦景點" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" class="article-date">
-  <time class="dt-published" datetime="2019-02-20T01:37:53.000Z" itemprop="datePublished">2019-02-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="p-name article-title" itemprop="headline name">
-      如何用 PostgreSQL 的 advisory lock 實作推薦景點
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2022" class="archive-year">2022</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" class="archive-article-date">
+  <time class="dt-published" datetime="2022-05-01T14:40:49.000Z" itemprop="datePublished">5月 1</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/">用 Redis 來處理熱門景點的 autocomplete 功能</a>
     </h1>
   
 
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Funliday 最近做了大改版，其中一項功能就是把去年中因為 Google 要開始收費而暫時拿掉的「推薦景點」加回來，這個功能就是提供使用者指定區域附近評價較高的景點。</p>
-<p>大家現在在使用景點瀏覽時，應該有時候會發現資料出來的速度不一致，慢的時候 (超過 5 秒，有時候會落在 10 秒以上) 代表可能有其他使用者正在查詢這個區域的「推薦景點」，思考邏輯就是在同一區域只要有一個使用者查詢過這個區域的「推薦景點」，其他同區域的使用者就會因為已經查詢過這份資料 (如熱門景點：台北 101、東京晴空塔…等) 而受惠。</p>
-<p>在目前小編能力還無法將查詢效能大幅改善的狀況之下 Orz，若同一個區域有多個使用者同時查詢，每個查詢都要花費 10 秒的話，這樣子資料庫會浪費超多時間在不必要的查詢上面。</p>
-<p>像這類無法避免的使用者行為，但又要減少資料庫無謂的同樣操作時，小編突然想到之前 Triton Ho 在上課時提到的 exclusive lock。</p>
-<p>Advisory lock 是 PostgreSQL 的一種 lock 機制，可以在 application 層操作 exclusive lock (以下稱為 X lock) 或是 shared lock (以下稱為 S lock)。當使用 X lock 時，若非同一個 session 是無法將它 unlock，而 S lock 則是任何一個 session 都可以用 S lock 拿取 (acquire) 相同的 lock，但不可以用 X lock 拿取 S lock。</p>
-<p>依小編的這個使用情境，可以在查詢「推薦景點」之前先問一次 Redis 有沒有這個區域的資料，有的話直接從 Redis 取得，沒有的話就先到 PostgreSQL acquire 一次 X lock，如果可以成功的話，則表示還沒有其他 session 正在查詢這個區域的資料，所以可以在 acquire 之後直接查詢，接著再 unlock 這個 X lock；但如果無法 acquire 的話，則表示目前有其他 session 正在查，所以直接回 client 查詢中的訊息，可以等一下再查。</p>
-<p>所以小編使用 PostgreSQL 的 advisory lock 及 Redis 就可以達成不會有同一時間查詢相同耗時的查詢了。</p>
-<p>其實再好一點的作法可能是把這類耗時的查詢丟到 MQ 裡面，讓 response 先回 client，等到 MQ 做完這個 job 之後，再用 push notification 通知 client 到 Redis 取得已經計算完的資料。或是用 polling 固定 n 秒鐘查詢一次，這都要視你的基礎設施而定。小編現在是先用 polling 的方式簡單處理，雖然方法有點笨，但在沒多餘心力 (Elasticsearch 太博大精深了 Orz) 的狀態之下就先這樣做了。</p>
-<ul>
-<li>How do PostgreSQL advisory locks work: <a target="_blank" rel="noopener" href="https://vladmihalcea.com/how-do-postgresql-advisory-locks-work/">https://vladmihalcea.com/how-do-postgresql-advisory-locks-work/</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/" data-id="cl2ocw35n000xanlz7x084e5i" data-title="如何用 PostgreSQL 的 advisory lock 實作推薦景點" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
-
-    </footer>
+    </header>
   </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2019/02/28/POI-Bank-%E6%AD%A3%E5%BC%8F%E5%85%AC%E5%B8%83%EF%BC%81/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          POI Bank 正式公布！
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-3/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">用 Redis 來處理 City 的 autocomplete 功能 - 3</div>
-    </a>
-  
-</nav>
-
-  
 </article>
+  
+  
+    </div></section>
+  
 
 
 </section>

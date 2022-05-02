@@ -15,8 +15,37 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Wed, 16 Mar 2022 10:28:00 GMT</pubDate>
+    <pubDate>Mon, 02 May 2022 06:43:59 GMT</pubDate>
     <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>用 Redis 來處理熱門景點的 autocomplete 功能</title>
+      <link>https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/</link>
+      <guid>https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/</guid>
+      <pubDate>Sun, 01 May 2022 14:40:49 GMT</pubDate>
+      
+        
+        
+          
+          
+      <description>&lt;img</description>
+          
+        
+      
+      
+      
+      
+      
+      <category domain="https://techblog.funliday.com/tags/redis/">redis</category>
+      
+      <category domain="https://techblog.funliday.com/tags/autocomplete/">autocomplete</category>
+      
+      <category domain="https://techblog.funliday.com/tags/sorted-set/">sorted set</category>
+      
+      
+      <comments>https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/#disqus_thread</comments>
+      
+    </item>
     
     <item>
       <title>Funliday 2022 誠徵前端工程師及實習生</title>
@@ -284,38 +313,6 @@
       
       
       <comments>https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/#disqus_thread</comments>
-      
-    </item>
-    
-    <item>
-      <title>解決瞬時大流量的 GET 請求</title>
-      <link>https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/</link>
-      <guid>https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/</guid>
-      <pubDate>Tue, 12 Jan 2021 01:47:55 GMT</pubDate>
-      
-        
-        
-          
-          
-      <description>&lt;p&gt;最近 Funliday 常發一些精選旅遊回憶的 App 通知給使用者，在去年十一二月的時候發通知 Server 還能撐的了瞬時大流量的 request。&lt;/p&gt;
-&lt;p&gt;但今年開始發這類通知，總共發了三次，三次都造成 Server 被打掛，而且重開 AP</description>
-          
-        
-      
-      
-      
-      
-      
-      <category domain="https://techblog.funliday.com/tags/postgresql/">postgresql</category>
-      
-      <category domain="https://techblog.funliday.com/tags/nodejs/">nodejs</category>
-      
-      <category domain="https://techblog.funliday.com/tags/javascript/">javascript</category>
-      
-      <category domain="https://techblog.funliday.com/tags/expressjs/">expressjs</category>
-      
-      
-      <comments>https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/#disqus_thread</comments>
       
     </item>
     
