@@ -84,6 +84,109 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-在-COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2022-09-06T04:47:39.000Z" itemprop="datePublished">2022-09-06</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/">在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/e8398770b7084acabbfc6258adcd0be3" title="釋放你的儲存空間！移除那些已經沒使用的 index" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 560px; height: 314px;" data-ratio="1.78343949044586"></iframe>
+
+<p>今年小編ZHIH在 COSCUP 上分享的內容，「釋放你的儲存空間！移除那些已經沒使用的 index」，主要是針對這個主題所做的survey。</p>
+<p>內容主要分作兩部分 </p>
+<ol>
+<li>移除未使用的index </li>
+<li>針對已存在的index 進行空間上的優化</li>
+</ol>
+<p>會以大略講重點的方式提及內容</p>
+<hr>
+<h2 id="移除未使用的index"><a href="#移除未使用的index" class="headerlink" title="移除未使用的index"></a>移除未使用的index</h2><h3 id="為何要移除這些沒有在使用的index"><a href="#為何要移除這些沒有在使用的index" class="headerlink" title="為何要移除這些沒有在使用的index"></a>為何要移除這些沒有在使用的index</h3><ul>
+<li>預算考量，本身系統用不到下一個量級，卻因為這些不在使用的資料佔據空間，導致必須升級提高成本，備份時間也拉長</li>
+<li>當初為了特定的feature設置的index，隨時間推移，原本的feature不再使用，而當初的設置index也不再需要，而佔據空間 </li>
+<li>delete / update / insert 導致空間碎片化，造成效率降低</li>
+</ul>
+<h3 id="該怎麼確認這些沒有使用的index"><a href="#該怎麼確認這些沒有使用的index" class="headerlink" title="該怎麼確認這些沒有使用的index"></a>該怎麼確認這些沒有使用的index</h3><p>可以透過pg_stat_all_indexes 利用語句將 idx_scan &amp; idx_tup_read &amp; idx_tup_read 設為 0 (或是一個很小的數字)來找出候選人</p>
+<h3 id="刪除之前"><a href="#刪除之前" class="headerlink" title="刪除之前"></a>刪除之前</h3><ul>
+<li>看到idx_scan &amp; idx_tup_read &amp; idx_tup_read 的 0，並不代表真的沒使用到，背後的統計邏輯其實是可能會用到但不算記載統計表內， 舉例來說： optimizer 其實會讀取index 來做後續query planer的決策，但讀取的動作不會算到討既資料內</li>
+<li>目標的index 沒有使用到的原因，是否為語句上的失誤導致沒有正常使用？</li>
+<li>目標的index 在當前的情況下，刪除後是否有刪除的價值，比方說 佔據空間很大，卻又都沒在用</li>
+</ul>
+<h3 id="刪除之後"><a href="#刪除之後" class="headerlink" title="刪除之後"></a>刪除之後</h3><ul>
+<li>監控目標index 刪除前後對效能的影響，如果有嚴重影響要補回去</li>
+<li>養成定期檢查習慣，重置index統計表，方便確認每一個區間是否有一些待觀察名單，養成好習慣，日後好相伴～</li>
+</ul>
+<h2 id="針對已存在的index-進行空間上的優化"><a href="#針對已存在的index-進行空間上的優化" class="headerlink" title="針對已存在的index 進行空間上的優化"></a>針對已存在的index 進行空間上的優化</h2><h3 id="為何要做針對已存在的index-進行空間上的優化？"><a href="#為何要做針對已存在的index-進行空間上的優化？" class="headerlink" title="為何要做針對已存在的index 進行空間上的優化？"></a>為何要做針對已存在的index 進行空間上的優化？</h3><p>Pg有實作MVCC去保存舊有的資料，而這個實作雖然可以方便roll back，卻造成了update，並不是直接針對column修改成指定的value，而是會先標記就資料是過期的再去insert新的資料上去，照樣的特性下，會保留舊有的資料一段時間，進而造成空間上的佔據浪費空間，而這個狀況也增作bloat。</p>
+<h3 id="要怎麼解決bloat-的情形呢？"><a href="#要怎麼解決bloat-的情形呢？" class="headerlink" title="要怎麼解決bloat 的情形呢？"></a>要怎麼解決bloat 的情形呢？</h3><p>主要分兩種語法</p>
+<ul>
+<li>vacuum</li>
+</ul>
+<ol>
+<li>vacuum<br>可以把位置上的舊資料清掉，重複利用，但這個動作本身不會把空間還給OS</li>
+<li>vacuum full<br>可以把位置上的舊資料清掉，且會把空間還給OS，缺點是進行時整張table 會lock不能使用，有不間斷得使用需求是硬傷</li>
+</ol>
+<ul>
+<li>reindex </li>
+</ul>
+<ol>
+<li>reindex<br>建立新的index替換舊的index，但是會write lock，有write的需求時會有影響</li>
+<li>reindex concurrently<br>可以在不write lock &amp; read lock情況下持續運作，但會造成IO loading負擔及記憶體上升，完成動作的時間拉長，執行效率變差，但好處是service 可以保持運作不間斷</li>
+</ol>
+<hr>
+<p>綜合上述：</p>
+<ul>
+<li>reindex concurrently 適合production運作，好處是不會中斷，但可接受service 中斷選擇在離峰執行也是不錯的選擇</li>
+<li>至於development 則依照需求，找出適用的即可</li>
+</ul>
+<h3 id="避免在常變更的column設置index"><a href="#避免在常變更的column設置index" class="headerlink" title="避免在常變更的column設置index"></a>避免在常變更的column設置index</h3><p>提到實際行為前要先知道幾樣東西的特性</p>
+<ul>
+<li>實際存放資料的地方叫做page (像是memory) or block(像是disk)，每一個page or block都有大小的限制</li>
+<li>index 裡面會存放資料的實際位置 ex: (22,8) 代表第22個block第8個element，藉此快速拿到資料</li>
+</ul>
+<p>Pg在有建立index的情況下進行update，除了在index 會需要多一個entry來放新的資料（前面提及的mvcc有關），也會針對實際的資料新增一筆entry，新的index會指向新的資料位置，這一來一往，除了page 會增加資料外，index的部分也額外需要多一個entry造成資料的浪費，為了優化index那邊空間浪費的部分，而有了HOT update<br>而HOT update的特性有以下：</p>
+<ul>
+<li>使用同一個index entry 指向實際的資料位置不做更換，代表不會額外新增entry</li>
+<li>新舊資料要在同一張page or block </li>
+</ul>
+<p>這樣的特性下，確實減少了index那邊的空間，但要滿足觸發條件除了新舊資料要在同一個page or block，也需要更新的 column value 並不屬於任何一個 index，因為對應的column value改變，勢必要產生新的entry來做對應，就跟一般update一樣了，當然實務上還是會有需求對有設index 的column value 做變更，但依然盡可能地去做避免</p>
+<h3 id="避免錯誤的設置index"><a href="#避免錯誤的設置index" class="headerlink" title="避免錯誤的設置index"></a>避免錯誤的設置index</h3><p>假設一個情境有一張table 專門儲存訂單資料，多數的情況下訂單都是成立的不太需要特別查看，但總會有少數幾張訂單是會取消的，在某些情況下還是需要特別拿出來去確認，假設這個是否取消的column叫”isCanceled” 是boolean value，這個table有1000筆資料有5筆是取消的，為了加快query速度對”isCanceled”這個column做index，但實際上需求真正需要的只是要知道被取消的那5筆資料，但操作上去卻1000筆資料都做index，造成其餘的995筆都是沒意義的，那為何不針對那5筆作index就好？1000 vs 5空間誰大誰小這顯而易見了吧～，而針對這五筆作index動作就是partial index，因此也可以知道適當使用partial index 的重要性</p>
+<h2 id="結論"><a href="#結論" class="headerlink" title="結論"></a>結論</h2><ul>
+<li>透過定期監看 pg_stat_all_indexes，確認沒用到的 index ，並移除</li>
+<li>定時去處理 index bloat 問題，節省空間同時也能維護效率</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/" data-id="cl7rgee0f000iceshfnw7hcti" data-title="在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-用-Redis-來處理熱門景點的-autocomplete-功能" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" class="article-date">
@@ -269,7 +372,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" data-id="cl2ocw35u0016anlz7au56d76" data-title="用 Redis 來處理熱門景點的 autocomplete 功能" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" data-id="cl7rgee0v0018cesh6yzz97f1" data-title="用 Redis 來處理熱門景點的 autocomplete 功能" class="article-share-link">Share</a>
       
       
       
@@ -379,7 +482,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" data-id="cl2ocw34x0001anlz3bpk0zd8" data-title="Funliday 2022 誠徵前端工程師及實習生" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" data-id="cl7rgee030001cesh6j9jd4zn" data-title="Funliday 2022 誠徵前端工程師及實習生" class="article-share-link">Share</a>
       
       
       
@@ -440,7 +543,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="cl2ocw355000banlzh5ge62cv" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="cl7rgee0b000bceshc02ndhvi" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
       
       
       
@@ -494,7 +597,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="cl2ocw359000fanlzdemy8jgt" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="cl7rgee0e000fceshcm9r5bj6" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
       
       
       
@@ -597,7 +700,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="cl2ocw35t0014anlz85428ek2" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="cl7rgee0u0016cesha2o89p7h" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
       
       
       
@@ -668,7 +771,7 @@
 <hr>
 <p>從 <code>pattern_replace</code> filter 改成 <code>stop</code> filter 之後的結果一樣，但意義不太一樣。而且 ES 在搜尋時好像還可以對 stop word 做一些額外的處理，但這是後話，目前也還沒研究到那裡，有機會再來分享吧。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#x65;&#x77;&#97;&#x6e;&#x67;&#64;&#102;&#x75;&#x6e;&#108;&#105;&#100;&#x61;&#121;&#46;&#99;&#111;&#109;">&#x6b;&#x65;&#x77;&#97;&#x6e;&#x67;&#64;&#102;&#x75;&#x6e;&#108;&#105;&#100;&#x61;&#121;&#46;&#99;&#111;&#109;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#x77;&#97;&#x6e;&#103;&#x40;&#102;&#x75;&#x6e;&#x6c;&#105;&#100;&#x61;&#x79;&#x2e;&#99;&#111;&#x6d;">&#107;&#101;&#x77;&#97;&#x6e;&#103;&#x40;&#102;&#x75;&#x6e;&#x6c;&#105;&#100;&#x61;&#x79;&#x2e;&#99;&#111;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer-anatomy.html">Anatomy of an analyzer | Elasticsearch Guide [7.13] | Elastic</a></li>
@@ -680,7 +783,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="cl2ocw35m000wanlzavz2gayl" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="cl7rgee0m000xceshd9ug08cy" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
       
       
       
@@ -732,7 +835,7 @@
 <p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
 <p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#x61;&#x6e;&#103;&#64;&#102;&#x75;&#x6e;&#x6c;&#x69;&#x64;&#97;&#121;&#46;&#x63;&#x6f;&#x6d;">&#107;&#101;&#119;&#x61;&#x6e;&#103;&#64;&#102;&#x75;&#x6e;&#x6c;&#x69;&#x64;&#97;&#121;&#46;&#x63;&#x6f;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#101;&#119;&#x61;&#x6e;&#103;&#64;&#x66;&#117;&#x6e;&#108;&#105;&#100;&#97;&#x79;&#46;&#99;&#111;&#x6d;">&#x6b;&#101;&#119;&#x61;&#x6e;&#103;&#64;&#x66;&#117;&#x6e;&#108;&#105;&#100;&#97;&#x79;&#46;&#99;&#111;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
@@ -741,7 +844,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="cl2ocw35l000tanlzems0hni9" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="cl7rgee0m000wcesh3xmjddu9" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
       
       
       
@@ -810,7 +913,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="cl2ocw35i000ranlzcmq68og5" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="cl7rgee0l000tceshbmwi3yt2" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
@@ -899,56 +1002,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cl2ocw35h000panlz4ezq3n8n" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cl7rgee0k000rceshhgk5gi7l" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-Funliday-的-tech-blog-開張啦！" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" class="article-date">
-  <time class="dt-published" datetime="2021-02-08T06:02:41.000Z" itemprop="datePublished">2021-02-08</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/">Funliday 的 tech blog 開張啦！</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <img src="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/icon.png" class="">
-
-<p>假日想說來做一個 tech blog，將小編之前在<a target="_blank" rel="noopener" href="https://www.facebook.com/kewang.information">個人粉絲頁</a>關於 Funliday 的技術文都整理上去，這樣子也比較容易擴散，以後關於文章主文也只會在這個 blog 裡面撰寫。</p>
-<p>後來用了 GitHub pages+hexo 來處理，只要用 markdown 來寫文章就可以了，然後串接 Travis CI，push 到 GitHub 就直接發佈出去。而且客製化高，對於寫技術文來說，是個非常好的選擇！</p>
-<p>雖然現在功能只有 RSS 而已，但有空會再來把其他必備功能 (像是留言) 加上去，總之快來訂閱一下啊！</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="cl2ocw3510004anlz4fwp1v0e" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li></ul>
 
     </footer>
   </div>
@@ -995,7 +1053,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -1006,6 +1064,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/">在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」</a>
+          </li>
         
           <li>
             <a href="/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/">用 Redis 來處理熱門景點的 autocomplete 功能</a>
@@ -1021,10 +1083,6 @@
         
           <li>
             <a href="/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/">在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」</a>
-          </li>
-        
-          <li>
-            <a href="/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/">用 Redis 來處理 City 的 autocomplete 功能 - 4</a>
           </li>
         
       </ul>
