@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
   
-<meta name="generator" content="Hexo 5.3.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container">
@@ -84,6 +84,95 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-外地人分的清楚嘉義市跟嘉義縣嗎？" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" class="article-date">
+  <time class="dt-published" datetime="2021-02-21T07:40:35.000Z" itemprop="datePublished">2021-02-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/">外地人分的清楚嘉義市跟嘉義縣嗎？</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/chiayi.png" class="">
+
+<p>最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋<strong>嘉義市</strong>的時候也可以搜尋到<strong>嘉義縣</strong>的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇<strong>嘉義縣</strong>、<strong>太保市</strong>或<strong>嘉義市</strong>的時候，都可以找到「故宮南院」。</p>
+<p>對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。</p>
+<hr>
+<p>我們先來整理一下<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國的行政區劃</a>：</p>
+<ol>
+<li>省、直轄市</li>
+<li>縣、市</li>
+<li>鄉、鎮、縣轄市、直轄市山地原住民區、區</li>
+<li>村、里</li>
+<li>鄰</li>
+</ol>
+<h2 id="嘉義縣與嘉義市"><a href="#嘉義縣與嘉義市" class="headerlink" title="嘉義縣與嘉義市"></a>嘉義縣與嘉義市</h2><p><strong>嘉義市</strong>是「第二級市」，與<strong>嘉義縣</strong>無關。而<strong>嘉義縣</strong>是「第二級縣」，與<strong>嘉義市</strong>無關，兩者是平行位階。另外<strong>嘉義縣</strong>的縣治是<strong>太保市</strong>，為「第三級縣轄市」，但就算當地人也不見得搞的懂從屬關係。</p>
+<p>以行政區邊界來看，<strong>嘉義縣</strong>與<strong>嘉義市</strong>雖然是平行位階，但<strong>嘉義縣</strong>卻將<strong>嘉義市</strong>包圍起來 (<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E9%A3%9B%E5%9C%B0%E5%88%97%E8%A1%A8">嘉義市是嘉義縣的內飛地</a>)，就跟<strong>新北市</strong>及<strong>台北市</strong>雖然都是「一級直轄市」，但<strong>新北市</strong>卻將<strong>台北市</strong>包圍起來一樣的意思。</p>
+<h2 id="宜蘭縣與宜蘭市"><a href="#宜蘭縣與宜蘭市" class="headerlink" title="宜蘭縣與宜蘭市"></a>宜蘭縣與宜蘭市</h2><p><strong>宜蘭縣</strong>是「第二級縣」，而<strong>宜蘭市</strong>是「第三級縣轄市」，另外<strong>宜蘭縣</strong>的縣治正好為<strong>宜蘭市</strong>。</p>
+<p>以行政區邊界來看，因為<strong>宜蘭縣</strong>的縣治為<strong>宜蘭市</strong>，所以<strong>宜蘭縣</strong>將<strong>宜蘭市</strong>包圍起來也是很正常的事。</p>
+<h2 id="系統化需求"><a href="#系統化需求" class="headerlink" title="系統化需求"></a>系統化需求</h2><p>了解了行政區劃以及自己在 Google 上的搜尋經驗來講，使用者真的很難知道所搜尋的關鍵字，到底是屬於哪個行政區的位階，能打出「嘉義」或「宜蘭」就已經很厲害了。所以使用者在<strong>宜蘭市</strong>搜尋「羅東夜市」，或者是<strong>嘉義市</strong>搜尋「故宮南院」的時候，都應該要能搜的到正確的結果。</p>
+<p>回到開頭所講的，這裡就可以從這裡把原始需求系統化，其實就是需要一個 similar city 的功能。把 schema 整理出來之後，也就是下面這樣而已：</p>
+<table>
+<thead>
+<tr>
+<th>city</th>
+<th>similar</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>嘉義市</td>
+<td>嘉義縣</td>
+</tr>
+<tr>
+<td>宜蘭市</td>
+<td>宜蘭縣</td>
+</tr>
+</tbody></table>
+<p>所以在<strong>嘉義市</strong>搜尋的時候，必須要將<strong>嘉義縣</strong>也加進來，在 PostGIS 就是用 <code>ST_Union</code> 將兩個 bounding box 合併起來再丟去 Elasticsearch 用 <code>geo_polygon</code> 做搜尋。</p>
+<h2 id="關於生活圈"><a href="#關於生活圈" class="headerlink" title="關於生活圈"></a>關於生活圈</h2><p>上面的這個功能雖然已經上線了，但這世界真的沒有這麼簡單。其實 similar city 不只是單純的地名相似而已，應該也要包括相似的地理位置、生活習性、交通便利度…等。以下舉幾個例子大家應該就懂意思了。</p>
+<ul>
+<li>九份：應該算基隆、新北、台北哪個城市呢？</li>
+<li>淡水老街：應該算新北、台北哪個城市呢？</li>
+<li>長庚醫院：應該算林口、桃園、龜山、新莊、蘆竹、迴龍哪個城市呢？</li>
+</ul>
+<p>從上面這些例子就知道了，其實還有很多可以改善的空間，最重要的是要把生活圈也加到 similar city 才行，還有很大的進步空間啊！</p>
+<h2 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國行政區劃</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E9%A3%9B%E5%9C%B0%E5%88%97%E8%A1%A8">台灣飛地列表</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ptt.cc/bbs/Geography/M.1358421417.A.681.html">40生活圈vs36生活圈-北部、中部</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ptt.cc/bbs/Geography/M.1358421607.A.676.html">40生活圈vs36生活圈-南部、東部</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cl9c99rdg000t9vmbdlgnh96c" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Funliday-的-tech-blog-開張啦！" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" class="article-date">
@@ -115,7 +204,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="cl7rgee060004cesh7get42vg" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="cl9c99rcx00049vmb816g71sq" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
       
       
       
@@ -171,8 +260,10 @@
 <p>基於以上狀況，小編就開始回去看自己的程式碼是不是哪裡寫錯了。會這樣想也是覺得 PostgreSQL 應該沒這麼弱，一下就被打掛，一定是自己程式碼的問題 Orz</p>
 <hr>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">  connectionString: process.env.DATABASE_URL,</span><br><span class="line">  ssl: <span class="literal">true</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
 <p>這邊來分享一下自己程式碼的寫法，上面是原始寫法，在每個 API 都 create 一個 db client instance 來處理該 API 層的所有 db request。這是蠻單純的做法，也是 day 1 開始的處理方式。但有個小問題，就是每個 API 層都要自己 create instance，不好管理，且浪費資源。</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// inject-db.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">InjectDb</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">    connectionString: process.env.DATABASE_URL,</span><br><span class="line">    ssl: <span class="literal">true</span></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  req.pool = pool;</span><br><span class="line"></span><br><span class="line">  next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; InjectDb &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// poi-recommend.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> req.pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
 <p>後來因為想要做 graceful shutdown 的關係，所以調整了一下 db client instance 的建立方式，用 inject 將 instance 綁在 request 上面，如第二段程式碼。這樣只要在 middleware (inject-db.js) 建立 db client instance 就好，好管理，而且只要有 req 就可以取得 instance (poi-recommend.js)，非常方便。而這也是 1/6 時的程式碼，就從這裡開始研究吧。</p>
 <hr>
 <p>直接切入 node-postgres 的文件，認真讀了一下 pool 有下面兩種使用方式：</p>
@@ -183,6 +274,7 @@
 <p>但偏偏小編從 day 1 用的就是第 2 種方式 Orz，雖然看起來應該是寫錯，但也是要修改後實測，才知道是不是真的可以解決問題。</p>
 <hr>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// inject-db.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; Pool &#125; = <span class="built_in">require</span>(<span class="string">&quot;pg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> pool = <span class="keyword">new</span> Pool(&#123;</span><br><span class="line">  connectionString: process.env.DATABASE_URL,</span><br><span class="line">  ssl: <span class="literal">true</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">InjectDb</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  req.pool = &#123;</span><br><span class="line">    query: <span class="keyword">async</span> (...args) =&gt; &#123;</span><br><span class="line">      <span class="keyword">const</span> client = <span class="keyword">await</span> pool.connect();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">let</span> results;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        results = <span class="keyword">await</span> client.query(...args);</span><br><span class="line">      &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        client.release();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> results;</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; InjectDb &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// poi-recommend.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = express.Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&quot;/&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> results = (<span class="keyword">await</span> req.pool.query(QueryString.GET_ALL_DATA)).rows;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.success(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
 <p>如上面，這是修改後的程式碼。想了一下子，覺得目前在 API 層使用 req.pool.query 還不錯，不想用官方的建議做法：先 create client，然後 query 之後，再使用 release。</p>
 <p>如果照官方建議做法，API 層的程式碼會多一堆與商業邏輯無關的程式碼，也不好維護。所以在不想動到 API 層的程式碼，只能使用 monkey patch 的方式來達到這個需求。</p>
 <p>monkey patch 可以將原方法利用類似 override 的方式，將整個方法改掉，而不改變 caller 的程式碼，這也是 JavaScript, Ruby, Python 這類動態語言的特性之一，但真的要慎用，一不小心就會把原方法改成完全不同意義的方法了。</p>
@@ -202,7 +294,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="cl7rgee0x001gcesh1qu6ez5s" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="cl9c99rdw001i9vmb9lh4hm6a" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
       
       
       
@@ -257,7 +349,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="cl7rgee0j000pcesh7te6448q" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="cl9c99rdf000r9vmbbu9n8tkz" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
       
       
       
@@ -309,7 +401,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="cl7rgee0g000kceshhdgv8ef1" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="cl9c99rdb000k9vmbdif40rtp" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
       
       
       
@@ -353,7 +445,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="cl7rgee0i000oceshhhe00cb0" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="cl9c99rde000p9vmbcf5wenne" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
       
       
       
@@ -451,7 +543,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="cl7rgee0a000acesh812i7076" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="cl9c99rd2000a9vmbaqer7wit" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
       
       
       
@@ -501,7 +593,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="cl7rgee0d000dcesh4euafdy2" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="cl9c99rd6000d9vmb0dssacvj" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
       
       
       
@@ -556,7 +648,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" data-id="cl7rgee070005cesh6lmuaymo" data-title="Funliday 重磅推出新的 prerender 套件 pppr" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" data-id="cl9c99rcy00059vmb5mol4l4p" data-title="Funliday 重磅推出新的 prerender 套件 pppr" class="article-share-link">Share</a>
       
       
       
@@ -611,55 +703,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="cl7rgee0o0010cesh9r6w8ho4" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-純手工打造前端框架的-metadata-內容" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" class="article-date">
-  <time class="dt-published" datetime="2020-05-15T07:50:27.000Z" itemprop="datePublished">2020-05-15</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/">純手工打造前端框架的 metadata 內容</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>這一系列文總共有三篇，這是第一篇。</p>
-<p>對於用 Vue, Angular, React 這類前端框架來講，如果沒有對 search engine 或 social network 特別處理的話，出來的結果一定不會如你所想的一樣。</p>
-<p>因為 client side rendering (CSR) 的作用域通常是在 body 裡面的 container，所以對於 search engine 或 social network 來說，container 外的 head tag 只是一層皮，裡面的資料基本上沒有什麼用，因為解析出來的內容都一模一樣，沒有獨特性。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; fstat &#125; = <span class="built_in">require</span>(<span class="string">&quot;fs&quot;</span>);</span><br><span class="line"></span><br><span class="line">app.get(<span class="string">&quot;*&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> urlPath = req.url;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> loadMetaDataFunction = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// load data function</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> obj <span class="keyword">of</span> mathRoutes(Routes, req.path)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (obj.route.loadData) &#123;</span><br><span class="line">      loadMetaDataFunction = obj.route.loadData;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">const</span> keys = [];</span><br><span class="line">      <span class="keyword">const</span> regexp = pathToRegexp(obj.route.path, keys);</span><br><span class="line">      <span class="keyword">const</span> result = regexp.exec(req.path);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (result) &#123;</span><br><span class="line">        req.params = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">        keys.forEach(<span class="function">(<span class="params">key, index</span>) =&gt;</span> &#123;</span><br><span class="line">          req.params[key.name] = result[index + <span class="number">1</span>];</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> content;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!templateHtml) &#123;</span><br><span class="line">    templateHtml = <span class="keyword">await</span> fs.readFile(<span class="string">&quot;public/index.htm&quot;</span>, <span class="string">&quot;utf-8&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (loadMetaDataFunction) &#123;</span><br><span class="line">    <span class="keyword">const</span> metaDataResult = <span class="keyword">await</span> loadMetaDataFunction(</span><br><span class="line">      urlPath,</span><br><span class="line">      req.qpery,</span><br><span class="line">      req.params,</span><br><span class="line">      req.headers</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    content = buildMeta(templateHtml, metaDataResult.metaData);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    content = buildMeta(templateHtml, defaultMetaTagsString(urlPath));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  res.set(<span class="string">&quot;Cache-Control&quot;</span>, <span class="string">&quot;no-cache&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.send(content);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>為了要讓每一頁的 head tag 都不一樣，最簡單的方式就是在 web 這一層的 expressjs server 多加一個特殊的 route，去 catch 所有 web 的 get request，類似上面的程式碼。</p>
-<p>然後搭配 <code>path-to-regexp</code> 來設定特定 url pattern 做不同的 head tag 設計，比如 <code>kewang/trips/123</code> 的 title 叫做 “kewang 的台北二天一夜行程”，<code>kewang/journals/456</code> 的 title 叫做 “kewang 的宜蘭三日遊記”，當然這裡的例子舉的很簡單，正規的做法應該要搭配資料庫來取得對應的 title 跟 og data 才對，也就是附圖程式裡面的 <code>loadMetaDataFunction</code>。</p>
-<p>只要做好這類的處理，在 social network 上面應該就可以所向無敵了。但這世界可不只有 social network，更恐怖的谷歌大神還在後面等著你咧！</p>
-<p>下一篇就來講一下如何對付搜尋引擎吧。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" data-id="cl7rgee0x001dcesh9cs8flik" data-title="純手工打造前端框架的 metadata 內容" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="cl9c99rdm00119vmbgxhpefzp" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
       
       
       
@@ -677,7 +721,7 @@
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
+    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -701,7 +745,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 16.67px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 11.67px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 13.33px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 11.67px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 11.67px;">iframe</a> <a href="/tags/javascript/" style="font-size: 11.67px;">javascript</a> <a href="/tags/jieba/" style="font-size: 11.67px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 13.33px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 11.67px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 13.33px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 15px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 11.67px;">pppr</a> <a href="/tags/prerender/" style="font-size: 15px;">prerender</a> <a href="/tags/redis/" style="font-size: 18.33px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 11.67px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 17.14px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 11.43px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 12.86px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 15.71px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 11.43px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 11.43px;">iframe</a> <a href="/tags/javascript/" style="font-size: 11.43px;">javascript</a> <a href="/tags/jieba/" style="font-size: 11.43px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 12.86px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 11.43px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.86px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 15.71px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 11.43px;">pppr</a> <a href="/tags/prerender/" style="font-size: 14.29px;">prerender</a> <a href="/tags/redis/" style="font-size: 18.57px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 11.43px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
     </div>
   </div>
 
@@ -710,7 +754,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -721,6 +765,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/">在 MOPCON 2022 分享的「深入淺出 autocomplete」</a>
+          </li>
         
           <li>
             <a href="/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/">在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」</a>
@@ -736,10 +784,6 @@
         
           <li>
             <a href="/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/">到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」</a>
-          </li>
-        
-          <li>
-            <a href="/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/">在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」</a>
           </li>
         
       </ul>

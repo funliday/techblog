@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
   
-<meta name="generator" content="Hexo 5.3.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container">
@@ -83,6 +83,56 @@
 
       <div class="outer">
         <section id="main">
+  
+    <article id="post-在-MOPCON-2022-分享的「深入淺出-autocomplete」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/" class="article-date">
+  <time class="dt-published" datetime="2022-10-17T03:47:54.000Z" itemprop="datePublished">2022-10-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/">在 MOPCON 2022 分享的「深入淺出 autocomplete」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <iframe src="//www.slideshare.net/slideshow/embed_code/key/dqYXDq5Cdt0LOK" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/autocomplete-253634452" title="深入淺出 autocomplete" target="_blank">深入淺出 autocomplete</a> </strong> from <strong><a href="//www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
+
+<p>這次在 MOPCON 分享的「深入淺出 autocomplete」算是歷次的 autocomplete 相關內容以來，首次在研討會有完整的分享。</p>
+<p>就如同大綱所提的，這次分享了如何使用 Redis 實作 autocomplete 之外，也首次分享了 Funliday 如何改用 Elasticsearch 實作這項功能。Redis 的實作之前提過蠻多次的，今天就多講一些關於 Elasticsearch 的實作。</p>
+<hr>
+<p>其實 Elasticsearch 的 edge n-gram tokenizer 非常適合拿來做 autocomplete 的底層，除了不用自己寫 normalize 和 tokenize 外，也有限制長度的參數可以使用。</p>
+<p>再來就是跟 Redis 相比，Elasticsearch 天生有 inverted index 的資料結構，所以比較不會有資料量過度膨脹的問題。而且不像 Redis 的 sorted set，資料寫入時就已經決定好格式，Elasticsearch 的 document 更新非常方便。</p>
+<p>另外，雖然 Elasticsearch 的資料是儲存在硬碟裡，跟 Redis 原生就儲存在記憶體的速度一定有差異。但因為 Elasticsearch 實作 autocomplete 時，用的是 filter，所以只要這個關鍵字用的夠頻繁，其實最後 Elasticsearch 還是從 cache 裡面取資料出來，速度影響不會這麼大。</p>
+<hr>
+<p>現在 POIBank 的 search v2 (還沒上線 囧) 的一部分 autocomplete 就是用 Elasticsearch 來實作，先來下個 flag，希望明年過年前後可以把所有的 autocomplete 都從 Redis 移植到 Elasticsearch！</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/" data-id="cl9c99rdc000m9vmb1xet08wq" data-title="在 MOPCON 2022 分享的「深入淺出 autocomplete」" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
   
     <article id="post-在-COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
@@ -173,7 +223,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/" data-id="cl7rgee0f000iceshfnw7hcti" data-title="在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/" data-id="cl9c99rd9000i9vmbet1xbyc3" data-title="在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」" class="article-share-link">Share</a>
       
       
       
@@ -263,8 +313,10 @@
 
 <h2 id="寫入階段"><a href="#寫入階段" class="headerlink" title="寫入階段"></a>寫入階段</h2><p>以前在 <a href="/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/" title="用 Redis 來處理 City 的 autocomplete 功能 - 1">用 Redis 來處理 City 的 autocomplete 功能 - 1</a> 的時候有提過，在做 Autocomplete 的時候，我們可以利用 sorted set 來處理字母順序的問題，而 sorted set 在新增元素的時候，其實也可以加分數 (score) 上去，以上面為例，我們可以使用 <code>ZADD</code> 這樣處理。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">ZADD ac_poi:北 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口肉 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口肉圓 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北門 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北門綠 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北門綠豆 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北門綠豆沙 84 北門綠豆沙</span><br><span class="line">ZADD ac_poi:北 82 北門肉羹</span><br><span class="line">ZADD ac_poi:北門 82 北門肉羹</span><br><span class="line">ZADD ac_poi:北門肉 82 北門肉羹</span><br><span class="line">ZADD ac_poi:北門肉羹 82 北門肉羹</span><br></pre></td></tr></table></figure>
+
 <h3 id="兩種不同的寫入方式"><a href="#兩種不同的寫入方式" class="headerlink" title="兩種不同的寫入方式"></a>兩種不同的寫入方式</h3><p>大家應該有發現到這裡的儲存方式和以前不同，之前在儲存的時候是固定的 key 搭配不同的 member prefix，以及固定為 0 的 score。</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以前</span></span><br><span class="line">ZADD ac_city 0 台</span><br><span class="line">ZADD ac_city 0 台北</span><br><span class="line">ZADD ac_city 0 台北市</span><br><span class="line">ZADD ac_city 0 台北市*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 現在</span></span><br><span class="line">ZADD ac_poi:北 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口肉 79 北門口肉圓</span><br><span class="line">ZADD ac_poi:北門口肉圓 79 北門口肉圓</span><br></pre></td></tr></table></figure>
+
 <p>主要是為了可以讓 score 做排序，所以將 prefix 移往 key。雖然 key 看起來會有點奇怪，但這是一個還蠻巧妙的設計。</p>
 <h3 id="寫入後的結果"><a href="#寫入後的結果" class="headerlink" title="寫入後的結果"></a>寫入後的結果</h3><p>內容排不下，我們就以「北門口」為例，存到 redis 之後會變成下面這樣子。</p>
 <table>
@@ -356,6 +408,7 @@
 <p>所以 sorted set 在同一個 key 存入不同 member 之後，會以 score 由小排到大。到這邊為止，算是寫入階段完成。</p>
 <h2 id="查詢階段"><a href="#查詢階段" class="headerlink" title="查詢階段"></a>查詢階段</h2><p>在搜尋的時候就是仿照 City 那邊的做法，只不過會將原本需要用 <code>ZRANK</code> 將 cursor 定位至特定的 member 再往後用 <code>ZRANGE</code> 取得資料，現在只要直接用 <code>ZRANGE</code> 取得就可以了。雖然 City 也可以用 Lua 來達成 atomic operation，但為了讓系統單純一點，這裡就先不這樣處理了。</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以前</span></span><br><span class="line">pos = ZRANK ac_city 北門</span><br><span class="line">results = ZRANGE ac_city pos + 1 pos + 1 + 50</span><br><span class="line"></span><br><span class="line"><span class="comment"># 現在</span></span><br><span class="line">results = ZRANGE ac_poi:北門 +INF -INF BYSCORE REV LIMIT 0 50</span><br></pre></td></tr></table></figure>
+
 <p>取回來的 <code>results</code> 會變下面這樣子 score 由大排到小，然後再做一些處理，就可以輸出回前端了。</p>
 <ul>
 <li>84 北門綠豆沙</li>
@@ -372,7 +425,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" data-id="cl7rgee0v0018cesh6yzz97f1" data-title="用 Redis 來處理熱門景點的 autocomplete 功能" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" data-id="cl9c99rdr001b9vmb4c4ic4tj" data-title="用 Redis 來處理熱門景點的 autocomplete 功能" class="article-share-link">Share</a>
       
       
       
@@ -482,7 +535,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" data-id="cl7rgee030001cesh6j9jd4zn" data-title="Funliday 2022 誠徵前端工程師及實習生" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" data-id="cl9c99rct00019vmb5f6ebd1o" data-title="Funliday 2022 誠徵前端工程師及實習生" class="article-share-link">Share</a>
       
       
       
@@ -543,7 +596,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="cl7rgee0b000bceshc02ndhvi" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="cl9c99rd3000b9vmb2qf5do0l" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
       
       
       
@@ -597,7 +650,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="cl7rgee0e000fceshcm9r5bj6" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="cl9c99rd8000f9vmb8p7qh2v5" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
       
       
       
@@ -641,8 +694,10 @@
 <hr>
 <h2 id="2-加上別名-alias"><a href="#2-加上別名-alias" class="headerlink" title="2. 加上別名 (alias)"></a>2. 加上別名 (alias)</h2><p>直接舉例，很少人會打「我要去板橋區逛夜市」，應該都是打「我要去板橋逛夜市」吧？在 Funliday 裡面，資料庫存的都是官方名稱「板橋區」、「花蓮縣」，但使用者一般不會直接打全名，能讓使用者少輸入就儘量少輸入，所以有了 alias 這個機制的產生。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">板</span><br><span class="line">板橋</span><br><span class="line">板橋山*123457</span><br><span class="line">板橋區*123456</span><br></pre></td></tr></table></figure>
+
 <p>照原本的邏輯來看，如果輸入「板橋」的時候，candidate 會照順序顯示「板橋山」、「板橋區」，這也是之前提到的 Sorted Set。但加了 alias 的邏輯之後，則會照順序顯示為「板橋」、「板橋山」，儲存方式會變下面這樣：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">板</span><br><span class="line">板橋</span><br><span class="line">板橋*123456</span><br><span class="line">板橋山*123457</span><br><span class="line">板橋區*123456</span><br></pre></td></tr></table></figure>
+
 <p><strong>使用者對於板橋到底是「市」還是「區」根本不在意</strong>，所以需要有個 alias 可以顯示出來，邏輯會變這樣：</p>
 <pre class="mermaid">graph TD;
     A[開始] --> B[將內容使用 id 做分組];
@@ -665,27 +720,35 @@
 <p>相同情況也發生在 Paris，有美國、英國、加拿大，但大家應該對法國的比較熟悉。而這個功能的實作方式就是先定義好哪些是百大城市，然後直接放在 autocomplete 的 metadata 裡面，等到取出來之後要排序時，再依照百大城市來排，這樣可以確保百大城市會排在最上面。</p>
 <p>不過這樣的實作方式會有一個重大的問題，假設美國的 san francisco 在 Sorted Set 是排在其他國家的後面，像下面這樣子，然後取資料時只取 3 筆，那就無論如何都找不到美國的 san francisco。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">san francisco*123456</span><br><span class="line">san francisco*226857</span><br><span class="line">san francisco*423896</span><br><span class="line">san francisco*498437 &#x3D;&gt; 美國舊金山</span><br></pre></td></tr></table></figure>
+
 <p>雖然目前好像還沒遇到這個問題，不過也已經先想好了解法，就是在使用 ZADD 塞資料到 Redis 的時候，可以將這筆資料的分數提高讓資料可以排在前面，避免無法取得資料。</p>
 <hr>
 <h2 id="5-調整分隔符號"><a href="#5-調整分隔符號" class="headerlink" title="5. 調整分隔符號"></a>5. 調整分隔符號</h2><p>大家看到這幾篇內容應該都有發現，我們的 autocomplete 格式是 <code>name*id</code>，用 <code>*</code> 來做為分隔符號。但會遇到下面的這個問題：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">san francisco*123456</span><br><span class="line">san francisco*226857</span><br><span class="line">san francisco*423896</span><br><span class="line">san francisco*498437 &#x3D;&gt; 美國舊金山</span><br><span class="line">san*45632 &#x3D;&gt; 城市 A</span><br><span class="line">san*67545 &#x3D;&gt; 城市 B</span><br></pre></td></tr></table></figure>
+
 <p>如果只輸入 <code>san</code> 的話，理論上應該要先顯示最下面兩個 san city 才對，但因為我們用了 <code>*</code> 做分隔符號，而 <code>(空格)</code> (0x20) 在 ASCII code 裡面是排在 <code>*</code> (0x2A) 前面的，所以造成如果只取得四筆資料，這樣子是永遠拿不到理應在最前面的「城市 A」和「城市 B」了。</p>
 <p>所以我們只能改分隔符號，想了一下比 <code>(空格)</code> 還要更適合，而且字典排序又在它前面的，那應該就是 <code>(NULL)</code> (0x00) 了，改用 <code>(NULL)</code> 之後，儲存內容會變成下面這樣：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">san\x0045632 &#x3D;&gt; 城市 A</span><br><span class="line">san\x0067545 &#x3D;&gt; 城市 B</span><br><span class="line">san francisco\x00123456</span><br><span class="line">san francisco\x00226857</span><br><span class="line">san francisco\x00423896</span><br><span class="line">san francisco\x00498437 &#x3D;&gt; 美國舊金山</span><br></pre></td></tr></table></figure>
+
 <p>避免歐美語系常用多個單字加上空格結合成一個城市名，但無法找到單名城市名的狀況。而回到 Node.js 的部分，分隔符號既然改成了不可視字元，那我們的程式也要調整成下面這樣子才行：</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BEFORE</span></span><br><span class="line"><span class="keyword">const</span> beforeParts = name.split(<span class="string">&quot;*&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// AFTER</span></span><br><span class="line"><span class="keyword">const</span> afterParts = name.split(<span class="string">&quot;\u0000&quot;</span>);</span><br></pre></td></tr></table></figure>
+
 <hr>
 <h2 id="6-加上-parent-city"><a href="#6-加上-parent-city" class="headerlink" title="6. 加上 parent city"></a>6. 加上 parent city</h2><p>簡單舉個例，畫面上如果顯示成下面這樣，有人看的懂嗎？</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">中山區, 台灣</span><br><span class="line">中山區, 台灣</span><br></pre></td></tr></table></figure>
+
 <p>其實這也是一開始設計的時候沒處理好，這樣子真的不知道是「台北市的中山區」，還是「基隆市的中山區」，所以我們最近把 parent city 也加上去了，所以會變成這樣子顯示：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">中山區, 基隆市, 台灣</span><br><span class="line">中山區, 台北市, 台灣</span><br></pre></td></tr></table></figure>
+
 <p>其實我們的許多資料都是從 Open data 來的，但 parent city 這個就不一定全世界都有，所以我們由土法煉鋼的方式。原則上 candidate city 應該會被 parent city 的範圍包住，所以用 PostGIS 的 <code>ST_Intersects</code> 來計算全世界的 parent city，這個也跑了好幾天才跑完。</p>
 <p>但因為 Open data 的 boundary box 不一定很準確，相對的 parent city 也是有一些錯誤。這段就真的只能透過工人智慧來解決問題了。</p>
 <hr>
 <h2 id="7-移除連續重複名稱"><a href="#7-移除連續重複名稱" class="headerlink" title="7. 移除連續重複名稱"></a>7. 移除連續重複名稱</h2><p>這個主要是從新加坡的需求而來的，新加坡既是國家，也是城市。但顯示出來就會變成下面這樣：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">新加坡, 新加坡</span><br></pre></td></tr></table></figure>
+
 <p>這樣子真的有點奇怪，所以我們想了一個方式，目前既然有了 <code>city, parent, country</code> 這三層的結構，所以如果有任兩個連續一樣名稱的話，就只留一個就好，調整後會變下面這樣子：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">新加坡</span><br></pre></td></tr></table></figure>
+
 <p>這樣使用者應該也比較不容易困惑。</p>
 <hr>
 <p>洋洋灑灑列了 7 大調整，雖然有些功能還沒上 production，但這樣的修改應該可以讓使用者的體驗有感提升才對！</p>
@@ -700,7 +763,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="cl7rgee0u0016cesha2o89p7h" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="cl9c99rdq00189vmb3z2zfl4i" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
       
       
       
@@ -759,6 +822,7 @@
 
 <p>我們第一版採用的是 char filter 裡面的 <code>pattern_replace</code> filter，顧名思義這個 filter 就是把文字做替換，以我們的需求來說，就是要把標點符號跟 (空白) 轉成空字串，所以可以寫成下面這個樣子。</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> settings = &#123;</span><br><span class="line">  analysis: &#123;</span><br><span class="line">    char_filter: &#123;</span><br><span class="line">      jieba_char_filter: &#123;</span><br><span class="line">        type: <span class="string">&#x27;pattern_replace&#x27;</span>,</span><br><span class="line">        pattern: <span class="string">&#x27;[\\t\\s!$%^&amp;*()\\[\\]&#123;&#125;&lt;&gt;|:;\\\\\&#x27;&quot;,.?/˙‥‧‵、。﹐﹒﹔﹕！＃＄％＆＊，．：；？＠～•…·¡¿¦¨¯´·¸º‽‼⁏※†‡ˉ˘⁇⁈⁉ˆ⁊⸘]&#x27;</span>,</span><br><span class="line">        replacement: <span class="string">&#x27;&#x27;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    analyzer: &#123;</span><br><span class="line">      jieba_search_normalize: &#123;</span><br><span class="line">        char_filter: [<span class="string">&#x27;jieba_char_filter&#x27;</span>],</span><br><span class="line">        tokenizer: <span class="string">&#x27;jieba_search&#x27;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>但後來看了幾篇文章後，發現 <code>pattern_replace</code> filter 用在這裡會有點怪，它是拿來用在像 emoji 轉成文字、特定的正規表示式轉換…等，所以也要注意正規表示式沒寫好的話，其實很容易造成效能瓶頸，所以要慎用。</p>
 <h2 id="使用-stop-filter"><a href="#使用-stop-filter" class="headerlink" title="使用 stop filter"></a>使用 stop filter</h2><pre class="mermaid">graph TD;
     A["台北(空白)美食"] -->|tokenizer|B["台北、(空白)、美食"];
@@ -767,11 +831,12 @@
 <p>後來發現其實應該要用 token filter 來處理才對，把經過 tokenizer 處理完的 token stream 再做二次處理，而這裡就要用到 token filter 裡面一拖拉庫 filter 的其中一個 <code>stop</code> filter。</p>
 <p><code>stop</code> filter 的功能是將 token stream 裡面屬於 stop word (停用詞) 的 token 移除，對於英文來說，停用詞就是「this、that、the、a、on」這類單字；而中文來說其實就是「的、啊」這類字，當然也可以將標點符號及 (空白) 加上去。所以改用 <code>stop</code> filter 之後，就寫成下面這個樣子。</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> settings = &#123;</span><br><span class="line">  analysis: &#123;</span><br><span class="line">    analyzer: &#123;</span><br><span class="line">      jieba_search_normalize: &#123;</span><br><span class="line">        tokenizer: <span class="string">&#x27;jieba_search&#x27;</span>,</span><br><span class="line">        filter: [<span class="string">&#x27;jieba_stop&#x27;</span>, <span class="string">&#x27;whitespace_stop&#x27;</span>]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    filter: &#123;</span><br><span class="line">      jieba_stop: &#123;</span><br><span class="line">        type: <span class="string">&#x27;stop&#x27;</span>,</span><br><span class="line">        stopwords_path: <span class="string">&#x27;stopwords/stopwords.txt&#x27;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      whitespace_stop: &#123;</span><br><span class="line">        type: <span class="string">&#x27;stop&#x27;</span>,</span><br><span class="line">        stopwords: [<span class="string">&#x27; &#x27;</span>, <span class="string">&#x27;　&#x27;</span>] <span class="comment">// 前面是半型空白，後面是全型空白</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>大家可能發現到為什麼會有兩個 <code>stop</code> filter，我們在測試的時候，發現 (空白) 似乎沒辦法用檔案的型式 (<code>stopwords_path</code>) 讀取，所以直接寫死在 <code>stopwords</code> 陣列，這樣就可以了。</p>
 <hr>
 <p>從 <code>pattern_replace</code> filter 改成 <code>stop</code> filter 之後的結果一樣，但意義不太一樣。而且 ES 在搜尋時好像還可以對 stop word 做一些額外的處理，但這是後話，目前也還沒研究到那裡，有機會再來分享吧。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#x77;&#97;&#x6e;&#103;&#x40;&#102;&#x75;&#x6e;&#x6c;&#105;&#100;&#x61;&#x79;&#x2e;&#99;&#111;&#x6d;">&#107;&#101;&#x77;&#97;&#x6e;&#103;&#x40;&#102;&#x75;&#x6e;&#x6c;&#105;&#100;&#x61;&#x79;&#x2e;&#99;&#111;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#x65;&#x77;&#97;&#110;&#x67;&#64;&#102;&#117;&#110;&#108;&#x69;&#x64;&#x61;&#121;&#x2e;&#x63;&#x6f;&#x6d;">&#107;&#x65;&#x77;&#97;&#110;&#x67;&#64;&#102;&#117;&#110;&#108;&#x69;&#x64;&#x61;&#121;&#x2e;&#x63;&#x6f;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer-anatomy.html">Anatomy of an analyzer | Elasticsearch Guide [7.13] | Elastic</a></li>
@@ -783,7 +848,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="cl7rgee0m000xceshd9ug08cy" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="cl9c99rdk000z9vmb1wcwej9n" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
       
       
       
@@ -835,7 +900,7 @@
 <p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
 <p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#101;&#119;&#x61;&#x6e;&#103;&#64;&#x66;&#117;&#x6e;&#108;&#105;&#100;&#97;&#x79;&#46;&#99;&#111;&#x6d;">&#x6b;&#101;&#119;&#x61;&#x6e;&#103;&#64;&#x66;&#117;&#x6e;&#108;&#105;&#100;&#97;&#x79;&#46;&#99;&#111;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#97;&#110;&#x67;&#x40;&#102;&#x75;&#110;&#x6c;&#x69;&#x64;&#x61;&#x79;&#x2e;&#x63;&#111;&#109;">&#107;&#101;&#119;&#97;&#110;&#x67;&#x40;&#102;&#x75;&#110;&#x6c;&#x69;&#x64;&#x61;&#x79;&#x2e;&#x63;&#111;&#109;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
@@ -844,7 +909,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="cl7rgee0m000wcesh3xmjddu9" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="cl9c99rdi000x9vmbgeohblls" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
       
       
       
@@ -913,7 +978,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="cl7rgee0l000tceshbmwi3yt2" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="cl9c99rdh000w9vmb4h7e1qj1" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
@@ -927,100 +992,11 @@
 
 
   
-    <article id="post-外地人分的清楚嘉義市跟嘉義縣嗎？" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" class="article-date">
-  <time class="dt-published" datetime="2021-02-21T07:40:35.000Z" itemprop="datePublished">2021-02-21</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/">外地人分的清楚嘉義市跟嘉義縣嗎？</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <img src="/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/chiayi.png" class="">
-
-<p>最近在處理 POIBank 搜尋的時候，難搞的 @willie 又來了一個新需求，他想要在搜尋<strong>嘉義市</strong>的時候也可以搜尋到<strong>嘉義縣</strong>的景點，簡單舉個例子。「故宮南院」的地址為「嘉義縣太保市故宮大道888號」，所以他希望使用者在搜尋時，無論城市是選擇<strong>嘉義縣</strong>、<strong>太保市</strong>或<strong>嘉義市</strong>的時候，都可以找到「故宮南院」。</p>
-<p>對系統來說，沒有什麼需求是做不到的，但不能把需求客製化，所以想了一下這需求要如何開發才會比較有系統性。</p>
-<hr>
-<p>我們先來整理一下<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國的行政區劃</a>：</p>
-<ol>
-<li>省、直轄市</li>
-<li>縣、市</li>
-<li>鄉、鎮、縣轄市、直轄市山地原住民區、區</li>
-<li>村、里</li>
-<li>鄰</li>
-</ol>
-<h2 id="嘉義縣與嘉義市"><a href="#嘉義縣與嘉義市" class="headerlink" title="嘉義縣與嘉義市"></a>嘉義縣與嘉義市</h2><p><strong>嘉義市</strong>是「第二級市」，與<strong>嘉義縣</strong>無關。而<strong>嘉義縣</strong>是「第二級縣」，與<strong>嘉義市</strong>無關，兩者是平行位階。另外<strong>嘉義縣</strong>的縣治是<strong>太保市</strong>，為「第三級縣轄市」，但就算當地人也不見得搞的懂從屬關係。</p>
-<p>以行政區邊界來看，<strong>嘉義縣</strong>與<strong>嘉義市</strong>雖然是平行位階，但<strong>嘉義縣</strong>卻將<strong>嘉義市</strong>包圍起來 (<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E9%A3%9B%E5%9C%B0%E5%88%97%E8%A1%A8">嘉義市是嘉義縣的內飛地</a>)，就跟<strong>新北市</strong>及<strong>台北市</strong>雖然都是「一級直轄市」，但<strong>新北市</strong>卻將<strong>台北市</strong>包圍起來一樣的意思。</p>
-<h2 id="宜蘭縣與宜蘭市"><a href="#宜蘭縣與宜蘭市" class="headerlink" title="宜蘭縣與宜蘭市"></a>宜蘭縣與宜蘭市</h2><p><strong>宜蘭縣</strong>是「第二級縣」，而<strong>宜蘭市</strong>是「第三級縣轄市」，另外<strong>宜蘭縣</strong>的縣治正好為<strong>宜蘭市</strong>。</p>
-<p>以行政區邊界來看，因為<strong>宜蘭縣</strong>的縣治為<strong>宜蘭市</strong>，所以<strong>宜蘭縣</strong>將<strong>宜蘭市</strong>包圍起來也是很正常的事。</p>
-<h2 id="系統化需求"><a href="#系統化需求" class="headerlink" title="系統化需求"></a>系統化需求</h2><p>了解了行政區劃以及自己在 Google 上的搜尋經驗來講，使用者真的很難知道所搜尋的關鍵字，到底是屬於哪個行政區的位階，能打出「嘉義」或「宜蘭」就已經很厲害了。所以使用者在<strong>宜蘭市</strong>搜尋「羅東夜市」，或者是<strong>嘉義市</strong>搜尋「故宮南院」的時候，都應該要能搜的到正確的結果。</p>
-<p>回到開頭所講的，這裡就可以從這裡把原始需求系統化，其實就是需要一個 similar city 的功能。把 schema 整理出來之後，也就是下面這樣而已：</p>
-<table>
-<thead>
-<tr>
-<th>city</th>
-<th>similar</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>嘉義市</td>
-<td>嘉義縣</td>
-</tr>
-<tr>
-<td>宜蘭市</td>
-<td>宜蘭縣</td>
-</tr>
-</tbody></table>
-<p>所以在<strong>嘉義市</strong>搜尋的時候，必須要將<strong>嘉義縣</strong>也加進來，在 PostGIS 就是用 <code>ST_Union</code> 將兩個 bounding box 合併起來再丟去 Elasticsearch 用 <code>geo_polygon</code> 做搜尋。</p>
-<h2 id="關於生活圈"><a href="#關於生活圈" class="headerlink" title="關於生活圈"></a>關於生活圈</h2><p>上面的這個功能雖然已經上線了，但這世界真的沒有這麼簡單。其實 similar city 不只是單純的地名相似而已，應該也要包括相似的地理位置、生活習性、交通便利度…等。以下舉幾個例子大家應該就懂意思了。</p>
-<ul>
-<li>九份：應該算基隆、新北、台北哪個城市呢？</li>
-<li>淡水老街：應該算新北、台北哪個城市呢？</li>
-<li>長庚醫院：應該算林口、桃園、龜山、新莊、蘆竹、迴龍哪個城市呢？</li>
-</ul>
-<p>從上面這些例子就知道了，其實還有很多可以改善的空間，最重要的是要把生活圈也加到 similar city 才行，還有很大的進步空間啊！</p>
-<h2 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83">中華民國行政區劃</a></li>
-<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E9%A3%9B%E5%9C%B0%E5%88%97%E8%A1%A8">台灣飛地列表</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.ptt.cc/bbs/Geography/M.1358421417.A.681.html">40生活圈vs36生活圈-北部、中部</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.ptt.cc/bbs/Geography/M.1358421607.A.676.html">40生活圈vs36生活圈-南部、東部</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="cl7rgee0k000rceshhgk5gi7l" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -1044,7 +1020,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 16.67px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 11.67px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 13.33px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 11.67px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 11.67px;">iframe</a> <a href="/tags/javascript/" style="font-size: 11.67px;">javascript</a> <a href="/tags/jieba/" style="font-size: 11.67px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 13.33px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 11.67px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 13.33px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 15px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 11.67px;">pppr</a> <a href="/tags/prerender/" style="font-size: 15px;">prerender</a> <a href="/tags/redis/" style="font-size: 18.33px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 11.67px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/autocomplete/" style="font-size: 17.14px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 11.43px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 12.86px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 15.71px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 11.43px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 11.43px;">iframe</a> <a href="/tags/javascript/" style="font-size: 11.43px;">javascript</a> <a href="/tags/jieba/" style="font-size: 11.43px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 12.86px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 11.43px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 12.86px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 15.71px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 11.43px;">pppr</a> <a href="/tags/prerender/" style="font-size: 14.29px;">prerender</a> <a href="/tags/redis/" style="font-size: 18.57px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 11.43px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
     </div>
   </div>
 
@@ -1053,7 +1029,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -1064,6 +1040,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/">在 MOPCON 2022 分享的「深入淺出 autocomplete」</a>
+          </li>
         
           <li>
             <a href="/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/">在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」</a>
@@ -1079,10 +1059,6 @@
         
           <li>
             <a href="/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/">到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」</a>
-          </li>
-        
-          <li>
-            <a href="/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/">在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」</a>
           </li>
         
       </ul>
