@@ -108,7 +108,7 @@
       
         <iframe src="//www.slideshare.net/slideshow/embed_code/key/dqYXDq5Cdt0LOK" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/kewang/autocomplete-253634452" title="深入淺出 autocomplete" target="_blank">深入淺出 autocomplete</a> </strong> from <strong><a href="//www.slideshare.net/kewang" target="_blank">Mu Chun Wang</a></strong> </div>
 
-<p>這次在 MOPCON 分享的「深入淺出 autocomplete」算是歷次的 autocomplete 相關內容以來，首次在研討會有完整的分享。</p>
+<p>這次在 MOPCON 分享的「深入淺出 autocomplete」，算是歷次在 blog 分享的 <a href="https://techblog.funliday.com/tags/autocomplete/">autocomplete</a> 相關內容以來，首次在研討會有完整的分享。</p>
 <p>就如同大綱所提的，這次分享了如何使用 Redis 實作 autocomplete 之外，也首次分享了 Funliday 如何改用 Elasticsearch 實作這項功能。Redis 的實作之前提過蠻多次的，今天就多講一些關於 Elasticsearch 的實作。</p>
 <hr>
 <p>其實 Elasticsearch 的 edge n-gram tokenizer 非常適合拿來做 autocomplete 的底層，除了不用自己寫 normalize 和 tokenize 外，也有限制長度的參數可以使用。</p>
@@ -116,11 +116,19 @@
 <p>另外，雖然 Elasticsearch 的資料是儲存在硬碟裡，跟 Redis 原生就儲存在記憶體的速度一定有差異。但因為 Elasticsearch 實作 autocomplete 時，用的是 filter，所以只要這個關鍵字用的夠頻繁，其實最後 Elasticsearch 還是從 cache 裡面取資料出來，速度影響不會這麼大。</p>
 <hr>
 <p>現在 POIBank 的 search v2 (還沒上線 囧) 的一部分 autocomplete 就是用 Elasticsearch 來實作，先來下個 flag，希望明年過年前後可以把所有的 autocomplete 都從 Redis 移植到 Elasticsearch！</p>
+<hr>
+<ul>
+<li><a href="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/">用 Redis 來處理 City 的 autocomplete 功能 - 1</a></li>
+<li><a href="https://techblog.funliday.com/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/">用 Redis 來處理 City 的 autocomplete 功能 - 2</a></li>
+<li><a href="https://techblog.funliday.com/2019/01/10/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocoete-%E5%8A%9F%E8%83%BD-3/">用 Redis 來處理 City 的 autocomplete 功能 - 3</a></li>
+<li><a href="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/">用 Redis 來處理 City 的 autocomplete 功能 - 4</a></li>
+<li><a href="https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/">用 Redis 來處理熱門景點的 autocomplete 功能</a></li>
+</ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/" data-id="cl9c99rdc000m9vmb1xet08wq" data-title="在 MOPCON 2022 分享的「深入淺出 autocomplete」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/" data-id="cl9cbosb3000mcgue9f5q0ps3" data-title="在 MOPCON 2022 分享的「深入淺出 autocomplete」" class="article-share-link">Share</a>
       
       
       
@@ -223,7 +231,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/" data-id="cl9c99rd9000i9vmbet1xbyc3" data-title="在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/" data-id="cl9cbosb0000icgue58d0ekh1" data-title="在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」" class="article-share-link">Share</a>
       
       
       
@@ -425,7 +433,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" data-id="cl9c99rdr001b9vmb4c4ic4tj" data-title="用 Redis 來處理熱門景點的 autocomplete 功能" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/05/01/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD/" data-id="cl9cboscl004icguecd4ehwow" data-title="用 Redis 來處理熱門景點的 autocomplete 功能" class="article-share-link">Share</a>
       
       
       
@@ -535,7 +543,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" data-id="cl9c99rct00019vmb5f6ebd1o" data-title="Funliday 2022 誠徵前端工程師及實習生" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2022/03/16/Funliday-2022-%E8%AA%A0%E5%BE%B5%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB%E5%8F%8A%E5%AF%A6%E7%BF%92%E7%94%9F/" data-id="cl9cbosal0001cguecdic6hlu" data-title="Funliday 2022 誠徵前端工程師及實習生" class="article-share-link">Share</a>
       
       
       
@@ -596,7 +604,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="cl9c99rd3000b9vmb2qf5do0l" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/10/13/%E5%88%B0%E4%BF%9D%E5%93%A5%E7%9B%B4%E6%92%AD%E5%88%86%E4%BA%AB%E3%80%8C%E8%80%81%E5%8F%B8%E6%A9%9F%E5%B8%B6%E4%BD%A0%E4%B8%8A%E6%89%8B-PostgreSQL-%E9%97%9C%E8%81%AF%E5%BC%8F%E8%B3%87%E6%96%99%E5%BA%AB%E7%B3%BB%E7%B5%B1%E3%80%8D/" data-id="cl9cbosav000bcgueeev337qf" data-title="到保哥直播分享「老司機帶你上手 PostgreSQL 關聯式資料庫系統」" class="article-share-link">Share</a>
       
       
       
@@ -650,7 +658,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="cl9c99rd8000f9vmb8p7qh2v5" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/" data-id="cl9cbosaz000fcgue6bow10by" data-title="在 COSCUP 2021 分享的「使用 PostgreSQL 及 MongoDB 從零開始建置社群必備的按讚追蹤功能」" class="article-share-link">Share</a>
       
       
       
@@ -763,7 +771,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="cl9c99rdq00189vmb3z2zfl4i" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="cl9cbosck004hcgueg0ji79m9" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
       
       
       
@@ -836,7 +844,7 @@
 <hr>
 <p>從 <code>pattern_replace</code> filter 改成 <code>stop</code> filter 之後的結果一樣，但意義不太一樣。而且 ES 在搜尋時好像還可以對 stop word 做一些額外的處理，但這是後話，目前也還沒研究到那裡，有機會再來分享吧。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#x65;&#x77;&#97;&#110;&#x67;&#64;&#102;&#117;&#110;&#108;&#x69;&#x64;&#x61;&#121;&#x2e;&#x63;&#x6f;&#x6d;">&#107;&#x65;&#x77;&#97;&#110;&#x67;&#64;&#102;&#117;&#110;&#108;&#x69;&#x64;&#x61;&#121;&#x2e;&#x63;&#x6f;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#x65;&#119;&#x61;&#110;&#103;&#x40;&#102;&#117;&#x6e;&#108;&#x69;&#100;&#x61;&#121;&#46;&#99;&#111;&#109;">&#107;&#x65;&#119;&#x61;&#110;&#103;&#x40;&#102;&#117;&#x6e;&#108;&#x69;&#100;&#x61;&#121;&#46;&#99;&#111;&#109;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer-anatomy.html">Anatomy of an analyzer | Elasticsearch Guide [7.13] | Elastic</a></li>
@@ -848,7 +856,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="cl9c99rdk000z9vmb1wcwej9n" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="cl9cbosbb000zcgue6c2y2ozx" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
       
       
       
@@ -900,7 +908,7 @@
 <p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
 <p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#97;&#110;&#x67;&#x40;&#102;&#x75;&#110;&#x6c;&#x69;&#x64;&#x61;&#x79;&#x2e;&#x63;&#111;&#109;">&#107;&#101;&#119;&#97;&#110;&#x67;&#x40;&#102;&#x75;&#110;&#x6c;&#x69;&#x64;&#x61;&#x79;&#x2e;&#x63;&#111;&#109;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#101;&#119;&#97;&#110;&#103;&#x40;&#x66;&#117;&#110;&#x6c;&#x69;&#100;&#x61;&#121;&#46;&#x63;&#111;&#109;">&#x6b;&#101;&#119;&#97;&#110;&#103;&#x40;&#x66;&#117;&#110;&#x6c;&#x69;&#100;&#x61;&#121;&#46;&#x63;&#111;&#109;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
@@ -909,7 +917,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="cl9c99rdi000x9vmbgeohblls" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="cl9cbosba000xcgue2n358luk" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
       
       
       
@@ -978,7 +986,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="cl9c99rdh000w9vmb4h7e1qj1" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="cl9cbosba000wcgue4fge7u1h" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
