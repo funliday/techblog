@@ -109,7 +109,7 @@ tags:
 2. 依照語言分別放在不同索引：在搜尋時會有重複資料的問題
 3. 將一個大索引分割為子索引：會有 too many shard 或 too many index 的問題
 
-這篇其實是分享小編在重構 Elasticsearch 索引時的思路，**因為 Elasticsearch 有 index alias 功能，所以在設計索引時可以非常靈活**，雖然試了兩種方式都不能滿足現在的使用場景，但也希望能讓大家知道各自的適用場景。接下來就是解決熱門景點的問題了，大家期待下一篇文章吧！
+這篇其實是分享小編在重構 Elasticsearch 索引時的思路，**因為 Elasticsearch 有 index alias 功能，所以在設計索引時可以非常靈活**，雖然試了兩種方式都不能滿足現在的場景，但也希望能讓大家知道各自的適用場景。接下來就是解決熱門景點的問題了，大家期待下一篇文章吧！
 
 * [How many shards should I have in my Elasticsearch cluster?](https://www.elastic.co/blog/how-many-shards-should-i-have-in-my-elasticsearch-cluster)
 * [Multilingual search using language identification in Elasticsearch](https://www.elastic.co/blog/multilingual-search-using-language-identification-in-elasticsearch)
