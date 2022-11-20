@@ -95,7 +95,7 @@ tags:
 }
 ```
 
-這裡假設 n 為 20 萬，所以如果有 600 萬個 document 的話，只針對單一個索引 reopen，不會一次所有 600 萬個 document 都無法搜尋，只會有大約 3% 左右 (20/600) 的 document 會搜不到，所以絕對不會有 downtime。聽起來是個權衝之計，但開發完後測試遇到另個問題。
+這裡假設 n 為 20 萬，所以如果有 600 萬個 document 的話，只針對單一個索引 reopen，不會一次所有 600 萬個 document 都無法搜尋，只會有大約 3% 左右 (20/600) 的 document 會搜不到，所以絕對不會有 downtime。聽起來是個權衡之計，但開發完後測試遇到另個問題。
 
 現在突然忘了確切的問題是什麼，但小編記得當初好像是 index 太多個，所以產生 too many shard 還是 too many index 的 exception。這其實要對 Elasticsearch 底層 (lucene) 有較深的理解，才會知道如何設計比較好。
 
