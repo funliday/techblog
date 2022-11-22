@@ -4,7 +4,6 @@ date: 2022-11-07 18:44:26
 tags:
 - elasticsearch
 - poibank
-
 ---
 
 新版的 POI Bank 除了要解決多欄位搜尋的不便之外，還要解決底層 Elasticsearch index 不易維護的問題。
