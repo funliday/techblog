@@ -15,8 +15,94 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Mon, 17 Oct 2022 05:15:01 GMT</pubDate>
+    <pubDate>Mon, 05 Dec 2022 14:44:58 GMT</pubDate>
     <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>用 App search 的 curation 概念解決熱門景點的搜尋問題</title>
+      <link>https://techblog.funliday.com/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/</link>
+      <guid>https://techblog.funliday.com/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/</guid>
+      <pubDate>Tue, 22 Nov 2022 08:22:59 GMT</pubDate>
+      
+        
+        
+          
+          
+      <description>&lt;img</description>
+          
+        
+      
+      
+      
+      
+      
+      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
+      
+      <category domain="https://techblog.funliday.com/tags/poibank/">poibank</category>
+      
+      <category domain="https://techblog.funliday.com/tags/autocomplete/">autocomplete</category>
+      
+      <category domain="https://techblog.funliday.com/tags/appsearch/">appsearch</category>
+      
+      
+      <comments>https://techblog.funliday.com/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/#disqus_thread</comments>
+      
+    </item>
+    
+    <item>
+      <title>Elasticsearch 的多語言 index 到底該如何設計？</title>
+      <link>https://techblog.funliday.com/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/</link>
+      <guid>https://techblog.funliday.com/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/</guid>
+      <pubDate>Mon, 07 Nov 2022 10:44:26 GMT</pubDate>
+      
+        
+        
+          
+          
+      <description>&lt;p&gt;新版的 POI Bank 除了要解決多欄位搜尋的不便之外，還要解決底層 Elasticsearch index 不易維護的問題。&lt;/p&gt;
+&lt;h2 id=&quot;1-原本的索引設計&quot;&gt;&lt;a href=&quot;#1-原本的索引設計&quot; class=&quot;headerlink&quot;</description>
+          
+        
+      
+      
+      
+      
+      
+      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
+      
+      <category domain="https://techblog.funliday.com/tags/poibank/">poibank</category>
+      
+      
+      <comments>https://techblog.funliday.com/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/#disqus_thread</comments>
+      
+    </item>
+    
+    <item>
+      <title>新版的景點搜尋功能要上線了！</title>
+      <link>https://techblog.funliday.com/2022/11/06/%E6%96%B0%E7%89%88%E7%9A%84%E6%99%AF%E9%BB%9E%E6%90%9C%E5%B0%8B%E5%8A%9F%E8%83%BD%E8%A6%81%E4%B8%8A%E7%B7%9A%E4%BA%86%EF%BC%81/</link>
+      <guid>https://techblog.funliday.com/2022/11/06/%E6%96%B0%E7%89%88%E7%9A%84%E6%99%AF%E9%BB%9E%E6%90%9C%E5%B0%8B%E5%8A%9F%E8%83%BD%E8%A6%81%E4%B8%8A%E7%B7%9A%E4%BA%86%EF%BC%81/</guid>
+      <pubDate>Sun, 06 Nov 2022 10:18:40 GMT</pubDate>
+      
+        
+        
+          
+          
+      <description>&lt;img</description>
+          
+        
+      
+      
+      
+      
+      
+      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
+      
+      <category domain="https://techblog.funliday.com/tags/poibank/">poibank</category>
+      
+      
+      <comments>https://techblog.funliday.com/2022/11/06/%E6%96%B0%E7%89%88%E7%9A%84%E6%99%AF%E9%BB%9E%E6%90%9C%E5%B0%8B%E5%8A%9F%E8%83%BD%E8%A6%81%E4%B8%8A%E7%B7%9A%E4%BA%86%EF%BC%81/#disqus_thread</comments>
+      
+    </item>
     
     <item>
       <title>在 MOPCON 2022 分享的「深入淺出 autocomplete」</title>
@@ -36,11 +122,11 @@
       
       
       
+      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
+      
       <category domain="https://techblog.funliday.com/tags/poibank/">poibank</category>
       
       <category domain="https://techblog.funliday.com/tags/redis/">redis</category>
-      
-      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
       
       <category domain="https://techblog.funliday.com/tags/autocomplete/">autocomplete</category>
       
@@ -220,91 +306,6 @@
       
       
       <comments>https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/#disqus_thread</comments>
-      
-    </item>
-    
-    <item>
-      <title>如何最佳化中日文的關鍵字搜尋 - 3</title>
-      <link>https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/</link>
-      <guid>https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/</guid>
-      <pubDate>Sun, 13 Jun 2021 17:45:13 GMT</pubDate>
-      
-        
-        
-          
-          
-      <description>&lt;img</description>
-          
-        
-      
-      
-      
-      
-      
-      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
-      
-      <category domain="https://techblog.funliday.com/tags/jieba/">jieba</category>
-      
-      <category domain="https://techblog.funliday.com/tags/cjk/">cjk</category>
-      
-      
-      <comments>https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/#disqus_thread</comments>
-      
-    </item>
-    
-    <item>
-      <title>如何最佳化中日文的關鍵字搜尋 - 2</title>
-      <link>https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/</link>
-      <guid>https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/</guid>
-      <pubDate>Sat, 12 Jun 2021 06:29:11 GMT</pubDate>
-      
-        
-        
-          
-          
-      <description>&lt;img</description>
-          
-        
-      
-      
-      
-      
-      
-      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
-      
-      <category domain="https://techblog.funliday.com/tags/cjk/">cjk</category>
-      
-      
-      <comments>https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/#disqus_thread</comments>
-      
-    </item>
-    
-    <item>
-      <title>如何最佳化中日文的關鍵字搜尋 - 1</title>
-      <link>https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/</link>
-      <guid>https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/</guid>
-      <pubDate>Sat, 05 Jun 2021 10:27:22 GMT</pubDate>
-      
-        
-        
-          
-          
-      <description>&lt;img</description>
-          
-        
-      
-      
-      
-      
-      
-      <category domain="https://techblog.funliday.com/tags/elasticsearch/">elasticsearch</category>
-      
-      <category domain="https://techblog.funliday.com/tags/jieba/">jieba</category>
-      
-      <category domain="https://techblog.funliday.com/tags/cjk/">cjk</category>
-      
-      
-      <comments>https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/#disqus_thread</comments>
       
     </item>
     

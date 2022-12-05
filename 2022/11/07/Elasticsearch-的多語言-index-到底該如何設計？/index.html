@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSRWWXDXXF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-BSRWWXDXXF');
+</script>
+<!-- End Google Analytics -->
+
+  
+  <title>Elasticsearch 的多語言 index 到底該如何設計？ | Funliday Tech Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="新版的 POI Bank 除了要解決多欄位搜尋的不便之外，還要解決底層 Elasticsearch index 不易維護的問題。 1. 原本的索引設計其實原本設計的索引結構就如同下面這樣，同一個 document 存入所有的語言，再加上經緯度和觀看次數這些額外欄位。但實際在運作時，會發現因為 CJKV 這類語言要定期更新詞庫的關係，造成每次更新詞庫時都有 downtime 產生 (index 要先">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch 的多語言 index 到底該如何設計？">
+<meta property="og:url" content="https://techblog.funliday.com/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/index.html">
+<meta property="og:site_name" content="Funliday Tech Blog">
+<meta property="og:description" content="新版的 POI Bank 除了要解決多欄位搜尋的不便之外，還要解決底層 Elasticsearch index 不易維護的問題。 1. 原本的索引設計其實原本設計的索引結構就如同下面這樣，同一個 document 存入所有的語言，再加上經緯度和觀看次數這些額外欄位。但實際在運作時，會發現因為 CJKV 這類語言要定期更新詞庫的關係，造成每次更新詞庫時都有 downtime 產生 (index 要先">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2022-11-07T10:44:26.000Z">
+<meta property="article:modified_time" content="2022-12-05T14:44:58.898Z">
+<meta property="article:author" content="Kewang">
+<meta property="article:tag" content="elasticsearch">
+<meta property="article:tag" content="poibank">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="alternate" href="/atom.xml" title="Funliday Tech Blog" type="application/atom+xml"><link rel="alternate" href="/rss2.xml" title="Funliday Tech Blog" type="application/rss+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Funliday Tech Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://techblog.funliday.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Elasticsearch-的多語言-index-到底該如何設計？" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/" class="article-date">
+  <time class="dt-published" datetime="2022-11-07T10:44:26.000Z" itemprop="datePublished">2022-11-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Elasticsearch 的多語言 index 到底該如何設計？
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>新版的 POI Bank 除了要解決多欄位搜尋的不便之外，還要解決底層 Elasticsearch index 不易維護的問題。</p>
+<h2 id="1-原本的索引設計"><a href="#1-原本的索引設計" class="headerlink" title="1. 原本的索引設計"></a>1. 原本的索引設計</h2><p>其實原本設計的索引結構就如同下面這樣，同一個 document 存入所有的語言，再加上經緯度和觀看次數這些額外欄位。但實際在運作時，會發現因為 CJKV 這類語言要定期更新詞庫的關係，造成<strong>每次更新詞庫時都有 downtime 產生</strong> (index 要先 close 再 open)。雖然 Funliday 還不是一個非常大的服務，但有 downtime 對於使用者的體驗總是不好。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="comment">// idx-poi</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span>: <span class="number">999</span>,</span><br><span class="line">  <span class="attr">&quot;location&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;lon&quot;</span>: <span class="number">-0.1425249</span>,</span><br><span class="line">    <span class="attr">&quot;lat&quot;</span>: <span class="number">51.5007972</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;country_id&quot;</span>: <span class="number">12345678</span>,</span><br><span class="line">  <span class="attr">&quot;name_zh_cn&quot;</span>: <span class="string">&quot;白金汉宮&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_zh_tw&quot;</span>: <span class="string">&quot;白金漢宮&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_de&quot;</span>: <span class="string">&quot;Buckingham Palace&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_en&quot;</span>: <span class="string">&quot;Buckingham Palace&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;view_count&quot;</span>: <span class="number">98765</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-將語言從欄位層級提昇到索引層級"><a href="#2-將語言從欄位層級提昇到索引層級" class="headerlink" title="2. 將語言從欄位層級提昇到索引層級"></a>2. 將語言從欄位層級提昇到索引層級</h2><p>所以為了解決 downtime 的問題，將語言從欄位層級 (field level)，提昇到索引層級 (index level)，這樣子就算中文索引因為定期更新詞庫需要 reopen 造成 downtime，但其他語言的索引還是可以正常運作。</p>
+<p>於是改成了下面這種結構，但實際運作時卻發現了另一個問題 Orz</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="comment">// idx-poi-zh_tw</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span>: <span class="number">999</span>,</span><br><span class="line">  <span class="attr">&quot;location&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;lon&quot;</span>: <span class="number">-0.1425249</span>,</span><br><span class="line">    <span class="attr">&quot;lat&quot;</span>: <span class="number">51.5007972</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;country_id&quot;</span>: <span class="number">12345678</span>,</span><br><span class="line">  <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;白金漢宮&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;view_count&quot;</span>: <span class="number">98765</span></span><br><span class="line">&#125;</span><br><span class="line">&#123; <span class="comment">// idx-poi-zh_cn</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span>: <span class="number">999</span>,</span><br><span class="line">  <span class="attr">&quot;location&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;lon&quot;</span>: <span class="number">-0.1425249</span>,</span><br><span class="line">    <span class="attr">&quot;lat&quot;</span>: <span class="number">51.5007972</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;country_id&quot;</span>: <span class="number">12345678</span>,</span><br><span class="line">  <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;白金汉宮&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;view_count&quot;</span>: <span class="number">98765</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程式改寫完之後，一執行下去發現回傳的資料量怎麼這麼多重複的內容，只差在是從不同語言的索引回傳。後來仔細想了一下才發現，因為景點名稱本來在各語言就是不同名稱，像是「東京巨蛋」、「tokyo dome」，如果使用者關鍵字為「tokyo 巨蛋」，這樣子同個景點就會出現兩筆資料，這真的很困擾。</p>
+<p>所以為了要解決 downtime 改寫結構，就目前來說其實是個不太划算的方式，所以又換了另種方式，將索引分割成子索引。</p>
+<h2 id="3-將索引分割為子索引"><a href="#3-將索引分割為子索引" class="headerlink" title="3. 將索引分割為子索引"></a>3. 將索引分割為子索引</h2><p>其實分割成子索引主要也是避免 downtime 的發生，做法就是<strong>每 n 個 document 為一個索引，要 reopen 索引的時候，就只會影響到 n 個 document 而已</strong>。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="comment">// idx-poi-0001</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span>: <span class="number">999</span>,</span><br><span class="line">  <span class="attr">&quot;location&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;lon&quot;</span>: <span class="number">-0.1425249</span>,</span><br><span class="line">    <span class="attr">&quot;lat&quot;</span>: <span class="number">51.5007972</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;country_id&quot;</span>: <span class="number">12345678</span>,</span><br><span class="line">  <span class="attr">&quot;name_zh_cn&quot;</span>: <span class="string">&quot;白金汉宮&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_zh_tw&quot;</span>: <span class="string">&quot;白金漢宮&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_de&quot;</span>: <span class="string">&quot;Buckingham Palace&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_en&quot;</span>: <span class="string">&quot;Buckingham Palace&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;view_count&quot;</span>: <span class="number">98765</span></span><br><span class="line">&#125;</span><br><span class="line">&#123; <span class="comment">// idx-poi-0002</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span>: <span class="number">1000</span>,</span><br><span class="line">  <span class="attr">&quot;location&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;lon&quot;</span>: <span class="number">121.123456</span>,</span><br><span class="line">    <span class="attr">&quot;lat&quot;</span>: <span class="number">24.5007972</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;country_id&quot;</span>: <span class="number">87654321</span>,</span><br><span class="line">  <span class="attr">&quot;name_zh_cn&quot;</span>: <span class="string">&quot;國立台灣大學&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_zh_tw&quot;</span>: <span class="string">&quot;国立台湾大学&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_de&quot;</span>: <span class="string">&quot;Nationaluniversität Taiwan&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;name_en&quot;</span>: <span class="string">&quot;National Taiwan University&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;view_count&quot;</span>: <span class="number">5566</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>這裡假設 n 為 20 萬，所以如果有 600 萬個 document 的話，只針對單一個索引 reopen，不會一次所有 600 萬個 document 都無法搜尋，只會有大約 3% 左右 (20/600) 的 document 會搜不到，所以絕對不會有 downtime。聽起來是個權衡之計，但開發完後測試遇到另個問題。</p>
+<p>現在突然忘了確切的問題是什麼，但小編記得當初好像是 index 太多個，所以產生 too many shard 還是 too many index 的 exception。這其實要對 Elasticsearch 底層 (lucene) 有較深的理解，才會知道如何設計比較好。</p>
+<p>總之，後來又改回原本的單一個 index 了，不過之後勢必還是會分成子索引，讓 downtime 儘量減少。</p>
+<hr>
+<p>整理一下總共實作的方式及會遇到的問題：</p>
+<ol>
+<li>將所有資料放在同一個索引：在更新詞庫時會有 downtime 的問題</li>
+<li>依照語言分別放在不同索引：在搜尋時會有重複資料的問題</li>
+<li>將一個大索引分割為子索引：會有 too many shard 或 too many index 的問題</li>
+</ol>
+<p>這篇其實是分享小編在重構 Elasticsearch 索引時的思路，<strong>因為 Elasticsearch 有 index alias 功能，所以在設計索引時可以非常靈活</strong>，雖然試了兩種方式都不能滿足現在的場景，但也希望能讓大家知道各自的適用場景。接下來就是解決熱門景點的問題了，大家期待下一篇文章吧！</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/blog/how-many-shards-should-i-have-in-my-elasticsearch-cluster">How many shards should I have in my Elasticsearch cluster?</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/blog/multilingual-search-using-language-identification-in-elasticsearch">Multilingual search using language identification in Elasticsearch</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/" data-id="clbawmiaa0001c6phgmyj8p6n" data-title="Elasticsearch 的多語言 index 到底該如何設計？" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          用 App search 的 curation 概念解決熱門景點的搜尋問題
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/11/06/%E6%96%B0%E7%89%88%E7%9A%84%E6%99%AF%E9%BB%9E%E6%90%9C%E5%B0%8B%E5%8A%9F%E8%83%BD%E8%A6%81%E4%B8%8A%E7%B7%9A%E4%BA%86%EF%BC%81/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">新版的景點搜尋功能要上線了！</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/appsearch/" rel="tag">appsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bullmq/" rel="tag">bullmq</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cjk/" rel="tag">cjk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flyway/" rel="tag">flyway</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/messagequeue/" rel="tag">messagequeue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgis/" rel="tag">postgis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redlock/" rel="tag">redlock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BE%B5%E6%89%8D/" rel="tag">徵才</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/appsearch/" style="font-size: 10px;">appsearch</a> <a href="/tags/autocomplete/" style="font-size: 18px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 12px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 14px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 14px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 20px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12px;">pppr</a> <a href="/tags/prerender/" style="font-size: 16px;">prerender</a> <a href="/tags/redis/" style="font-size: 18px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 12px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/">用 App search 的 curation 概念解決熱門景點的搜尋問題</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/">Elasticsearch 的多語言 index 到底該如何設計？</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/06/%E6%96%B0%E7%89%88%E7%9A%84%E6%99%AF%E9%BB%9E%E6%90%9C%E5%B0%8B%E5%8A%9F%E8%83%BD%E8%A6%81%E4%B8%8A%E7%B7%9A%E4%BA%86%EF%BC%81/">新版的景點搜尋功能要上線了！</a>
+          </li>
+        
+          <li>
+            <a href="/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/">在 MOPCON 2022 分享的「深入淺出 autocomplete」</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/">在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 Kewang<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+
+
+  <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({theme: 'forest'});
+    }
+  </script>
+
+  </div>
+</body>
+</html>
