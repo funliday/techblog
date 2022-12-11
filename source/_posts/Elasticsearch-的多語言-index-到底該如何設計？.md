@@ -1,5 +1,6 @@
 ---
 title: Elasticsearch 的多語言 index 到底該如何設計？
+ogimage: ogimage.png
 date: 2022-11-07 18:44:26
 tags:
 - elasticsearch
