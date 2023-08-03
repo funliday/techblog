@@ -12,8 +12,6 @@ tags:
 因為 client side rendering (CSR) 的作用域通常是在 body 裡面的 container，所以對於 search engine 或 social network 來說，container 外的 head tag 只是一層皮，裡面的資料基本上沒有什麼用，因為解析出來的內容都一模一樣，沒有獨特性。
 
 ```js
-const { fstat } = require("fs");
-
 app.get("*", async (req, res) => {
   const urlPath = req.url;
 
