@@ -45,7 +45,7 @@ app.get("*", async (req, res) => {
   if (loadMetaDataFunction) {
     const metaDataResult = await loadMetaDataFunction(
       urlPath,
-      req.qpery,
+      req.query,
       req.params,
       req.headers
     );
