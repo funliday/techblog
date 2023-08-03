@@ -20,7 +20,7 @@ app.get("*", async (req, res) => {
   let loadMetaDataFunction = null;
 
   // load data function
-  for (const obj of mathRoutes(Routes, req.path)) {
+  for (const obj of matchRoutes(Routes, req.path)) {
     if (obj.route.loadData) {
       loadMetaDataFunction = obj.route.loadData;
 
