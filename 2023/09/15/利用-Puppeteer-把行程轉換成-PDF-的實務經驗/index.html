@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSRWWXDXXF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-BSRWWXDXXF');
+</script>
+<!-- End Google Analytics -->
+
+  
+  <title>利用 Puppeteer 把行程轉換成 PDF 的實務經驗 | Funliday Tech Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="Funliday 最近功能萬箭齊發，其中有幾項比較值得一提的，今天先來分享第一個，大家敲碗已久的行程轉成 PDF 功能是如何煉成的。   十年前在前公司有做過一個產險的案子，其中有一個功能是將保戶在 App 上填寫完的申請資料，轉成 PDF 存下來。雖然這個 PDF 功能不是我開發的，但記得當初的做法好像是用 iText 之類的 PDF library，把保戶填的資料塞進已經預先定義好的欄位裡面。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 Puppeteer 把行程轉換成 PDF 的實務經驗">
+<meta property="og:url" content="https://techblog.funliday.com/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/index.html">
+<meta property="og:site_name" content="Funliday Tech Blog">
+<meta property="og:description" content="Funliday 最近功能萬箭齊發，其中有幾項比較值得一提的，今天先來分享第一個，大家敲碗已久的行程轉成 PDF 功能是如何煉成的。   十年前在前公司有做過一個產險的案子，其中有一個功能是將保戶在 App 上填寫完的申請資料，轉成 PDF 存下來。雖然這個 PDF 功能不是我開發的，但記得當初的做法好像是用 iText 之類的 PDF library，把保戶填的資料塞進已經預先定義好的欄位裡面。">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://techblog.funliday.com/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/pdf.png">
+<meta property="article:published_time" content="2023-09-15T06:18:15.000Z">
+<meta property="article:modified_time" content="2023-09-15T07:50:08.069Z">
+<meta property="article:author" content="Kewang">
+<meta property="article:tag" content="puppeteer">
+<meta property="article:tag" content="pdf">
+<meta property="article:tag" content="playwright">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://techblog.funliday.com/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/pdf.png">
+  
+  
+    <link rel="alternate" href="/atom.xml" title="Funliday Tech Blog" type="application/atom+xml"><link rel="alternate" href="/rss2.xml" title="Funliday Tech Blog" type="application/rss+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Funliday Tech Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://techblog.funliday.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-利用-Puppeteer-把行程轉換成-PDF-的實務經驗" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/" class="article-date">
+  <time class="dt-published" datetime="2023-09-15T06:18:15.000Z" itemprop="datePublished">2023-09-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      利用 Puppeteer 把行程轉換成 PDF 的實務經驗
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Funliday 最近功能萬箭齊發，其中有幾項比較值得一提的，今天先來分享第一個，大家敲碗已久的行程轉成 PDF 功能是如何煉成的。</p>
+<img src="/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/pdf.png" class="">
+
+<p>十年前在前公司有做過一個產險的案子，其中有一個功能是將保戶在 App 上填寫完的申請資料，轉成 PDF 存下來。雖然這個 PDF 功能不是我開發的，但記得當初的做法好像是用 iText 之類的 PDF library，把保戶填的資料塞進已經預先定義好的欄位裡面。</p>
+<p>這種做法可以保證輸出時的版面不會受到影響，但對於一般的網頁開發者，門檻高了不少。因為網頁開發者還要了解從原始文件轉成 PDF 的過程，再加上預定義的欄位，完全沒使用網頁技術，總是覺得麻煩不少。</p>
+<p>畢竟網頁開發者比較熟悉的還是 HTML+CSS，直接用網頁產生 PDF 的話，應該會更受到網頁開發者歡迎。過了這麼多年，直接用網頁產生 PDF 的開發工具也愈來愈多，現在當紅的應該就是 Puppeteer 跟 Playwright 了！總算進入正題，來分享一下我們是如何用 Puppeteer 產生 PDF 的。</p>
+<h2 id="最簡單使用-Puppeteer-的方式"><a href="#最簡單使用-Puppeteer-的方式" class="headerlink" title="最簡單使用 Puppeteer 的方式"></a>最簡單使用 Puppeteer 的方式</h2><p>Puppeteer 是一套 Headless Chrome 的 toolkit，Funliday 目前還在運作的 pppr (prerender engine) 也是使用 Puppeteer 開發的喔！而 Puppeteer 本身就有一行程式碼可以將目前讀取到的網頁，直接輸出成 PDF 內容</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> page.goto(<span class="string">&quot;https://www.funliday.com&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> output = <span class="keyword">await</span> page.pdf(); <span class="comment">// 就是這行啦</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> res.set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/pdf&quot;</span>).send(output);</span><br></pre></td></tr></table></figure>
+
+<p>只要三行程式碼就可以完成工作的話，那今天寫這篇真的是灌水灌大了！</p>
+<h2 id="減少-Google-Chrome-記憶體使用量"><a href="#減少-Google-Chrome-記憶體使用量" class="headerlink" title="減少 Google Chrome 記憶體使用量"></a>減少 Google Chrome 記憶體使用量</h2><p>Google Chrome 是一個非常吃記憶體的怪獸，我們也不想開太大的機器來服侍 Google Chrome，於是 CDN 就變的非常重要了。</p>
+<p>使用者點擊 URL 的時候，會先去 CDN 問這個 URL 有沒有資料，有的話就不經過 origin server 直接回傳結果，減少 origin server 的負擔，沒有的話就先到 origin server 執行業務邏輯，再透過 CDN 回傳給使用者，以這裡的例子就是把網頁 render 成 PDF。</p>
+<p>所以如果同一個 URL 丟到 LINE 的大群組之類的，短時間就不用擔心一堆人點 URL 造成 Google Chrome 吃一大堆記憶體重複 render。</p>
+<p>但這裡有個額外的小細節，如果丟到社群媒體上，記得要多判斷 user agent，判斷如果是社群媒體的話，就顯示 PDF 的縮圖或想要呈現的內容，使用者體驗會更好。(但我們還沒做 XD)</p>
+<h2 id="加上驗證功能"><a href="#加上驗證功能" class="headerlink" title="加上驗證功能"></a>加上驗證功能</h2><p>另外這個功能目前限制只有自己跟同群組的夥伴可以使用，所以在 URL 上有做了一點小處理。就是 URL 有帶了 member id 以及 auth token，如果有人隨意更動這兩個值的話，會造成驗證失敗，算是非常基本的驗證，目前需求也用不到嚴謹的驗證。如果要再嚴謹驗證的話，目前的想法應該是會再加上 cookie 驗證。</p>
+<p>另外帶了 member id 之後，也可以拿來做統計，算是目前有限資源的最快開發方式。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">CheckAuthMember</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  req.memberId = extractMemberId(req);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!req.memberId) &#123;</span><br><span class="line">    <span class="keyword">return</span> res.redirect(<span class="number">302</span>, <span class="string">&quot;https://www.funliday.com&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> extractMemberId = <span class="function"><span class="params">req</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (!req.query.member_id || !req.query.token) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> decoded;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    decoded = jwt.verify(req.query.token, tokenSecret);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> req.query.member_id === decoded.member_id ? req.query.member_id : <span class="string">&quot;&quot;</span>;</span><br><span class="line">  &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">    <span class="built_in">console</span>.error(err);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="提升-render-速度"><a href="#提升-render-速度" class="headerlink" title="提升 render 速度"></a>提升 render 速度</h2><p>再來就是關於 render 的速度了，在 local 端做 render 一定是比 remote 端要快上許多，而且專案複雜度 local 也遠比 remote 要少許多，所以我們先使用 pug 在 local 做完 render 之後 (其實就是 server side render)，直接開啟 <code>file:///tmp/the-best-pdf.html</code>，減少 remote 的資料傳輸，當 render 結束後再輸出成 PDF。最後記得要把 local 的 HTML 檔刪除喔。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> content = pug.renderFile(<span class="string">&quot;pdf.pug&quot;</span>, &#123;</span><br><span class="line">  trip</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> tmpFilename = <span class="string">`/tmp/<span class="subst">$&#123;fileName&#125;</span>.html`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> fs.writeFile(tmpFilename, content);</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> page.goto(<span class="string">`file://<span class="subst">$&#123;tmpFilename&#125;</span>`</span>, &#123;</span><br><span class="line">  waitUntil: [<span class="string">&quot;load&quot;</span>, <span class="string">&quot;domcontentloaded&quot;</span>, <span class="string">&quot;networkidle2&quot;</span>]</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> output = <span class="keyword">await</span> page.pdf();</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> page.close();</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> fs.unlink(tmpFilename);</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> res.set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/pdf&quot;</span>).send(output);</span><br></pre></td></tr></table></figure>
+
+<h2 id="提升開發效率"><a href="#提升開發效率" class="headerlink" title="提升開發效率"></a>提升開發效率</h2><p>因為 PDF 的內容設計主要是依靠前端，所以可以與後端大致脫勾，這樣的開發方式大幅提升了我們 delivery 的效率，除非畫面上的元素有特殊要判斷的內容，否則前端設計完 PDF 之後就可以直接 push 到 master 上線使用。</p>
+<hr>
+<p>這個功能在沒宣傳的狀態之下，每日使用者人數比預期的多，算是蠻開心的。另外往日本遊玩的台灣使用者，PDF 也會放入各種 coupon，最重要的當然就是 <strong>BIC CAMERA</strong> 和<strong>唐吉訶德</strong>啦，幫大家省錢之餘，也希望大家多多愛用這個功能喔！</p>
+<ul>
+<li><a href="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/">Funliday 重磅推出新的 prerender 套件 pppr</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/" data-id="clmkaus80000dj3op1qlh8z80" data-title="利用 Puppeteer 把行程轉換成 PDF 的實務經驗" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pdf/" rel="tag">pdf</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/playwright/" rel="tag">playwright</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/puppeteer/" rel="tag">puppeteer</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">用 App search 的 curation 概念解決熱門景點的搜尋問題</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/appsearch/" rel="tag">appsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bullmq/" rel="tag">bullmq</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cjk/" rel="tag">cjk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flyway/" rel="tag">flyway</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/messagequeue/" rel="tag">messagequeue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdf/" rel="tag">pdf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/playwright/" rel="tag">playwright</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgis/" rel="tag">postgis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/puppeteer/" rel="tag">puppeteer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redlock/" rel="tag">redlock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BE%B5%E6%89%8D/" rel="tag">徵才</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/appsearch/" style="font-size: 10px;">appsearch</a> <a href="/tags/autocomplete/" style="font-size: 18px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 12px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 14px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 14px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/pdf/" style="font-size: 10px;">pdf</a> <a href="/tags/playwright/" style="font-size: 10px;">playwright</a> <a href="/tags/poibank/" style="font-size: 20px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12px;">pppr</a> <a href="/tags/prerender/" style="font-size: 16px;">prerender</a> <a href="/tags/puppeteer/" style="font-size: 10px;">puppeteer</a> <a href="/tags/redis/" style="font-size: 18px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 12px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/">利用 Puppeteer 把行程轉換成 PDF 的實務經驗</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/">用 App search 的 curation 概念解決熱門景點的搜尋問題</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/">Elasticsearch 的多語言 index 到底該如何設計？</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/06/%E6%96%B0%E7%89%88%E7%9A%84%E6%99%AF%E9%BB%9E%E6%90%9C%E5%B0%8B%E5%8A%9F%E8%83%BD%E8%A6%81%E4%B8%8A%E7%B7%9A%E4%BA%86%EF%BC%81/">新版的景點搜尋功能要上線了！</a>
+          </li>
+        
+          <li>
+            <a href="/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/">在 MOPCON 2022 分享的「深入淺出 autocomplete」</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 Kewang<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+
+
+  <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({theme: 'forest'});
+    }
+  </script>
+
+  </div>
+</body>
+</html>

@@ -84,6 +84,119 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-用-Redis-來處理-City-的-autocomplete-功能-4" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" class="article-date">
+  <time class="dt-published" datetime="2021-07-14T01:41:36.000Z" itemprop="datePublished">2021-07-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/">用 Redis 來處理 City 的 autocomplete 功能 - 4</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <img src="/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/screenshot.png" class="" width="400">
+
+<p>最近一直在改 autocomplete，對於使用者的體驗應該有蠻明顯的提升，所以繼兩年半後，來發第四篇關於 autocomplete 的文章。</p>
+<h2 id="1-照使用次數排序"><a href="#1-照使用次數排序" class="headerlink" title="1. 照使用次數排序"></a>1. 照使用次數排序</h2><p>在 autocomplete 功能上線的第一天，排序一直以來是用字典排序，但如果有熱度排行的話，這樣子對使用者會更友善。而 Funliday 本來就有記錄了每次使用者選取了哪個 city，這樣子我們就可以用這些資料來做 city 的熱度排序。</p>
+<p>所以當使用者輸入「中山區」的時候，就有可能會是「基隆中山區」跟「台北中山區」互爭第一，而不是一直固定的順序。當然，這個的實作方式前提就是要把熱度存進 metadata 裡面才行，這個部分可以參考第二篇的內容喔。</p>
+<hr>
+<h2 id="2-加上別名-alias"><a href="#2-加上別名-alias" class="headerlink" title="2. 加上別名 (alias)"></a>2. 加上別名 (alias)</h2><p>直接舉例，很少人會打「我要去板橋區逛夜市」，應該都是打「我要去板橋逛夜市」吧？在 Funliday 裡面，資料庫存的都是官方名稱「板橋區」、「花蓮縣」，但使用者一般不會直接打全名，能讓使用者少輸入就儘量少輸入，所以有了 alias 這個機制的產生。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">板</span><br><span class="line">板橋</span><br><span class="line">板橋山*123457</span><br><span class="line">板橋區*123456</span><br></pre></td></tr></table></figure>
+
+<p>照原本的邏輯來看，如果輸入「板橋」的時候，candidate 會照順序顯示「板橋山」、「板橋區」，這也是之前提到的 Sorted Set。但加了 alias 的邏輯之後，則會照順序顯示為「板橋」、「板橋山」，儲存方式會變下面這樣：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">板</span><br><span class="line">板橋</span><br><span class="line">板橋*123456</span><br><span class="line">板橋山*123457</span><br><span class="line">板橋區*123456</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用者對於板橋到底是「市」還是「區」根本不在意</strong>，所以需要有個 alias 可以顯示出來，邏輯會變這樣：</p>
+<pre class="mermaid">graph TD;
+    A[開始] --> B[將內容使用 id 做分組];
+    B --> C{判斷單一組裡面的個數有幾個};
+    C -->|只有一個| D[直接加入 candidate list];
+    C -->|超過一個| E{判斷裡面有沒有 alias};
+    E -->|有| F[把 alias 加入 candidate list];
+    E -->|沒有| G[走原本的邏輯];
+    D --> END;
+    F --> END;
+    G --> END;
+    END[結束];</pre>
+
+<p>改用上面這種邏輯之後，使用者只要輸入「板橋」就能避免像是「板橋山」會在「板橋區」前面顯示的問題，也可以讓使用者少輸入一些字就能在第一筆找到他要的內容了。</p>
+<hr>
+<h2 id="3-照目前國家排序"><a href="#3-照目前國家排序" class="headerlink" title="3. 照目前國家排序"></a>3. 照目前國家排序</h2><p>其實相同城市名的狀況在許多國家都有出現，以台日舉例，台灣有三重區、松山區、台東市，日本有三重縣、松山市、台東區。Funliday 是全球化的服務，如果照字典排序的話，至少會有一個國家的使用者不滿意，所以為了解決這個問題，我們拿了使用者的「所在國家」來做應用。</p>
+<p>若使用者同意使用定位功能的話，我們就會把所在國家的城市排序在前面，這是因為我們認為<strong>使用者對於自己國家的城市名比較有親切感</strong>，如果其他國家的相同城市名顯示在最上面，可能會有點困惑。</p>
+<hr>
+<h2 id="4-將全球百大城市往前排"><a href="#4-將全球百大城市往前排" class="headerlink" title="4. 將全球百大城市往前排"></a>4. 將全球百大城市往前排</h2><p>跟上一點的問題一樣，因為全世界同名的城市實在太多了，在實作時我們發現光是 San Francisco 就有超過十個 (包括義大利、巴拉圭、阿根廷、瓜地馬拉…)，而廣為人知是美國的舊金山，於是我們想到或許將全球百大城市排序往前排是一個不錯的方式。</p>
+<p>相同情況也發生在 Paris，有美國、英國、加拿大，但大家應該對法國的比較熟悉。而這個功能的實作方式就是先定義好哪些是百大城市，然後直接放在 autocomplete 的 metadata 裡面，等到取出來之後要排序時，再依照百大城市來排，這樣可以確保百大城市會排在最上面。</p>
+<p>不過這樣的實作方式會有一個重大的問題，假設美國的 san francisco 在 Sorted Set 是排在其他國家的後面，像下面這樣子，然後取資料時只取 3 筆，那就無論如何都找不到美國的 san francisco。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">san francisco*123456</span><br><span class="line">san francisco*226857</span><br><span class="line">san francisco*423896</span><br><span class="line">san francisco*498437 &#x3D;&gt; 美國舊金山</span><br></pre></td></tr></table></figure>
+
+<p>雖然目前好像還沒遇到這個問題，不過也已經先想好了解法，就是在使用 ZADD 塞資料到 Redis 的時候，可以將這筆資料的分數提高讓資料可以排在前面，避免無法取得資料。</p>
+<hr>
+<h2 id="5-調整分隔符號"><a href="#5-調整分隔符號" class="headerlink" title="5. 調整分隔符號"></a>5. 調整分隔符號</h2><p>大家看到這幾篇內容應該都有發現，我們的 autocomplete 格式是 <code>name*id</code>，用 <code>*</code> 來做為分隔符號。但會遇到下面的這個問題：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">san francisco*123456</span><br><span class="line">san francisco*226857</span><br><span class="line">san francisco*423896</span><br><span class="line">san francisco*498437 &#x3D;&gt; 美國舊金山</span><br><span class="line">san*45632 &#x3D;&gt; 城市 A</span><br><span class="line">san*67545 &#x3D;&gt; 城市 B</span><br></pre></td></tr></table></figure>
+
+<p>如果只輸入 <code>san</code> 的話，理論上應該要先顯示最下面兩個 san city 才對，但因為我們用了 <code>*</code> 做分隔符號，而 <code>(空格)</code> (0x20) 在 ASCII code 裡面是排在 <code>*</code> (0x2A) 前面的，所以造成如果只取得四筆資料，這樣子是永遠拿不到理應在最前面的「城市 A」和「城市 B」了。</p>
+<p>所以我們只能改分隔符號，想了一下比 <code>(空格)</code> 還要更適合，而且字典排序又在它前面的，那應該就是 <code>(NULL)</code> (0x00) 了，改用 <code>(NULL)</code> 之後，儲存內容會變成下面這樣：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">san\x0045632 &#x3D;&gt; 城市 A</span><br><span class="line">san\x0067545 &#x3D;&gt; 城市 B</span><br><span class="line">san francisco\x00123456</span><br><span class="line">san francisco\x00226857</span><br><span class="line">san francisco\x00423896</span><br><span class="line">san francisco\x00498437 &#x3D;&gt; 美國舊金山</span><br></pre></td></tr></table></figure>
+
+<p>避免歐美語系常用多個單字加上空格結合成一個城市名，但無法找到單名城市名的狀況。而回到 Node.js 的部分，分隔符號既然改成了不可視字元，那我們的程式也要調整成下面這樣子才行：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BEFORE</span></span><br><span class="line"><span class="keyword">const</span> beforeParts = name.split(<span class="string">&quot;*&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// AFTER</span></span><br><span class="line"><span class="keyword">const</span> afterParts = name.split(<span class="string">&quot;\u0000&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="6-加上-parent-city"><a href="#6-加上-parent-city" class="headerlink" title="6. 加上 parent city"></a>6. 加上 parent city</h2><p>簡單舉個例，畫面上如果顯示成下面這樣，有人看的懂嗎？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">中山區, 台灣</span><br><span class="line">中山區, 台灣</span><br></pre></td></tr></table></figure>
+
+<p>其實這也是一開始設計的時候沒處理好，這樣子真的不知道是「台北市的中山區」，還是「基隆市的中山區」，所以我們最近把 parent city 也加上去了，所以會變成這樣子顯示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">中山區, 基隆市, 台灣</span><br><span class="line">中山區, 台北市, 台灣</span><br></pre></td></tr></table></figure>
+
+<p>其實我們的許多資料都是從 Open data 來的，但 parent city 這個就不一定全世界都有，所以我們由土法煉鋼的方式。原則上 candidate city 應該會被 parent city 的範圍包住，所以用 PostGIS 的 <code>ST_Intersects</code> 來計算全世界的 parent city，這個也跑了好幾天才跑完。</p>
+<p>但因為 Open data 的 boundary box 不一定很準確，相對的 parent city 也是有一些錯誤。這段就真的只能透過工人智慧來解決問題了。</p>
+<hr>
+<h2 id="7-移除連續重複名稱"><a href="#7-移除連續重複名稱" class="headerlink" title="7. 移除連續重複名稱"></a>7. 移除連續重複名稱</h2><p>這個主要是從新加坡的需求而來的，新加坡既是國家，也是城市。但顯示出來就會變成下面這樣：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">新加坡, 新加坡</span><br></pre></td></tr></table></figure>
+
+<p>這樣子真的有點奇怪，所以我們想了一個方式，目前既然有了 <code>city, parent, country</code> 這三層的結構，所以如果有任兩個連續一樣名稱的話，就只留一個就好，調整後會變下面這樣子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">新加坡</span><br></pre></td></tr></table></figure>
+
+<p>這樣使用者應該也比較不容易困惑。</p>
+<hr>
+<p>洋洋灑灑列了 7 大調整，雖然有些功能還沒上 production，但這樣的修改應該可以讓使用者的體驗有感提升才對！</p>
+<hr>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="https://techblog.funliday.com/2019/01/08/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-1/">用 Redis 來處理 City 的 autocomplete 功能 - 1</a></li>
+<li><a href="https://techblog.funliday.com/2019/01/09/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-2/">用 Redis 來處理 City 的 autocomplete 功能 - 2</a></li>
+<li><a target="_blank" rel="noopener" href="https://redis.io/commands/ZADD">ZADD - Redis</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%9F%8E%E9%82%A6">城邦 - 維基百科，自由的百科全書</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/" data-id="clmkaus9w004cj3opdfdofkz3" data-title="用 Redis 來處理 City 的 autocomplete 功能 - 4" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-如何最佳化中日文的關鍵字搜尋-3" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" class="article-date">
@@ -143,7 +256,7 @@
 <hr>
 <p>從 <code>pattern_replace</code> filter 改成 <code>stop</code> filter 之後的結果一樣，但意義不太一樣。而且 ES 在搜尋時好像還可以對 stop word 做一些額外的處理，但這是後話，目前也還沒研究到那裡，有機會再來分享吧。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#x6b;&#101;&#119;&#97;&#x6e;&#x67;&#x40;&#x66;&#x75;&#110;&#108;&#x69;&#x64;&#97;&#x79;&#46;&#99;&#111;&#x6d;">&#x6b;&#101;&#119;&#97;&#x6e;&#x67;&#x40;&#x66;&#x75;&#110;&#108;&#x69;&#x64;&#97;&#x79;&#46;&#99;&#111;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#x77;&#97;&#x6e;&#103;&#64;&#x66;&#x75;&#x6e;&#108;&#x69;&#x64;&#x61;&#121;&#46;&#x63;&#111;&#x6d;">&#107;&#101;&#x77;&#97;&#x6e;&#103;&#64;&#x66;&#x75;&#x6e;&#108;&#x69;&#x64;&#x61;&#121;&#46;&#x63;&#111;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/">如何最佳化中日文的關鍵字搜尋 - 2</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer-anatomy.html">Anatomy of an analyzer | Elasticsearch Guide [7.13] | Elastic</a></li>
@@ -155,7 +268,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="clbjgshx40011bmkn8h1q3z82" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/13/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-3/" data-id="clmkaus9o003tj3op9r2y7dwp" data-title="如何最佳化中日文的關鍵字搜尋 - 3" class="article-share-link">Share</a>
       
       
       
@@ -207,7 +320,7 @@
 <p>把這個問題修正之後，其實改善了一大部分的中日文搜尋，因為之前一直都是用 <code>title_*</code> 來搜尋，雖然知道這樣寫效果應該蠻差的，但一直找不到方式 (也沒有花時間) 來驗證，而 highlight 這個功能幫了很多忙。其實 highlight 應該還可以做一些延伸應用，像是在每一個搜尋結果旁邊多一個按鈕，回報給 Funliday「您認為這個搜尋結果有符合你的期待嗎？」，有了使用者的回報，再加上最前面提到的參數，這樣應該能幫助搜尋做的更好。</p>
 <p>這篇大概差不多結束啦，下一篇來分享搜尋「台北 美食」遇到的問題。</p>
 <hr>
-<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#101;&#119;&#97;&#110;&#103;&#x40;&#x66;&#117;&#110;&#108;&#x69;&#100;&#97;&#x79;&#46;&#99;&#x6f;&#x6d;">&#107;&#101;&#119;&#97;&#110;&#103;&#x40;&#x66;&#117;&#110;&#108;&#x69;&#100;&#97;&#x79;&#46;&#99;&#x6f;&#x6d;</a> 喔！</p>
+<p>工商服務，我們在徵後端工程師啦！如果你對於開發景點資料庫 (PostgreSQL)、關鍵字搜尋 (Elasticsearch)、機器學習有興趣的話，歡迎 FB 私訊粉絲頁或直接寄信到 <a href="mailto:&#107;&#x65;&#119;&#97;&#x6e;&#x67;&#64;&#102;&#117;&#x6e;&#x6c;&#105;&#x64;&#x61;&#121;&#x2e;&#99;&#x6f;&#x6d;">&#107;&#x65;&#119;&#97;&#x6e;&#x67;&#64;&#102;&#117;&#x6e;&#x6c;&#105;&#x64;&#x61;&#121;&#x2e;&#99;&#x6f;&#x6d;</a> 喔！</p>
 <ul>
 <li><a href="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/">如何最佳化中日文的關鍵字搜尋 - 1</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cakeresume.com/companies/funliday/jobs/backend-engineer-725d1e">後端工程師 Backend Engineer - Funliday Inc. 趣放假股份有限公司 職缺｜CakeResume 找工作</a></li>
@@ -216,7 +329,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="clbjgshx3000zbmknbrccd3sl" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/12/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-2/" data-id="clmkaus9n003sj3opa57o92e0" data-title="如何最佳化中日文的關鍵字搜尋 - 2" class="article-share-link">Share</a>
       
       
       
@@ -285,7 +398,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="clbjgshx2000xbmkn16ha0nqj" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/06/05/%E5%A6%82%E4%BD%95%E6%9C%80%E4%BD%B3%E5%8C%96%E4%B8%AD%E6%97%A5%E6%96%87%E7%9A%84%E9%97%9C%E9%8D%B5%E5%AD%97%E6%90%9C%E5%B0%8B-1/" data-id="clmkaus8e000zj3ope8qph9sv" data-title="如何最佳化中日文的關鍵字搜尋 - 1" class="article-share-link">Share</a>
       
       
       
@@ -374,7 +487,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="clbjgshx2000wbmknhtxm5nq9" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/21/%E5%A4%96%E5%9C%B0%E4%BA%BA%E5%88%86%E7%9A%84%E6%B8%85%E6%A5%9A%E5%98%89%E7%BE%A9%E5%B8%82%E8%B7%9F%E5%98%89%E7%BE%A9%E7%B8%A3%E5%97%8E%EF%BC%9F/" data-id="clmkaus8d000xj3opceol9g2i" data-title="外地人分的清楚嘉義市跟嘉義縣嗎？" class="article-share-link">Share</a>
       
       
       
@@ -419,7 +532,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="clbjgshwl0005bmkn6vaihkb4" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/02/08/Funliday-%E7%9A%84-tech-blog-%E9%96%8B%E5%BC%B5%E5%95%A6%EF%BC%81/" data-id="clmkaus7u0005j3opcrcw5mtn" data-title="Funliday 的 tech blog 開張啦！" class="article-share-link">Share</a>
       
       
       
@@ -509,7 +622,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="clbjgshxh001pbmknb7yw2vh6" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2021/01/12/%E8%A7%A3%E6%B1%BA%E7%9E%AC%E6%99%82%E5%A4%A7%E6%B5%81%E9%87%8F%E7%9A%84-GET-%E8%AB%8B%E6%B1%82/" data-id="clmkausa1004mj3oph2f6himy" data-title="解決瞬時大流量的 GET 請求" class="article-share-link">Share</a>
       
       
       
@@ -564,7 +677,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="clbjgshx0000ubmkn2psc38w9" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/11/30/%E5%9C%A8-PostgreSQL-TW-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A4%A7%E8%A7%A3%E5%AF%86%EF%BC%81%E7%94%A8-PostgreSQL-%E6%8F%90%E5%8D%87-350-%E5%80%8D%E7%9A%84-Funliday-%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E8%A8%88%E7%AE%97%E9%80%9F%E5%BA%A6%E3%80%8D/" data-id="clmkaus8c000wj3ophag8a2jy" data-title="在 PostgreSQL.TW 分享的「大解密！用 PostgreSQL 提升 350 倍的 Funliday 推薦景點計算速度」" class="article-share-link">Share</a>
       
       
       
@@ -616,7 +729,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="clbjgshwv000lbmkn8c578kkt" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/26/%E5%9C%A8-MOPCON-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-iframe-%E8%A3%BD%E4%BD%9C%E4%B8%80%E5%80%8B%E6%98%93%E6%96%BC%E6%9B%B4%E6%96%B0%E5%8F%8A%E6%9B%B4%E5%AE%89%E5%85%A8%E7%9A%84%E5%89%8D%E7%AB%AF%E5%A5%97%E4%BB%B6%E3%80%8D/" data-id="clmkaus87000oj3op1n1f44ha" data-title="在 MOPCON 2020 分享的「如何使用 iframe 製作一個易於更新及更安全的前端套件」" class="article-share-link">Share</a>
       
       
       
@@ -660,109 +773,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="clbjgshwz000sbmkn04jl0jl3" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="clmkaus8a000uj3ophz9v9s1x" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-再度最佳化推薦景點的回應時間" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" class="article-date">
-  <time class="dt-published" datetime="2020-09-28T02:01:10.000Z" itemprop="datePublished">2020-09-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/">再度最佳化推薦景點的回應時間</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <img src="/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/recommend.png" class="">
-
-<p>現在大家使用 Funliday 在「景點瀏覽」輸入城市，或者是移動地圖出現的推薦景點，應該都是即時出現，也是最近花了一些時間的成果。下面先筆記一下推薦景點開發的歷程，之後如果有機會應該可以到 PostgreSQL.TW 分享一下完整的內容。</p>
-<p>簡單來說，就是一個從 70000ms 的 response time，提升到 200ms 的 response time 過程。</p>
-<hr>
-<h2 id="2019-02-推薦景點第一版"><a href="#2019-02-推薦景點第一版" class="headerlink" title="2019/02 推薦景點第一版"></a>2019/02 推薦景點第一版</h2><p><a href="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/">如何用 PostgreSQL 的 advisory lock 實作推薦景點</a></p>
-<h2 id="2019-09-late-加上使用者查詢的-poi-history-到推薦景點"><a href="#2019-09-late-加上使用者查詢的-poi-history-到推薦景點" class="headerlink" title="2019/09 late 加上使用者查詢的 poi history 到推薦景點"></a>2019/09 late 加上使用者查詢的 poi history 到推薦景點</h2><ol>
-<li>如果該 city 最近 30 天的 poi history 景點超過 10 個，則直接使用</li>
-<li>如果該 city 最近 30 天的 poi history 景點小於等於 10 個，則加上 KNN+rating 算法所取出的 poi 一起回傳給使用者</li>
-<li>使用網路上找到的 uniq，將 poi history 的景點及 KNN+rating 算法的景點去除重覆資料</li>
-<li>會將計算後取出的 poi id 存入 Redis，TTL 為 1 天</li>
-</ol>
-<h2 id="2020-06-late-加快查詢速度"><a href="#2020-06-late-加快查詢速度" class="headerlink" title="2020/06 late 加快查詢速度"></a>2020/06 late 加快查詢速度</h2><ol>
-<li>將原本要從 poi_data (超過 2500 萬筆的 POI) 取得 city 的 bbox，改從 city_data (約 200 萬筆的 city) 取得，加快查詢速度</li>
-</ol>
-<h2 id="2020-07-late-刪除不正確的-poi"><a href="#2020-07-late-刪除不正確的-poi" class="headerlink" title="2020/07 late 刪除不正確的 poi"></a>2020/07 late 刪除不正確的 poi</h2><ol>
-<li>刪除該 city 經過 poi history 計算後 count 為 0 的 poi</li>
-<li>刪除部分不該出現在推薦景點上的景點類型，如：飲水機、球場、停車場…等</li>
-<li>將 KNN+rating 的景點 TTL 設定為 14 天，而從 poi history 計算出來的景點 TTL 一樣為 1 天</li>
-</ol>
-<h2 id="2020-09-late-重構推薦景點功能，並加上-L2-L3-cache"><a href="#2020-09-late-重構推薦景點功能，並加上-L2-L3-cache" class="headerlink" title="2020/09 late 重構推薦景點功能，並加上 L2, L3 cache"></a>2020/09 late 重構推薦景點功能，並加上 L2, L3 cache</h2><h3 id="2020-09-22-late-重構推薦景點功能"><a href="#2020-09-22-late-重構推薦景點功能" class="headerlink" title="2020/09/22 late 重構推薦景點功能"></a>2020/09/22 late 重構推薦景點功能</h3><ol>
-<li>先從 Redis 取出確認該 city 是否有 cache，有的話就直接回傳，沒有的話寫入 refresh = true 的 flag 到 city_data table，表示該 city 資料必須更新</li>
-<li>從 DB 取出確認該 city 是否有 cache，有的話就直接回傳，沒有的話就必須即時計算該 city 的推薦景點</li>
-<li>推薦景點的算法與之前相同，包括了 poi history 及 KNN+rating，但移除 uniq，改用 Set 的寫法去除重覆資料</li>
-<li>計算完該 city 的推薦景點之後，直接將資料存回 Redis 及 DB，並且回傳計算完的推薦景點</li>
-<li>期望這樣跑下來後，之後使用者就算在 Redis 找不到 cache (因為過期)，也可以從 DB 找到 cache (因為不會消失)</li>
-<li>每天固定跑 scheduler，掃出 refresh flag 為 true 的 city，在 background job 將最新的推薦景點寫回 Redis 及 DB，並將 refresh flag 設定為 false</li>
-</ol>
-<h3 id="2020-09-23-early-加快預熱-cache-到-DB-的速度"><a href="#2020-09-23-early-加快預熱-cache-到-DB-的速度" class="headerlink" title="2020/09/23 early 加快預熱 cache 到 DB 的速度"></a>2020/09/23 early 加快預熱 cache 到 DB 的速度</h3><ol>
-<li>因為目前在 Redis 還有部分 city 的 cache，如果要等一天 (TTL) 之後這些 cache 失效後才能啟動 L2 cache 機制會有點浪費</li>
-<li>所以增加若在 Redis 確認該 city 有 cache 且 DB 沒 cache 的話，就將該 cache 寫回 DB，並且回傳</li>
-</ol>
-<h3 id="2020-09-23-middle-確認是否有最佳化空間"><a href="#2020-09-23-middle-確認是否有最佳化空間" class="headerlink" title="2020/09/23 middle 確認是否有最佳化空間"></a>2020/09/23 middle 確認是否有最佳化空間</h3><ol>
-<li>延長 city Redis cache 的 TTL 從 1 天增加到 14 天，避免部分活動過於熱門，導致該區域的推薦景點都被該活動洗掉</li>
-</ol>
-<h3 id="2020-09-24-early-加上-new-relic"><a href="#2020-09-24-early-加上-new-relic" class="headerlink" title="2020/09/24 early 加上 new relic"></a>2020/09/24 early 加上 new relic</h3><ol>
-<li>加上 new relic 的 custom attributes，記錄該 city 的 IO 相關讀取時間</li>
-</ol>
-<h3 id="2020-09-24-middle-加上-local-cache"><a href="#2020-09-24-middle-加上-local-cache" class="headerlink" title="2020/09/24 middle 加上 local cache"></a>2020/09/24 middle 加上 local cache</h3><ol>
-<li>因為從 Redis 或 DB 取回來的 id 要再經過一次 DB 查詢，才能組合完整的 response 回傳</li>
-<li>所以加上 city id 及使用者語言做為 local cache key，加快同 city id 且同語言的資料回傳速度</li>
-<li>如果 city id 或使用者語言在該 cache 找不到，再回 DB 查詢</li>
-<li>加上 new relic 的 custom segment，方便判讀 request 的瓶頸是在哪一段</li>
-</ol>
-<h3 id="2020-09-24-late-調整-poi-history-的執行速度"><a href="#2020-09-24-late-調整-poi-history-的執行速度" class="headerlink" title="2020/09/24 late 調整 poi history 的執行速度"></a>2020/09/24 late 調整 poi history 的執行速度</h3><ol>
-<li>將原本使用 where + group 取得最近 30 的 poi history 語法，改為先做 where，再做 group，將原本放在同一個 CTE 的 query 拆成兩個 CTE 執行</li>
-<li>速度從原本的 40 ~ 50 秒，甚至到 70 秒，下降到約 10 秒左右</li>
-</ol>
-<h3 id="2020-09-25-early-移除不必要的-middleware"><a href="#2020-09-25-early-移除不必要的-middleware" class="headerlink" title="2020/09/25 early 移除不必要的 middleware"></a>2020/09/25 early 移除不必要的 middleware</h3><ol>
-<li>在整整一年前將 poi recommend 及 search 拆開成不同檔案的時候，沒有仔細確認，所以每次 request 都要到 Redis 做兩次的 auth check</li>
-<li>所以將其中一個 auth check 拿掉，加快約 1ms</li>
-</ol>
-<h3 id="2020-09-27-early-再次檢視-poi-history-計算方式是否有最佳化空間"><a href="#2020-09-27-early-再次檢視-poi-history-計算方式是否有最佳化空間" class="headerlink" title="2020/09/27 early 再次檢視 poi history 計算方式是否有最佳化空間"></a>2020/09/27 early 再次檢視 poi history 計算方式是否有最佳化空間</h3><ol>
-<li>原本在使用經緯度計算是哪個 city 時，查詢速度大約都 400ms 左右，加上 GiST index 之後，查詢速度提升 1000x，變成只要 0.4ms 就能算出來</li>
-<li>整整一年前導入 poi history 到推薦景點時，資料量還沒這麼大，所以在計算時速度都蠻快的</li>
-<li>但 poi history 現在資料筆數已經超過 2500 萬筆，都變成 Seq Scan，雖然 planner 會判斷成 Parallel Seq Scan，但速度還是很慢</li>
-<li>因為是使用近 30 天的資料做計算，所以將 created_at 加入 index，速度從 10 秒左右降到 1 秒左右</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="clbjgshwp000bbmkncgnfgie9" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
 
     </footer>
   </div>
@@ -790,7 +805,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/appsearch/" rel="tag">appsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bullmq/" rel="tag">bullmq</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cjk/" rel="tag">cjk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flyway/" rel="tag">flyway</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/messagequeue/" rel="tag">messagequeue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgis/" rel="tag">postgis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redlock/" rel="tag">redlock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BE%B5%E6%89%8D/" rel="tag">徵才</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/appsearch/" rel="tag">appsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bullmq/" rel="tag">bullmq</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cjk/" rel="tag">cjk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flyway/" rel="tag">flyway</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/messagequeue/" rel="tag">messagequeue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdf/" rel="tag">pdf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/playwright/" rel="tag">playwright</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgis/" rel="tag">postgis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/puppeteer/" rel="tag">puppeteer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redlock/" rel="tag">redlock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BE%B5%E6%89%8D/" rel="tag">徵才</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
     </div>
   </div>
 
@@ -800,7 +815,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/appsearch/" style="font-size: 10px;">appsearch</a> <a href="/tags/autocomplete/" style="font-size: 18px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 12px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 14px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 14px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/poibank/" style="font-size: 20px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12px;">pppr</a> <a href="/tags/prerender/" style="font-size: 16px;">prerender</a> <a href="/tags/redis/" style="font-size: 18px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 12px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/appsearch/" style="font-size: 10px;">appsearch</a> <a href="/tags/autocomplete/" style="font-size: 18px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 12px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 14px;">cjk</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 10px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 14px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/pdf/" style="font-size: 10px;">pdf</a> <a href="/tags/playwright/" style="font-size: 10px;">playwright</a> <a href="/tags/poibank/" style="font-size: 20px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12px;">pppr</a> <a href="/tags/prerender/" style="font-size: 16px;">prerender</a> <a href="/tags/puppeteer/" style="font-size: 10px;">puppeteer</a> <a href="/tags/redis/" style="font-size: 18px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/sorted-set/" style="font-size: 12px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 10px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
     </div>
   </div>
 
@@ -809,7 +824,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
 
@@ -820,6 +835,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/">利用 Puppeteer 把行程轉換成 PDF 的實務經驗</a>
+          </li>
         
           <li>
             <a href="/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/">用 App search 的 curation 概念解決熱門景點的搜尋問題</a>
@@ -837,10 +856,6 @@
             <a href="/2022/10/17/%E5%9C%A8-MOPCON-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%B7%B1%E5%85%A5%E6%B7%BA%E5%87%BA-autocomplete%E3%80%8D/">在 MOPCON 2022 分享的「深入淺出 autocomplete」</a>
           </li>
         
-          <li>
-            <a href="/2022/09/06/%E5%9C%A8-COSCUP-2022-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E9%87%8B%E6%94%BE%E4%BD%A0%E7%9A%84%E5%84%B2%E5%AD%98%E7%A9%BA%E9%96%93%EF%BC%81%E7%A7%BB%E9%99%A4%E9%82%A3%E4%BA%9B%E5%B7%B2%E7%B6%93%E6%B2%92%E4%BD%BF%E7%94%A8%E7%9A%84%20index%E3%80%8D/">在 COSCUP-2022-分享的「釋放你的儲存空間！移除那些已經沒使用的 index」</a>
-          </li>
-        
       </ul>
     </div>
   </div>
@@ -854,7 +869,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       
-      &copy; 2022 Kewang<br>
+      &copy; 2023 Kewang<br>
       Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

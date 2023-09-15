@@ -15,8 +15,38 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Sun, 11 Dec 2022 14:31:40 GMT</pubDate>
+    <pubDate>Fri, 15 Sep 2023 07:50:08 GMT</pubDate>
     <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>利用 Puppeteer 把行程轉換成 PDF 的實務經驗</title>
+      <link>https://techblog.funliday.com/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/</link>
+      <guid>https://techblog.funliday.com/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/</guid>
+      <pubDate>Fri, 15 Sep 2023 06:18:15 GMT</pubDate>
+      
+        
+        
+          
+          
+      <description>&lt;p&gt;Funliday 最近功能萬箭齊發，其中有幾項比較值得一提的，今天先來分享第一個，大家敲碗已久的行程轉成 PDF 功能是如何煉成的。&lt;/p&gt;
+&lt;img</description>
+          
+        
+      
+      
+      
+      
+      
+      <category domain="https://techblog.funliday.com/tags/puppeteer/">puppeteer</category>
+      
+      <category domain="https://techblog.funliday.com/tags/pdf/">pdf</category>
+      
+      <category domain="https://techblog.funliday.com/tags/playwright/">playwright</category>
+      
+      
+      <comments>https://techblog.funliday.com/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/#disqus_thread</comments>
+      
+    </item>
     
     <item>
       <title>用 App search 的 curation 概念解決熱門景點的搜尋問題</title>
@@ -277,35 +307,6 @@
       
       
       <comments>https://techblog.funliday.com/2021/08/02/%E5%9C%A8-COSCUP-2021-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E4%BD%BF%E7%94%A8-PostgreSQL-%E5%8F%8A-MongoDB-%E5%BE%9E%E9%9B%B6%E9%96%8B%E5%A7%8B%E5%BB%BA%E7%BD%AE%E7%A4%BE%E7%BE%A4%E5%BF%85%E5%82%99%E7%9A%84%E6%8C%89%E8%AE%9A%E8%BF%BD%E8%B9%A4%E5%8A%9F%E8%83%BD%E3%80%8D/#disqus_thread</comments>
-      
-    </item>
-    
-    <item>
-      <title>用 Redis 來處理 City 的 autocomplete 功能 - 4</title>
-      <link>https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/</link>
-      <guid>https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/</guid>
-      <pubDate>Wed, 14 Jul 2021 01:41:36 GMT</pubDate>
-      
-        
-        
-          
-          
-      <description>&lt;img src=&quot;/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/screenshot.png&quot; class=&quot;&quot;</description>
-          
-        
-      
-      
-      
-      
-      
-      <category domain="https://techblog.funliday.com/tags/redis/">redis</category>
-      
-      <category domain="https://techblog.funliday.com/tags/autocomplete/">autocomplete</category>
-      
-      <category domain="https://techblog.funliday.com/tags/sorted-set/">sorted set</category>
-      
-      
-      <comments>https://techblog.funliday.com/2021/07/14/%E7%94%A8-Redis-%E4%BE%86%E8%99%95%E7%90%86-City-%E7%9A%84-autocomplete-%E5%8A%9F%E8%83%BD-4/#disqus_thread</comments>
       
     </item>
     
