@@ -44,6 +44,10 @@ Google Chrome 是一個非常吃記憶體的怪獸，我們也不想開太大的
 
 ## 加上驗證功能
 
+```
+PDF 網址：https://host/p/:userid/trips/:trip_id?member_id=:my_member_id&token=:my_auth_token
+```
+
 另外這個功能目前限制只有自己跟同群組的夥伴可以使用，所以在 URL 上有做了一點小處理。就是 URL 有帶了 member id 以及 auth token，如果有人隨意更動這兩個值的話，會造成驗證失敗，算是非常基本的驗證，目前需求也用不到嚴謹的驗證。如果要再嚴謹驗證的話，目前的想法應該是會再加上 cookie 驗證。
 
 另外帶了 member id 之後，也可以拿來做統計，算是目前有限資源的最快開發方式。
