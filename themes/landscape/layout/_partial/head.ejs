@@ -22,12 +22,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <% if (page.ogimage) { %>
     <%- open_graph({image: page.ogimage, twitter_id: theme.twitter, fb_admins: theme.fb_admins, fb_app_id: theme.fb_app_id}) %>
-    <% if (page.ogwidth) { %>
-      <meta property="og:image:width" content="<%= page.ogwidth %>" />
-    <% } %>
-    <% if (page.ogheight) { %>
-      <meta property="og:image:height" content="<%= page.ogheight %>" />
-    <% } %>
   <% } else { %>
     <%- open_graph({twitter_id: theme.twitter, fb_admins: theme.fb_admins, fb_app_id: theme.fb_app_id}) %>
   <% } %>
