@@ -1,6 +1,8 @@
 ---
 title: 利用 Puppeteer 把行程轉換成 PDF 的實務經驗
 ogimage: ogimage.png
+ogwidth: 1130
+ogheight: 801
 date: 2023-09-15 14:18:15
 tags:
   - puppeteer
