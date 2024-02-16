@@ -104,7 +104,7 @@ const setCookie = (res, name, value) => {
 />
 ```
 
-View State 是 ASP.net 在 WebForm 在保留控制項狀態時的解決方案，就是把狀態存在 `<input type="hidden" />` 裡面，讓狀態可以帶到下一次的 request 裡面，我想到這方式剛好可以讓 HTML 做前後端共同存取。所以利用這方式，把原本在 init middeware 寫到 cookie 的內容，改成寫到 res.locals 裡面，然後再利用 res.render 把內容寫到 HTML 裡面
+View State 是 ASP.net 在 WebForm 在保留控制項狀態時的解決方案，就是把狀態存在 `<input type="hidden" />` 裡面，讓狀態可以帶到下一次的 request 裡面，我想到這方式剛好可以讓 HTML 做前後端共同存取。所以利用這方式，把原本在 init middeware 寫到 cookie 的內容，改成寫到 `res.locals` 裡面，然後再利用 `res.render` 把內容寫到 HTML 裡面
 
 #### 後端的 middleware
 
