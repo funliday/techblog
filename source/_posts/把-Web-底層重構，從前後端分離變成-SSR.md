@@ -10,6 +10,8 @@ tags:
 - expressjs
 ---
 
+{% asset_img cover.webp %}
+
 Web 底層重構完成過了半年多，目前效果還算不錯，來分享一下我們是如何重構的。
 
 ## 前後端分離
