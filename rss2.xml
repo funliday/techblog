@@ -15,7 +15,7 @@
     <atom:link href="https://techblog.funliday.com/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Fri, 16 Feb 2024 10:34:30 GMT</pubDate>
+    <pubDate>Fri, 16 Feb 2024 10:36:55 GMT</pubDate>
     <generator>http://hexo.io/</generator>
     
     <item>
@@ -28,8 +28,7 @@
         
           
           
-      <description>&lt;p&gt;Web 底層重構完成過了半年多，目前效果還算不錯，來分享一下我們是如何重構的。&lt;/p&gt;
-&lt;h2 id=&quot;前後端分離&quot;&gt;&lt;a href=&quot;#前後端分離&quot; class=&quot;headerlink&quot; title=&quot;前後端分離&quot;&gt;&lt;/a&gt;前後端分離&lt;/h2&gt;&lt;p&gt;Funliday</description>
+      <description>&lt;img</description>
           
         
       
