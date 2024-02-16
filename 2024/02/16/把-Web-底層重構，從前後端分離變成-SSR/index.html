@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSRWWXDXXF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-BSRWWXDXXF');
+</script>
+<!-- End Google Analytics -->
+
+  
+  <title>把 Web 底層重構，從前後端分離變成 SSR | Funliday Tech Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="Web 底層重構完成過了半年多，目前效果還算不錯，來分享一下我們是如何重構的。 前後端分離Funliday 的初期開發模式，一直都是 backend 撰寫 API，然後 Web 及 App 都直接串接 API，達到真正前後端分離。這樣的開發模式無論對於前後端都非常單純，串接的 API 都是一模一樣，所以溝通成本也不高，那為什麼要重構？ 為什麼要重構？對於 App 來說，因為是原生系統，所以還是維持">
+<meta property="og:type" content="article">
+<meta property="og:title" content="把 Web 底層重構，從前後端分離變成 SSR">
+<meta property="og:url" content="https://techblog.funliday.com/2024/02/16/%E6%8A%8A-Web-%E5%BA%95%E5%B1%A4%E9%87%8D%E6%A7%8B%EF%BC%8C%E5%BE%9E%E5%89%8D%E5%BE%8C%E7%AB%AF%E5%88%86%E9%9B%A2%E8%AE%8A%E6%88%90-SSR/index.html">
+<meta property="og:site_name" content="Funliday Tech Blog">
+<meta property="og:description" content="Web 底層重構完成過了半年多，目前效果還算不錯，來分享一下我們是如何重構的。 前後端分離Funliday 的初期開發模式，一直都是 backend 撰寫 API，然後 Web 及 App 都直接串接 API，達到真正前後端分離。這樣的開發模式無論對於前後端都非常單純，串接的 API 都是一模一樣，所以溝通成本也不高，那為什麼要重構？ 為什麼要重構？對於 App 來說，因為是原生系統，所以還是維持">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://techblog.funliday.com/2024/02/16/%E6%8A%8A-Web-%E5%BA%95%E5%B1%A4%E9%87%8D%E6%A7%8B%EF%BC%8C%E5%BE%9E%E5%89%8D%E5%BE%8C%E7%AB%AF%E5%88%86%E9%9B%A2%E8%AE%8A%E6%88%90-SSR/cover.webp">
+<meta property="article:published_time" content="2024-02-16T08:36:02.000Z">
+<meta property="article:modified_time" content="2024-02-16T10:34:30.580Z">
+<meta property="article:author" content="Kewang">
+<meta property="article:tag" content="ssr">
+<meta property="article:tag" content="seo">
+<meta property="article:tag" content="cookie">
+<meta property="article:tag" content="view state">
+<meta property="article:tag" content="expressjs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://techblog.funliday.com/2024/02/16/%E6%8A%8A-Web-%E5%BA%95%E5%B1%A4%E9%87%8D%E6%A7%8B%EF%BC%8C%E5%BE%9E%E5%89%8D%E5%BE%8C%E7%AB%AF%E5%88%86%E9%9B%A2%E8%AE%8A%E6%88%90-SSR/cover.webp">
+  
+  
+    <link rel="alternate" href="/atom.xml" title="Funliday Tech Blog" type="application/atom+xml"><link rel="alternate" href="/rss2.xml" title="Funliday Tech Blog" type="application/rss+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Funliday Tech Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://techblog.funliday.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-把-Web-底層重構，從前後端分離變成-SSR" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/02/16/%E6%8A%8A-Web-%E5%BA%95%E5%B1%A4%E9%87%8D%E6%A7%8B%EF%BC%8C%E5%BE%9E%E5%89%8D%E5%BE%8C%E7%AB%AF%E5%88%86%E9%9B%A2%E8%AE%8A%E6%88%90-SSR/" class="article-date">
+  <time class="dt-published" datetime="2024-02-16T08:36:02.000Z" itemprop="datePublished">2024-02-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      把 Web 底層重構，從前後端分離變成 SSR
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Web 底層重構完成過了半年多，目前效果還算不錯，來分享一下我們是如何重構的。</p>
+<h2 id="前後端分離"><a href="#前後端分離" class="headerlink" title="前後端分離"></a>前後端分離</h2><p>Funliday 的初期開發模式，一直都是 backend 撰寫 API，然後 Web 及 App 都直接串接 API，達到真正前後端分離。這樣的開發模式無論對於前後端都非常單純，串接的 API 都是一模一樣，所以溝通成本也不高，那為什麼要重構？</p>
+<h2 id="為什麼要重構？"><a href="#為什麼要重構？" class="headerlink" title="為什麼要重構？"></a>為什麼要重構？</h2><p>對於 App 來說，因為是原生系統，所以還是維持串接 API 為主。但 Web 如果還是用純 API 串接的話，其實會失去原本 Web 就有的優勢。</p>
+<p>Web 原本純粹只使用 API 做前後端的溝通，所以每一次的初始畫面呈現都要經過好多次的 API call。像是我們的首頁，因為 API 是基於前後端分離所開發的，所以要分別取得熱門行程、熱門遊記、熱門城市…等，大概近 10 支 API。</p>
+<p>然後每個畫面在第一次使用的時候，因為要取得初始參數，所以又要多一次 API call，這樣子來來回回，就算各個 API 互不相關，可以用 <code>Promise.all</code> 同時取得資料，但只要一支 API 因效能卡死。又或是有相關，前面死了就無法取得後面的內容，都會讓開發上變得更複雜。當然這些都能透過各種 design pattern 解決，但還是解決不了速度慢的問題。</p>
+<p>而且 API call 是從使用者的瀏覽器發出，中間經過各種 latency 才到達，這個速度延遲可見一斑。更何況 Funliday 在上升期，SEO 真的是非常非常重要，雖然已經有 pppr 可以幫忙處理 prerender 的事情，但底層的 puppeteer 三不五時要不就是記憶體吃太多，要不就是暫存檔太肥，所以改成 SSR 是更重要的事。</p>
+<h2 id="SSR-開始動工"><a href="#SSR-開始動工" class="headerlink" title="SSR 開始動工"></a>SSR 開始動工</h2><p>動架構是一件很重大的事，而且在人數不足的狀況之下，工作項更要謹慎評估。與前端工程師討論後，決定前端只做一個 adapter，把新流程用 adapter 接回舊流程解決。</p>
+<p>如同上面所提的，在 web 執行第一次 React 動作的時候，會先去打 init API 取得所有參數後，再繼續後面步驟。而改成新流程之後，最主要的想法是解決 API 的 round-trip 問題，而且 web 也是使用 expressjs 做為後端框架，所以把 init API 取得所有參數的流程，直接在每一個 route 加上一個 middleware 處理就好。</p>
+<h3 id="init-middleware"><a href="#init-middleware" class="headerlink" title="init middleware"></a>init middleware</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">initMiddleware</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> webToken = getCookie(req, <span class="string">&quot;webToken&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">`webToken: <span class="subst">$&#123;webToken&#125;</span>`</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!verifyWebToken(webToken)) &#123;</span><br><span class="line">    webToken = generateWebToken();</span><br><span class="line"></span><br><span class="line">    setCookie(res, <span class="string">&quot;webToken&quot;</span>, webToken);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> getCookie = <span class="function">(<span class="params">req, name</span>) =&gt;</span> req.cookies[<span class="string">`fld-<span class="subst">$&#123;name&#125;</span>`</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> setCookie = <span class="function">(<span class="params">res, name, value</span>) =&gt;</span> &#123;</span><br><span class="line">  res.cookie(<span class="string">`fld-<span class="subst">$&#123;name&#125;</span>`</span>, value);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">app.get(<span class="string">&quot;*&quot;</span>, initMiddleware, appRouter);</span><br></pre></td></tr></table></figure>
+
+<p>把後端提供的 init API 改成在 web server 的 init middleware 處理，但前端要如何取得 middleware 的所有參數？那當然就是要找可以前後端共同存取的資料結構啦。</p>
+<p>一開始想到的當然是 cookie，後端的 init middleware 寫入 cookie，前端的 init adapter 取得 cookie，然後再執行原本的工作流程。後端把 middleware 開發完後，塞了測試資料，前端也可以順利取得測試資料。但開發到後期，要真正把所有參數塞到 cookie 之後，卻發現了一個重大的問題，那就是每一個 cookie 的大小只能有 4096bytes 而已，這對於還要經過 base64 編碼後的參數大小根本不夠。</p>
+<h3 id="把-cookie-分割"><a href="#把-cookie-分割" class="headerlink" title="把 cookie 分割"></a>把 cookie 分割</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> setCookie = <span class="function">(<span class="params">res, name, value</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> stringifyValue = <span class="built_in">JSON</span>.stringify(value);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// split value every 1000 chars if value&#x27;s length &gt; 2000</span></span><br><span class="line">  <span class="keyword">if</span> (stringifyValue.length &gt; <span class="number">2000</span>) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`Use array cookie for <span class="subst">$&#123;name&#125;</span>`</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> valueArr = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; stringifyValue.length; i += <span class="number">1000</span>) &#123;</span><br><span class="line">      valueArr.push(stringifyValue.slice(i, i + <span class="number">1000</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; valueArr.length; i++) &#123;</span><br><span class="line">      res.cookie(<span class="string">`fld-<span class="subst">$&#123;name&#125;</span>-<span class="subst">$&#123;i&#125;</span>`</span>, valueArr[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    res.cookie(<span class="string">`fld-<span class="subst">$&#123;name&#125;</span>-$`</span>, valueArr.length);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    res.cookie(<span class="string">`fld-<span class="subst">$&#123;name&#125;</span>`</span>, stringifyValue);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>所以改良後的寫法變成把 cookie 分割，比如每 2000 bytes 切一刀，總共切成 n 個 chunk，然後前端取得資料的時候再合併起來後解碼。這個改良後的方式最後沒上線，因為原本前端只要關注取得實際的內容就好，結果現在卻因為 cookie 分割的關係，還要處理「合併」這個步驟。怎麼想都覺得奇怪，所以後來就把這個方案捨棄，不使用 cookie 了。</p>
+<h3 id="想到了-View-State"><a href="#想到了-View-State" class="headerlink" title="想到了 View State"></a>想到了 View State</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;input</span><br><span class="line">  type=&quot;hidden&quot;</span><br><span class="line">  name=&quot;__VIEWSTATE&quot;</span><br><span class="line">  id=&quot;__VIEWSTATE&quot;</span><br><span class="line">  value=&quot;QxHX4IaM9Z+otkbxCcwK...lNymmMdHoN+iO3PnA06vqcbm+JiQGvJNiqJTDNK918Tfnylm7Bdw1f83/GVw==&quot;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+<p>View State 是 ASP.net 在 WebForm 在保留控制項狀態時的解決方案，就是把狀態存在 <code>&lt;input type=&quot;hidden&quot; /&gt;</code> 裡面，讓狀態可以帶到下一次的 request 裡面，我想到這方式剛好可以讓 HTML 做前後端共同存取。所以利用這方式，把原本在 init middeware 寫到 cookie 的內容，改成寫到 res.locals 裡面，然後再利用 res.render 把內容寫到 HTML 裡面</p>
+<h4 id="後端的-middleware"><a href="#後端的-middleware" class="headerlink" title="後端的 middleware"></a>後端的 middleware</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">initMiddleware</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> initParams = <span class="keyword">await</span> getInit(&#123;</span><br><span class="line">    memberId,</span><br><span class="line">    language,</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  writeConfig(res, <span class="string">&quot;initParams&quot;</span>, initParams);</span><br><span class="line"></span><br><span class="line">  combineInitEnv(res);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> next();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> writeConfig = <span class="function">(<span class="params">res, name, value</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (!<span class="built_in">Array</span>.isArray(res.locals.xxxConfig)) &#123;</span><br><span class="line">    res.locals.xxxConfig = [];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  res.locals.xxxConfig.push(&#123;</span><br><span class="line">    name,</span><br><span class="line">    value,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> combineInitEnv = <span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">  res.locals.xxxConfig = Buffer.from(</span><br><span class="line">    <span class="built_in">JSON</span>.stringify(res.locals.xxxConfig)</span><br><span class="line">  ).toString(<span class="string">&quot;base64&quot;</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="後端的-view-template"><a href="#後端的-view-template" class="headerlink" title="後端的 view template"></a>後端的 view template</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">meta(charset&#x3D;&quot;UTF-8&quot;)</span><br><span class="line">meta(name&#x3D;&#39;funliday-env&#39; content&#x3D;xxxConfig)</span><br></pre></td></tr></table></figure>
+
+<p>而前端的 adapter 就單純使用 <code>document.querySelector</code> 取得初始參數就可以了。adapter 剩下的工作就是把所取得的初始參數，一個一個接回去原本的流程就能結束工作。但這牽涉到的業務邏輯太多，這裡就不多提了。</p>
+<h4 id="前端的-adapter"><a href="#前端的-adapter" class="headerlink" title="前端的 adapter"></a>前端的 adapter</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> funlidayEnv = <span class="built_in">document</span>.querySelector(<span class="string">&#x27;meta[name=&quot;funliday-env&quot;]&#x27;</span>);</span><br><span class="line"></span><br><span class="line">initAdapter.parse(funlidayEnv.content);</span><br></pre></td></tr></table></figure>
+
+<h2 id="結論"><a href="#結論" class="headerlink" title="結論"></a>結論</h2><p>從規劃到真正實作完成，大約經歷了半年左右，雖然只完成部分的頁面，但成功從前後端分離轉型為 SSR，顯著提升了使用者體驗與 SEO 效能。這次重構不僅加速了頁面載入速度，還大幅提高了我們在搜尋引擎的排名，吸引更多訪客。雖然最終的解決方案沒有什麼了不起，只要有一點經驗的 Node.js 後端工程師都應該要做的出來，但穿著衣服改衣服，突破各種舊架構上的限制，成功上線後還是覺得蠻值得拿來說嘴的 XD</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10051189">91之ASP.NET由淺入深 不負責講座 Day3 - ViewState</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://techblog.funliday.com/2024/02/16/%E6%8A%8A-Web-%E5%BA%95%E5%B1%A4%E9%87%8D%E6%A7%8B%EF%BC%8C%E5%BE%9E%E5%89%8D%E5%BE%8C%E7%AB%AF%E5%88%86%E9%9B%A2%E8%AE%8A%E6%88%90-SSR/" data-id="clsoijf4w0016imov0wugex8t" data-title="把 Web 底層重構，從前後端分離變成 SSR" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cookie/" rel="tag">cookie</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/seo/" rel="tag">seo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/view-state/" rel="tag">view state</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">利用 Puppeteer 把行程轉換成 PDF 的實務經驗</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/advisorylock/" rel="tag">advisorylock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/appsearch/" rel="tag">appsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/autocomplete/" rel="tag">autocomplete</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/blurhash/" rel="tag">blurhash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bullmq/" rel="tag">bullmq</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cjk/" rel="tag">cjk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cookie/" rel="tag">cookie</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cors/" rel="tag">cors</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/coscup/" rel="tag">coscup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/debounce/" rel="tag">debounce</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expressjs/" rel="tag">expressjs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flyway/" rel="tag">flyway</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gis/" rel="tag">gis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hsts/" rel="tag">hsts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/" rel="tag">iframe</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jieba/" rel="tag">jieba</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/markdown/" rel="tag">markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/messagequeue/" rel="tag">messagequeue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/modernweb/" rel="tag">modernweb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msgpack/" rel="tag">msgpack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netflix/" rel="tag">netflix</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/newrelic/" rel="tag">newrelic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodeploy/" rel="tag">nodeploy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/osm/" rel="tag">osm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdf/" rel="tag">pdf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/playwright/" rel="tag">playwright</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/poibank/" rel="tag">poibank</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgis/" rel="tag">postgis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/postgresql/" rel="tag">postgresql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pppr/" rel="tag">pppr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/prerender/" rel="tag">prerender</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/puppeteer/" rel="tag">puppeteer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redlock/" rel="tag">redlock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/seo/" rel="tag">seo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sorted-set/" rel="tag">sorted set</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssr/" rel="tag">ssr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travisci/" rel="tag">travisci</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/view-state/" rel="tag">view state</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BE%B5%E6%89%8D/" rel="tag">徵才</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" rel="tag">著作權</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" rel="tag">行政區劃</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/advisorylock/" style="font-size: 10px;">advisorylock</a> <a href="/tags/appsearch/" style="font-size: 10px;">appsearch</a> <a href="/tags/autocomplete/" style="font-size: 18px;">autocomplete</a> <a href="/tags/blurhash/" style="font-size: 12px;">blurhash</a> <a href="/tags/bullmq/" style="font-size: 10px;">bullmq</a> <a href="/tags/cjk/" style="font-size: 14px;">cjk</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/cors/" style="font-size: 10px;">cors</a> <a href="/tags/coscup/" style="font-size: 10px;">coscup</a> <a href="/tags/debounce/" style="font-size: 10px;">debounce</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/expressjs/" style="font-size: 12px;">expressjs</a> <a href="/tags/flyway/" style="font-size: 10px;">flyway</a> <a href="/tags/gis/" style="font-size: 10px;">gis</a> <a href="/tags/github/" style="font-size: 12px;">github</a> <a href="/tags/gitlab/" style="font-size: 10px;">gitlab</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hsts/" style="font-size: 10px;">hsts</a> <a href="/tags/iframe/" style="font-size: 12px;">iframe</a> <a href="/tags/javascript/" style="font-size: 12px;">javascript</a> <a href="/tags/jieba/" style="font-size: 12px;">jieba</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/messagequeue/" style="font-size: 10px;">messagequeue</a> <a href="/tags/modernweb/" style="font-size: 14px;">modernweb</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/msgpack/" style="font-size: 10px;">msgpack</a> <a href="/tags/netflix/" style="font-size: 10px;">netflix</a> <a href="/tags/newrelic/" style="font-size: 12px;">newrelic</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/nodeploy/" style="font-size: 10px;">nodeploy</a> <a href="/tags/osm/" style="font-size: 10px;">osm</a> <a href="/tags/pdf/" style="font-size: 10px;">pdf</a> <a href="/tags/playwright/" style="font-size: 10px;">playwright</a> <a href="/tags/poibank/" style="font-size: 20px;">poibank</a> <a href="/tags/postgis/" style="font-size: 10px;">postgis</a> <a href="/tags/postgresql/" style="font-size: 20px;">postgresql</a> <a href="/tags/pppr/" style="font-size: 12px;">pppr</a> <a href="/tags/prerender/" style="font-size: 16px;">prerender</a> <a href="/tags/puppeteer/" style="font-size: 10px;">puppeteer</a> <a href="/tags/redis/" style="font-size: 18px;">redis</a> <a href="/tags/redlock/" style="font-size: 10px;">redlock</a> <a href="/tags/seo/" style="font-size: 10px;">seo</a> <a href="/tags/sorted-set/" style="font-size: 12px;">sorted set</a> <a href="/tags/ssr/" style="font-size: 12px;">ssr</a> <a href="/tags/travisci/" style="font-size: 10px;">travisci</a> <a href="/tags/view-state/" style="font-size: 10px;">view state</a> <a href="/tags/%E5%BE%B5%E6%89%8D/" style="font-size: 10px;">徵才</a> <a href="/tags/%E8%91%97%E4%BD%9C%E6%AC%8A/" style="font-size: 10px;">著作權</a> <a href="/tags/%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83/" style="font-size: 10px;">行政區劃</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/02/">二月 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/02/16/%E6%8A%8A-Web-%E5%BA%95%E5%B1%A4%E9%87%8D%E6%A7%8B%EF%BC%8C%E5%BE%9E%E5%89%8D%E5%BE%8C%E7%AB%AF%E5%88%86%E9%9B%A2%E8%AE%8A%E6%88%90-SSR/">把 Web 底層重構，從前後端分離變成 SSR</a>
+          </li>
+        
+          <li>
+            <a href="/2023/09/15/%E5%88%A9%E7%94%A8-Puppeteer-%E6%8A%8A%E8%A1%8C%E7%A8%8B%E8%BD%89%E6%8F%9B%E6%88%90-PDF-%E7%9A%84%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/">利用 Puppeteer 把行程轉換成 PDF 的實務經驗</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/22/%E7%94%A8-App-search-%E7%9A%84-curation-%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%B1%BA%E7%86%B1%E9%96%80%E6%99%AF%E9%BB%9E%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/">用 App search 的 curation 概念解決熱門景點的搜尋問題</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/07/Elasticsearch-%E7%9A%84%E5%A4%9A%E8%AA%9E%E8%A8%80-index-%E5%88%B0%E5%BA%95%E8%A9%B2%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%EF%BC%9F/">Elasticsearch 的多語言 index 到底該如何設計？</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/06/%E6%96%B0%E7%89%88%E7%9A%84%E6%99%AF%E9%BB%9E%E6%90%9C%E5%B0%8B%E5%8A%9F%E8%83%BD%E8%A6%81%E4%B8%8A%E7%B7%9A%E4%BA%86%EF%BC%81/">新版的景點搜尋功能要上線了！</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 Kewang<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+
+
+  <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({theme: 'forest'});
+    }
+  </script>
+
+  </div>
+</body>
+</html>
