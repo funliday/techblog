@@ -3,9 +3,9 @@ title: 利用 Puppeteer 把行程轉換成 PDF 的實務經驗
 ogimage: ogimage.png
 date: 2023-09-15 14:18:15
 tags:
-  - puppeteer
-  - pdf
-  - playwright
+- puppeteer
+- pdf
+- playwright
 ---
 
 Funliday 最近功能萬箭齊發，其中有幾項比較值得一提的，今天先來分享第一個，大家敲碗已久的行程轉成 PDF 功能是如何煉成的。
