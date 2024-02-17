@@ -27,7 +27,7 @@
 <meta property="og:locale" content="zh_TW">
 <meta property="og:image" content="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/prerender.jpg">
 <meta property="article:published_time" content="2020-05-18T02:00:29.000Z">
-<meta property="article:modified_time" content="2024-02-17T03:23:55.493Z">
+<meta property="article:modified_time" content="2024-02-17T09:36:42.850Z">
 <meta property="article:author" content="Kewang">
 <meta property="article:tag" content="prerender">
 <meta name="twitter:card" content="summary">
@@ -52,7 +52,7 @@
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
   
-<meta name="generator" content="Hexo 5.4.2"></head>
+<meta name="generator" content="Hexo 7.1.1"></head>
 
 <body>
   <div id="container">
@@ -116,7 +116,7 @@
 <p>這一系列文總共有三篇，這是第二篇。</p>
 <p>上一篇解決了 social network 抓取 head tag 裡面的 title, og data 等問題，但其實還有 search engine 要解決，因為 social network 只看 head，但 search engine 除了 head 以外也會看 body，所以這篇要來解決 body 一模一樣的問題。</p>
 <p>傳統的 web 開發方式通常是一條龍開發 (你就是那條龍！)，後端取得資料庫的內容，然後組成 HTML 之後丟到瀏覽器上顯示。現代的 web 開發方式通常就是一個前端配一個後端，後端專注於把資料送給前端，前端專注於取得資料後在瀏覽器上面顯示漂漂亮亮的。而傳統方式稱為 server side rendering (SSR)，現代方式就稱為 client side rendering (CSR)。兩者開發方式各有優缺，蠻多文章有提過，這裡也就不另外說明了。</p>
-<p>比較簡單判斷 CSR/SSR 的方式可以直接在你想知道的網頁，按下 <kbd>Ctrl+u</kbd> (Windows, Linux) 打開原始碼，看看實際上顯示的內容跟原始碼是不是差異過大。如果網頁內容很豐富，但原始碼才十幾二十行而已，那可以很粗略的說這是 CSR，如果基本上一致那就可以說是 SSR。</p>
+<p>比較簡單判斷 CSR&#x2F;SSR 的方式可以直接在你想知道的網頁，按下 <kbd>Ctrl+u</kbd> (Windows, Linux) 打開原始碼，看看實際上顯示的內容跟原始碼是不是差異過大。如果網頁內容很豐富，但原始碼才十幾二十行而已，那可以很粗略的說這是 CSR，如果基本上一致那就可以說是 SSR。</p>
 <p>而 search engine 就是靠著原始碼把網頁內容做索引，所以如果谷歌大神到 CSR 的網站爬網頁內容，最後爬到的 body 當然都是同一份內容，這樣子對於 SEO 上是不合格的，所以這裡就要分享一下 Funliday-旅遊規劃 是如何處理這塊的。</p>
 <p>第一種方式，可以用 VAR 這三套前端框架各自支援的 SSR 方案來處理，像是 Nuxt.js, Next.js, Angular Universal，這些內容已經有許多前輩分享，這裡就不另外說明了。但要注意一點，就是導入這類的解決方案通常會影響到原本的開發模式，像是 webpack 跟 bootstrapping 的方式就一定會動到，小編是建議對框架真的很熟悉之後，再來用這方式會比較好。</p>
 <p>第二種方式，就是這次的重頭戲 prerender 了。prerender 也不是什麼魔法，就是一句話「讓爬蟲看到它應該要看的內容」。如圖所示，當 Nginx 收到 request 之後，發現 user agent 是 googlebot 就轉送到 prerender service，如果是一般 request 就直接丟到後面原本的 web server。</p>
@@ -130,7 +130,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="clspilgce001chyozbb9thbwx" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="clspvwvqf0019j4q0bh891ejm" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
       
       
       

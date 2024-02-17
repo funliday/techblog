@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
   
-<meta name="generator" content="Hexo 5.4.2"></head>
+<meta name="generator" content="Hexo 7.1.1"></head>
 
 <body>
   <div id="container">
@@ -114,7 +114,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="clspilgc7000uhyoz63mf6p1c" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/10/14/%E5%9C%A8-ModernWeb-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8Cpppr-%E8%A7%A3%E6%B1%BA-JavaScript-%E7%84%A1%E6%B3%95%E8%A2%AB%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E%E6%AD%A3%E7%A2%BA%E7%B4%A2%E5%BC%95%E7%9A%84%E5%95%8F%E9%A1%8C%E3%80%8D/" data-id="clspvwvq8000uj4q00w1840kx" data-title="在 ModernWeb 2020 分享的「pppr - 解決 JavaScript 無法被搜尋引擎正確索引的問題」" class="article-share-link">Share</a>
       
       
       
@@ -155,54 +155,54 @@
 <p>現在大家使用 Funliday 在「景點瀏覽」輸入城市，或者是移動地圖出現的推薦景點，應該都是即時出現，也是最近花了一些時間的成果。下面先筆記一下推薦景點開發的歷程，之後如果有機會應該可以到 PostgreSQL.TW 分享一下完整的內容。</p>
 <p>簡單來說，就是一個從 70000ms 的 response time，提升到 200ms 的 response time 過程。</p>
 <hr>
-<h2 id="2019-02-推薦景點第一版"><a href="#2019-02-推薦景點第一版" class="headerlink" title="2019/02 推薦景點第一版"></a>2019/02 推薦景點第一版</h2><p><a href="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/">如何用 PostgreSQL 的 advisory lock 實作推薦景點</a></p>
-<h2 id="2019-09-late-加上使用者查詢的-poi-history-到推薦景點"><a href="#2019-09-late-加上使用者查詢的-poi-history-到推薦景點" class="headerlink" title="2019/09 late 加上使用者查詢的 poi history 到推薦景點"></a>2019/09 late 加上使用者查詢的 poi history 到推薦景點</h2><ol>
+<h2 id="2019-02-推薦景點第一版"><a href="#2019-02-推薦景點第一版" class="headerlink" title="2019&#x2F;02 推薦景點第一版"></a>2019&#x2F;02 推薦景點第一版</h2><p><a href="https://techblog.funliday.com/2019/02/20/%E5%A6%82%E4%BD%95%E7%94%A8-PostgreSQL-%E7%9A%84-advisory-lock-%E5%AF%A6%E4%BD%9C%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E/">如何用 PostgreSQL 的 advisory lock 實作推薦景點</a></p>
+<h2 id="2019-09-late-加上使用者查詢的-poi-history-到推薦景點"><a href="#2019-09-late-加上使用者查詢的-poi-history-到推薦景點" class="headerlink" title="2019&#x2F;09 late 加上使用者查詢的 poi history 到推薦景點"></a>2019&#x2F;09 late 加上使用者查詢的 poi history 到推薦景點</h2><ol>
 <li>如果該 city 最近 30 天的 poi history 景點超過 10 個，則直接使用</li>
 <li>如果該 city 最近 30 天的 poi history 景點小於等於 10 個，則加上 KNN+rating 算法所取出的 poi 一起回傳給使用者</li>
 <li>使用網路上找到的 uniq，將 poi history 的景點及 KNN+rating 算法的景點去除重覆資料</li>
 <li>會將計算後取出的 poi id 存入 Redis，TTL 為 1 天</li>
 </ol>
-<h2 id="2020-06-late-加快查詢速度"><a href="#2020-06-late-加快查詢速度" class="headerlink" title="2020/06 late 加快查詢速度"></a>2020/06 late 加快查詢速度</h2><ol>
+<h2 id="2020-06-late-加快查詢速度"><a href="#2020-06-late-加快查詢速度" class="headerlink" title="2020&#x2F;06 late 加快查詢速度"></a>2020&#x2F;06 late 加快查詢速度</h2><ol>
 <li>將原本要從 poi_data (超過 2500 萬筆的 POI) 取得 city 的 bbox，改從 city_data (約 200 萬筆的 city) 取得，加快查詢速度</li>
 </ol>
-<h2 id="2020-07-late-刪除不正確的-poi"><a href="#2020-07-late-刪除不正確的-poi" class="headerlink" title="2020/07 late 刪除不正確的 poi"></a>2020/07 late 刪除不正確的 poi</h2><ol>
+<h2 id="2020-07-late-刪除不正確的-poi"><a href="#2020-07-late-刪除不正確的-poi" class="headerlink" title="2020&#x2F;07 late 刪除不正確的 poi"></a>2020&#x2F;07 late 刪除不正確的 poi</h2><ol>
 <li>刪除該 city 經過 poi history 計算後 count 為 0 的 poi</li>
 <li>刪除部分不該出現在推薦景點上的景點類型，如：飲水機、球場、停車場…等</li>
 <li>將 KNN+rating 的景點 TTL 設定為 14 天，而從 poi history 計算出來的景點 TTL 一樣為 1 天</li>
 </ol>
-<h2 id="2020-09-late-重構推薦景點功能，並加上-L2-L3-cache"><a href="#2020-09-late-重構推薦景點功能，並加上-L2-L3-cache" class="headerlink" title="2020/09 late 重構推薦景點功能，並加上 L2, L3 cache"></a>2020/09 late 重構推薦景點功能，並加上 L2, L3 cache</h2><h3 id="2020-09-22-late-重構推薦景點功能"><a href="#2020-09-22-late-重構推薦景點功能" class="headerlink" title="2020/09/22 late 重構推薦景點功能"></a>2020/09/22 late 重構推薦景點功能</h3><ol>
-<li>先從 Redis 取出確認該 city 是否有 cache，有的話就直接回傳，沒有的話寫入 refresh = true 的 flag 到 city_data table，表示該 city 資料必須更新</li>
+<h2 id="2020-09-late-重構推薦景點功能，並加上-L2-L3-cache"><a href="#2020-09-late-重構推薦景點功能，並加上-L2-L3-cache" class="headerlink" title="2020&#x2F;09 late 重構推薦景點功能，並加上 L2, L3 cache"></a>2020&#x2F;09 late 重構推薦景點功能，並加上 L2, L3 cache</h2><h3 id="2020-09-22-late-重構推薦景點功能"><a href="#2020-09-22-late-重構推薦景點功能" class="headerlink" title="2020&#x2F;09&#x2F;22 late 重構推薦景點功能"></a>2020&#x2F;09&#x2F;22 late 重構推薦景點功能</h3><ol>
+<li>先從 Redis 取出確認該 city 是否有 cache，有的話就直接回傳，沒有的話寫入 refresh &#x3D; true 的 flag 到 city_data table，表示該 city 資料必須更新</li>
 <li>從 DB 取出確認該 city 是否有 cache，有的話就直接回傳，沒有的話就必須即時計算該 city 的推薦景點</li>
 <li>推薦景點的算法與之前相同，包括了 poi history 及 KNN+rating，但移除 uniq，改用 Set 的寫法去除重覆資料</li>
 <li>計算完該 city 的推薦景點之後，直接將資料存回 Redis 及 DB，並且回傳計算完的推薦景點</li>
 <li>期望這樣跑下來後，之後使用者就算在 Redis 找不到 cache (因為過期)，也可以從 DB 找到 cache (因為不會消失)</li>
 <li>每天固定跑 scheduler，掃出 refresh flag 為 true 的 city，在 background job 將最新的推薦景點寫回 Redis 及 DB，並將 refresh flag 設定為 false</li>
 </ol>
-<h3 id="2020-09-23-early-加快預熱-cache-到-DB-的速度"><a href="#2020-09-23-early-加快預熱-cache-到-DB-的速度" class="headerlink" title="2020/09/23 early 加快預熱 cache 到 DB 的速度"></a>2020/09/23 early 加快預熱 cache 到 DB 的速度</h3><ol>
+<h3 id="2020-09-23-early-加快預熱-cache-到-DB-的速度"><a href="#2020-09-23-early-加快預熱-cache-到-DB-的速度" class="headerlink" title="2020&#x2F;09&#x2F;23 early 加快預熱 cache 到 DB 的速度"></a>2020&#x2F;09&#x2F;23 early 加快預熱 cache 到 DB 的速度</h3><ol>
 <li>因為目前在 Redis 還有部分 city 的 cache，如果要等一天 (TTL) 之後這些 cache 失效後才能啟動 L2 cache 機制會有點浪費</li>
 <li>所以增加若在 Redis 確認該 city 有 cache 且 DB 沒 cache 的話，就將該 cache 寫回 DB，並且回傳</li>
 </ol>
-<h3 id="2020-09-23-middle-確認是否有最佳化空間"><a href="#2020-09-23-middle-確認是否有最佳化空間" class="headerlink" title="2020/09/23 middle 確認是否有最佳化空間"></a>2020/09/23 middle 確認是否有最佳化空間</h3><ol>
+<h3 id="2020-09-23-middle-確認是否有最佳化空間"><a href="#2020-09-23-middle-確認是否有最佳化空間" class="headerlink" title="2020&#x2F;09&#x2F;23 middle 確認是否有最佳化空間"></a>2020&#x2F;09&#x2F;23 middle 確認是否有最佳化空間</h3><ol>
 <li>延長 city Redis cache 的 TTL 從 1 天增加到 14 天，避免部分活動過於熱門，導致該區域的推薦景點都被該活動洗掉</li>
 </ol>
-<h3 id="2020-09-24-early-加上-new-relic"><a href="#2020-09-24-early-加上-new-relic" class="headerlink" title="2020/09/24 early 加上 new relic"></a>2020/09/24 early 加上 new relic</h3><ol>
+<h3 id="2020-09-24-early-加上-new-relic"><a href="#2020-09-24-early-加上-new-relic" class="headerlink" title="2020&#x2F;09&#x2F;24 early 加上 new relic"></a>2020&#x2F;09&#x2F;24 early 加上 new relic</h3><ol>
 <li>加上 new relic 的 custom attributes，記錄該 city 的 IO 相關讀取時間</li>
 </ol>
-<h3 id="2020-09-24-middle-加上-local-cache"><a href="#2020-09-24-middle-加上-local-cache" class="headerlink" title="2020/09/24 middle 加上 local cache"></a>2020/09/24 middle 加上 local cache</h3><ol>
+<h3 id="2020-09-24-middle-加上-local-cache"><a href="#2020-09-24-middle-加上-local-cache" class="headerlink" title="2020&#x2F;09&#x2F;24 middle 加上 local cache"></a>2020&#x2F;09&#x2F;24 middle 加上 local cache</h3><ol>
 <li>因為從 Redis 或 DB 取回來的 id 要再經過一次 DB 查詢，才能組合完整的 response 回傳</li>
 <li>所以加上 city id 及使用者語言做為 local cache key，加快同 city id 且同語言的資料回傳速度</li>
 <li>如果 city id 或使用者語言在該 cache 找不到，再回 DB 查詢</li>
 <li>加上 new relic 的 custom segment，方便判讀 request 的瓶頸是在哪一段</li>
 </ol>
-<h3 id="2020-09-24-late-調整-poi-history-的執行速度"><a href="#2020-09-24-late-調整-poi-history-的執行速度" class="headerlink" title="2020/09/24 late 調整 poi history 的執行速度"></a>2020/09/24 late 調整 poi history 的執行速度</h3><ol>
+<h3 id="2020-09-24-late-調整-poi-history-的執行速度"><a href="#2020-09-24-late-調整-poi-history-的執行速度" class="headerlink" title="2020&#x2F;09&#x2F;24 late 調整 poi history 的執行速度"></a>2020&#x2F;09&#x2F;24 late 調整 poi history 的執行速度</h3><ol>
 <li>將原本使用 where + group 取得最近 30 的 poi history 語法，改為先做 where，再做 group，將原本放在同一個 CTE 的 query 拆成兩個 CTE 執行</li>
 <li>速度從原本的 40 ~ 50 秒，甚至到 70 秒，下降到約 10 秒左右</li>
 </ol>
-<h3 id="2020-09-25-early-移除不必要的-middleware"><a href="#2020-09-25-early-移除不必要的-middleware" class="headerlink" title="2020/09/25 early 移除不必要的 middleware"></a>2020/09/25 early 移除不必要的 middleware</h3><ol>
+<h3 id="2020-09-25-early-移除不必要的-middleware"><a href="#2020-09-25-early-移除不必要的-middleware" class="headerlink" title="2020&#x2F;09&#x2F;25 early 移除不必要的 middleware"></a>2020&#x2F;09&#x2F;25 early 移除不必要的 middleware</h3><ol>
 <li>在整整一年前將 poi recommend 及 search 拆開成不同檔案的時候，沒有仔細確認，所以每次 request 都要到 Redis 做兩次的 auth check</li>
 <li>所以將其中一個 auth check 拿掉，加快約 1ms</li>
 </ol>
-<h3 id="2020-09-27-early-再次檢視-poi-history-計算方式是否有最佳化空間"><a href="#2020-09-27-early-再次檢視-poi-history-計算方式是否有最佳化空間" class="headerlink" title="2020/09/27 early 再次檢視 poi history 計算方式是否有最佳化空間"></a>2020/09/27 early 再次檢視 poi history 計算方式是否有最佳化空間</h3><ol>
+<h3 id="2020-09-27-early-再次檢視-poi-history-計算方式是否有最佳化空間"><a href="#2020-09-27-early-再次檢視-poi-history-計算方式是否有最佳化空間" class="headerlink" title="2020&#x2F;09&#x2F;27 early 再次檢視 poi history 計算方式是否有最佳化空間"></a>2020&#x2F;09&#x2F;27 early 再次檢視 poi history 計算方式是否有最佳化空間</h3><ol>
 <li>原本在使用經緯度計算是哪個 city 時，查詢速度大約都 400ms 左右，加上 GiST index 之後，查詢速度提升 1000x，變成只要 0.4ms 就能算出來</li>
 <li>整整一年前導入 poi history 到推薦景點時，資料量還沒這麼大，所以在計算時速度都蠻快的</li>
 <li>但 poi history 現在資料筆數已經超過 2500 萬筆，都變成 Seq Scan，雖然 planner 會判斷成 Parallel Seq Scan，但速度還是很慢</li>
@@ -212,7 +212,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="clspilgbz000bhyoz3jeree6f" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/09/28/%E5%86%8D%E5%BA%A6%E6%9C%80%E4%BD%B3%E5%8C%96%E6%8E%A8%E8%96%A6%E6%99%AF%E9%BB%9E%E7%9A%84%E5%9B%9E%E6%87%89%E6%99%82%E9%96%93/" data-id="clspvwvq0000bj4q0gqrp70e2" data-title="再度最佳化推薦景點的回應時間" class="article-share-link">Share</a>
       
       
       
@@ -256,13 +256,13 @@
 <h2 id="3-你們後來是使用哪種方式做上傳呢？"><a href="#3-你們後來是使用哪種方式做上傳呢？" class="headerlink" title="3. 你們後來是使用哪種方式做上傳呢？"></a>3. 你們後來是使用哪種方式做上傳呢？</h2><p>原先是使用 server side (2) 的方式，但在處理 MQ 上傳後的 notify 花了不少時間，而且上傳到 S3 也沒這麼快，所以後來改用 client side 的方式做上傳功能，運作上也比原先的方式順暢。</p>
 <h2 id="4-為什麼不用-medium-的方式處理-blur？"><a href="#4-為什麼不用-medium-的方式處理-blur？" class="headerlink" title="4. 為什麼不用 medium 的方式處理 blur？"></a>4. 為什麼不用 medium 的方式處理 blur？</h2><p>因為 medium 檔案比 BlurHash 的字串大很多，而且要多發一次 request，成本比 BlurHash 高出不少，所以我們認為用 BlurHash 會是比較好的。</p>
 <hr>
-<p>當然也是要感謝 gslin 大大，他在 4/26 (日) 簡單介紹了 BlurHash。小編下午看到這篇文章，馬上丟去 slack 問我們的設計師大大，看她覺得這效果如何？她過沒多久回覺得不錯，小編就在星期日的下午開始處理 server side 的實作。隔天星期一有了初步的成果，然後給我們的安卓五星上將看，星期二就完成 Android 實作並上線了！</p>
+<p>當然也是要感謝 gslin 大大，他在 4&#x2F;26 (日) 簡單介紹了 BlurHash。小編下午看到這篇文章，馬上丟去 slack 問我們的設計師大大，看她覺得這效果如何？她過沒多久回覺得不錯，小編就在星期日的下午開始處理 server side 的實作。隔天星期一有了初步的成果，然後給我們的安卓五星上將看，星期二就完成 Android 實作並上線了！</p>
 <p>也是因為 CDN 那塊後來把原先的 lambda 改用自己寫的 server 處理，所以實作 BlurHash 才能這麼快。lambda 這塊也是血淚史，下略 10000 字，之後有機會再跟大家分享。歡迎大家對這塊有興趣的也來交流一下喔！</p>
 <h2 id="影片"><a href="#影片" class="headerlink" title="影片"></a>影片</h2><iframe width="560" height="315" src="https://www.youtube.com/embed/l1JVBX3tsMY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="clspilgc2000ihyozbkhyeuhe" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/08/03/%E5%9C%A8-COSCUP-2020-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8C%E6%A8%A1%E7%B3%8A%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%BE%8E-%E5%BE%9E-BlurHash-%E6%8E%A2%E8%A8%8E%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%8A%E5%82%B3%E5%9C%96%E7%89%87%E6%9E%B6%E6%A7%8B%E3%80%8D/" data-id="clspvwvq3000ij4q01bhacd8c" data-title="在 COSCUP 2020 分享的「模糊也是一種美 - 從 BlurHash 探討前後端上傳圖片架構」" class="article-share-link">Share</a>
       
       
       
@@ -317,7 +317,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" data-id="clspilgbx0007hyoz9btre5kj" data-title="Funliday 重磅推出新的 prerender 套件 pppr" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/25/Funliday-%E9%87%8D%E7%A3%85%E6%8E%A8%E5%87%BA%E6%96%B0%E7%9A%84-prerender-%E5%A5%97%E4%BB%B6-pppr/" data-id="clspvwvpx0007j4q07pzp1q7v" data-title="Funliday 重磅推出新的 prerender 套件 pppr" class="article-share-link">Share</a>
       
       
       
@@ -358,7 +358,7 @@
 <p>這一系列文總共有三篇，這是第二篇。</p>
 <p>上一篇解決了 social network 抓取 head tag 裡面的 title, og data 等問題，但其實還有 search engine 要解決，因為 social network 只看 head，但 search engine 除了 head 以外也會看 body，所以這篇要來解決 body 一模一樣的問題。</p>
 <p>傳統的 web 開發方式通常是一條龍開發 (你就是那條龍！)，後端取得資料庫的內容，然後組成 HTML 之後丟到瀏覽器上顯示。現代的 web 開發方式通常就是一個前端配一個後端，後端專注於把資料送給前端，前端專注於取得資料後在瀏覽器上面顯示漂漂亮亮的。而傳統方式稱為 server side rendering (SSR)，現代方式就稱為 client side rendering (CSR)。兩者開發方式各有優缺，蠻多文章有提過，這裡也就不另外說明了。</p>
-<p>比較簡單判斷 CSR/SSR 的方式可以直接在你想知道的網頁，按下 <kbd>Ctrl+u</kbd> (Windows, Linux) 打開原始碼，看看實際上顯示的內容跟原始碼是不是差異過大。如果網頁內容很豐富，但原始碼才十幾二十行而已，那可以很粗略的說這是 CSR，如果基本上一致那就可以說是 SSR。</p>
+<p>比較簡單判斷 CSR&#x2F;SSR 的方式可以直接在你想知道的網頁，按下 <kbd>Ctrl+u</kbd> (Windows, Linux) 打開原始碼，看看實際上顯示的內容跟原始碼是不是差異過大。如果網頁內容很豐富，但原始碼才十幾二十行而已，那可以很粗略的說這是 CSR，如果基本上一致那就可以說是 SSR。</p>
 <p>而 search engine 就是靠著原始碼把網頁內容做索引，所以如果谷歌大神到 CSR 的網站爬網頁內容，最後爬到的 body 當然都是同一份內容，這樣子對於 SEO 上是不合格的，所以這裡就要分享一下 Funliday-旅遊規劃 是如何處理這塊的。</p>
 <p>第一種方式，可以用 VAR 這三套前端框架各自支援的 SSR 方案來處理，像是 Nuxt.js, Next.js, Angular Universal，這些內容已經有許多前輩分享，這裡就不另外說明了。但要注意一點，就是導入這類的解決方案通常會影響到原本的開發模式，像是 webpack 跟 bootstrapping 的方式就一定會動到，小編是建議對框架真的很熟悉之後，再來用這方式會比較好。</p>
 <p>第二種方式，就是這次的重頭戲 prerender 了。prerender 也不是什麼魔法，就是一句話「讓爬蟲看到它應該要看的內容」。如圖所示，當 Nginx 收到 request 之後，發現 user agent 是 googlebot 就轉送到 prerender service，如果是一般 request 就直接丟到後面原本的 web server。</p>
@@ -372,7 +372,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="clspilgce001chyozbb9thbwx" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/18/%E7%94%A8-Prerender-%E8%A7%A3%E6%B1%BA%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E6%90%9C%E5%B0%8B%E5%95%8F%E9%A1%8C/" data-id="clspvwvqf0019j4q0bh891ejm" data-title="用 Prerender 解決前端框架的搜尋問題" class="article-share-link">Share</a>
       
       
       
@@ -411,7 +411,7 @@
         <p>這一系列文總共有三篇，這是第一篇。</p>
 <p>對於用 Vue, Angular, React 這類前端框架來講，如果沒有對 search engine 或 social network 特別處理的話，出來的結果一定不會如你所想的一樣。</p>
 <p>因為 client side rendering (CSR) 的作用域通常是在 body 裡面的 container，所以對於 search engine 或 social network 來說，container 外的 head tag 只是一層皮，裡面的資料基本上沒有什麼用，因為解析出來的內容都一模一樣，沒有獨特性。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">app.get(<span class="string">&quot;*&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> urlPath = req.url;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> loadMetaDataFunction = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// load data function</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> obj <span class="keyword">of</span> matchRoutes(Routes, req.path)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (obj.route.loadData) &#123;</span><br><span class="line">      loadMetaDataFunction = obj.route.loadData;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">const</span> keys = [];</span><br><span class="line">      <span class="keyword">const</span> regexp = pathToRegexp(obj.route.path, keys);</span><br><span class="line">      <span class="keyword">const</span> result = regexp.exec(req.path);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (result) &#123;</span><br><span class="line">        req.params = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">        keys.forEach(<span class="function">(<span class="params">key, index</span>) =&gt;</span> &#123;</span><br><span class="line">          req.params[key.name] = result[index + <span class="number">1</span>];</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> content;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!templateHtml) &#123;</span><br><span class="line">    templateHtml = <span class="keyword">await</span> fs.readFile(<span class="string">&quot;public/index.htm&quot;</span>, <span class="string">&quot;utf-8&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (loadMetaDataFunction) &#123;</span><br><span class="line">    <span class="keyword">const</span> metaDataResult = <span class="keyword">await</span> loadMetaDataFunction(</span><br><span class="line">      urlPath,</span><br><span class="line">      req.query,</span><br><span class="line">      req.params,</span><br><span class="line">      req.headers</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    content = buildMeta(templateHtml, metaDataResult.metaData);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    content = buildMeta(templateHtml, defaultMetaTagsString(urlPath));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  res.set(<span class="string">&quot;Cache-Control&quot;</span>, <span class="string">&quot;no-cache&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.send(content);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">app.<span class="title function_">get</span>(<span class="string">&quot;*&quot;</span>, <span class="keyword">async</span> (req, res) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> urlPath = req.<span class="property">url</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> loadMetaDataFunction = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// load data function</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> obj <span class="keyword">of</span> <span class="title function_">matchRoutes</span>(<span class="title class_">Routes</span>, req.<span class="property">path</span>)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (obj.<span class="property">route</span>.<span class="property">loadData</span>) &#123;</span><br><span class="line">      loadMetaDataFunction = obj.<span class="property">route</span>.<span class="property">loadData</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">const</span> keys = [];</span><br><span class="line">      <span class="keyword">const</span> regexp = <span class="title function_">pathToRegexp</span>(obj.<span class="property">route</span>.<span class="property">path</span>, keys);</span><br><span class="line">      <span class="keyword">const</span> result = regexp.<span class="title function_">exec</span>(req.<span class="property">path</span>);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (result) &#123;</span><br><span class="line">        req.<span class="property">params</span> = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">        keys.<span class="title function_">forEach</span>(<span class="function">(<span class="params">key, index</span>) =&gt;</span> &#123;</span><br><span class="line">          req.<span class="property">params</span>[key.<span class="property">name</span>] = result[index + <span class="number">1</span>];</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> content;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!templateHtml) &#123;</span><br><span class="line">    templateHtml = <span class="keyword">await</span> fs.<span class="title function_">readFile</span>(<span class="string">&quot;public/index.htm&quot;</span>, <span class="string">&quot;utf-8&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (loadMetaDataFunction) &#123;</span><br><span class="line">    <span class="keyword">const</span> metaDataResult = <span class="keyword">await</span> <span class="title function_">loadMetaDataFunction</span>(</span><br><span class="line">      urlPath,</span><br><span class="line">      req.<span class="property">query</span>,</span><br><span class="line">      req.<span class="property">params</span>,</span><br><span class="line">      req.<span class="property">headers</span></span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    content = <span class="title function_">buildMeta</span>(templateHtml, metaDataResult.<span class="property">metaData</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    content = <span class="title function_">buildMeta</span>(templateHtml, <span class="title function_">defaultMetaTagsString</span>(urlPath));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  res.<span class="title function_">set</span>(<span class="string">&quot;Cache-Control&quot;</span>, <span class="string">&quot;no-cache&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res.<span class="title function_">send</span>(content);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
 <p>為了要讓每一頁的 head tag 都不一樣，最簡單的方式就是在 web 這一層的 expressjs server 多加一個特殊的 route，去 catch 所有 web 的 get request，類似上面的程式碼。</p>
 <p>然後搭配 <code>path-to-regexp</code> 來設定特定 url pattern 做不同的 head tag 設計，比如 <code>kewang/trips/123</code> 的 title 叫做 “kewang 的台北二天一夜行程”，<code>kewang/journals/456</code> 的 title 叫做 “kewang 的宜蘭三日遊記”，當然這裡的例子舉的很簡單，正規的做法應該要搭配資料庫來取得對應的 title 跟 og data 才對，也就是附圖程式裡面的 <code>loadMetaDataFunction</code>。</p>
@@ -421,7 +421,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" data-id="clspilgcj001rhyozhp4r11p8" data-title="純手工打造前端框架的 metadata 內容" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/15/%E7%B4%94%E6%89%8B%E5%B7%A5%E6%89%93%E9%80%A0%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84-metadata-%E5%85%A7%E5%AE%B9/" data-id="clspvwvro005zj4q03rho4tpw" data-title="純手工打造前端框架的 metadata 內容" class="article-share-link">Share</a>
       
       
       
@@ -477,7 +477,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/" data-id="clspilgbv0004hyoz4lklcarl" data-title="Funliday 外站文章的 App 與 Web 不同實作" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/05/04/Funliday-%E5%A4%96%E7%AB%99%E6%96%87%E7%AB%A0%E7%9A%84-App-%E8%88%87-Web-%E4%B8%8D%E5%90%8C%E5%AF%A6%E4%BD%9C/" data-id="clspvwvpv0004j4q0gppmg9mb" data-title="Funliday 外站文章的 App 與 Web 不同實作" class="article-share-link">Share</a>
       
       
       
@@ -520,7 +520,7 @@
 <hr>
 <p>再來說一下個人選擇，如果是可以給一般人看的內容，小編一定是用 GitHub，畢竟資訊人誰沒有一個 GitHub 帳號呢？然後個人接案因為不能公開原始碼，所以當然放在 GitLab (以前是 Bitbucket)。現在 Funliday 的 git repo 因為原始碼不能公開，當然也是放在 GitLab。</p>
 <p>然後因為 Funliday server 是放在 Heroku 上面，Heroku 上面有個功能可以直接結合 GitHub 的 push 之後 deploy，但因為 Funliday 用的是 GitLab，所以沒辦法直接用這功能，只能繞個彎改用 dpl，把 GitLab 整合進 Heroku 裡。</p>
-<p>但也因為用了 GitLab 之後，才知道它的功能比 GitHub 多太多，對一般公司所需要的權限控制，小編是覺得比 GitHub 完整。然後對於 CI/CD 的支援度也很強大，現在還支援 build docker image 的功能。</p>
+<p>但也因為用了 GitLab 之後，才知道它的功能比 GitHub 多太多，對一般公司所需要的權限控制，小編是覺得比 GitHub 完整。然後對於 CI&#x2F;CD 的支援度也很強大，現在還支援 build docker image 的功能。</p>
 <hr>
 <p>不過當 GitHub private 免費之後，對於沒有依賴 GitLab 權限控制或 container 功能的使用者，還蠻有可能移回 GitHub 的，畢竟能在同一個 hosting 操作當然比較方便。所以以後小編開 repo 的考量，可能就不再是 private 或 public 了，而是在於 deploy 的方便性，或是能不能 build 出 artifact 了。</p>
 <ul>
@@ -530,7 +530,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2020/04/16/GitHub-%E5%B0%87%E6%89%80%E6%9C%89%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E9%83%BD%E5%85%8D%E8%B2%BB%E9%96%8B%E6%94%BE%EF%BC%8C%E5%8C%85%E6%8B%AC%E5%8D%94%E4%BD%9C%E5%9C%98%E9%9A%8A%EF%BC%81/" data-id="clspilgbx0008hyoz5x9r3sxy" data-title="GitHub 將所有核心功能都免費開放，包括協作團隊！" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2020/04/16/GitHub-%E5%B0%87%E6%89%80%E6%9C%89%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E9%83%BD%E5%85%8D%E8%B2%BB%E9%96%8B%E6%94%BE%EF%BC%8C%E5%8C%85%E6%8B%AC%E5%8D%94%E4%BD%9C%E5%9C%98%E9%9A%8A%EF%BC%81/" data-id="clspvwvpy0008j4q0fku045cl" data-title="GitHub 將所有核心功能都免費開放，包括協作團隊！" class="article-share-link">Share</a>
       
       
       
@@ -574,7 +574,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/" data-id="clspilgc6000shyozdcgx5rha" data-title="在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/08/29/%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84%E3%80%8CGoogle-Maps-%E9%96%8B%E5%A7%8B%E6%94%B6%E8%B2%BB%E4%BA%86%E8%A9%B2%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D/" data-id="clspvwvq7000sj4q0b4lj1vnd" data-title="在 ModernWeb 2019 分享的「Google Maps 開始收費了該怎麼辦？」" class="article-share-link">Share</a>
       
       
       
@@ -620,7 +620,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://techblog.funliday.com/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/" data-id="clspilgbn0000hyozcpxlfhyr" data-title="Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy" class="article-share-link">Share</a>
+      <a data-url="https://techblog.funliday.com/2019/08/28/Ant-%E5%9C%A8-ModernWeb-2019-%E5%88%86%E4%BA%AB%E7%9A%84-Progressive-Deployment-NoDeploy/" data-id="clspvwvpn0000j4q06jfaabz8" data-title="Ant 在 ModernWeb 2019 分享的 Progressive Deployment &amp; NoDeploy" class="article-share-link">Share</a>
       
       
       
