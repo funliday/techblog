@@ -1,6 +1,6 @@
 ---
 title: 把 Web 底層重構，從前後端分離變成 SSR
-ogimage: cover.webp
+ogimage: cover.png
 date: 2024-02-16 16:36:02
 tags:
 - ssr
@@ -10,7 +10,7 @@ tags:
 - expressjs
 ---
 
-{% asset_img cover.webp %}
+{% asset_img cover.png %}
 
 Web 底層重構完成過了半年多，目前效果還算不錯，來分享一下我們是如何重構的。
 
